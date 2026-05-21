@@ -1,30 +1,43 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
-  RefreshCw, Search, Plus, ChevronDown, ChevronUp,
-  ChevronsUpDown, Filter, AlertCircle
+  RefreshCw, Search, Plus, ChevronDown, Filter, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown
 } from "lucide-react";
 import { CampaignTableRow, CampaignMobileRow } from "@/components/features/dashboard/table";
 import { CreateCampaignModal } from "@/components/organisms/create-campaign-modal";
 import { RbacGuard } from "@/components/providers/rbac-guard";
 import { api, Campaign } from "@/services/mock.service";
 import { FilterDropdown } from "@/components/atoms/filter-dropdown";
+import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
 
 function SortIcon({ active, direction }: { active: boolean, direction?: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={13} className="text-slate-300" />;
+  if (!active) return <ArrowUpDown size={10} className="opacity-40" />;
   return direction === 'asc'
-    ? <ChevronUp size={13} className="text-modRed" />
-    : <ChevronDown size={13} className="text-modRed" />;
+    ? <ArrowUp size={10} className="text-modRed" />
+    : <ArrowDown size={10} className="text-modRed" />;
 }
 
-function FilterButton({ label }: { label: string }) {
-  return (
-    <button className="flex items-center space-x-2 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[13px] font-bold text-slate-700 shadow-sm hover:border-modRed/20 hover:bg-slate-50 transition-all outline-none">
-      <Filter size={14} />
-      <span>{label}</span>
-    </button>
-  );
+function parseLastEditToDate(lastEditStr: string): Date {
+  const now = new Date();
+  const lower = lastEditStr.toLowerCase().trim();
+
+  if (lower.includes("now") || lower.includes("min") || lower.includes("hr") || lower.includes("hour")) {
+    return now;
+  }
+  if (lower.includes("yesterday")) {
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    return yesterday;
+  }
+
+  const parsed = Date.parse(lastEditStr);
+  if (!isNaN(parsed)) {
+    return new Date(parsed);
+  }
+
+  return now;
 }
 
 export default function CampaignsPage() {
@@ -35,6 +48,11 @@ export default function CampaignsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [sortConfig, setSortConfig] = useState<{ key: keyof Campaign; direction: 'asc' | 'desc' } | null>(null);
+
+  // Date Calendar States
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const fetchCampaigns = async () => {
     setIsLoading(true);
@@ -49,8 +67,15 @@ export default function CampaignsPage() {
     }
   };
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     fetchCampaigns();
+    // Pre-set filter from query param (e.g., ?status=Live)
+    const statusParam = searchParams.get("status");
+    if (statusParam) {
+      setStatusFilter(decodeURIComponent(statusParam));
+    }
   }, []);
 
   const handleCampaignCreated = (name: string) => {
@@ -59,7 +84,7 @@ export default function CampaignsPage() {
       name: name,
       creatives: "0 Assets",
       outlets: "0",
-      status: "Draft",
+      status: "Sent for Approval",
       runtime: "0",
       lastEdit: "Just now"
     };
@@ -68,33 +93,70 @@ export default function CampaignsPage() {
   };
 
   const requestSort = (key: keyof Campaign) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === 'asc') {
+        setSortConfig({ key, direction: 'desc' });
+      } else {
+        setSortConfig(null);
+      }
+    } else {
+      setSortConfig({ key, direction: 'asc' });
     }
-    setSortConfig({ key, direction });
   };
 
   const filteredCampaigns = useMemo(() => {
     let result = campaigns.filter(camp => {
       const matchesSearch = camp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            camp.id.toLowerCase().includes(searchTerm.toLowerCase());
+        camp.id.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "All Status" || camp.status === statusFilter;
+
+      // Filter by custom date range if selected
+      if (startDate && endDate) {
+        const startOfDay = new Date(startDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const lastEditDate = parseLastEditToDate(camp.lastEdit);
+        if (lastEditDate < startOfDay || lastEditDate > endOfDay) {
+          return false;
+        }
+      }
+
       return matchesSearch && matchesStatus;
     });
 
     if (sortConfig) {
+      const { key, direction } = sortConfig;
       result.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        let valA: any = a[key];
+        let valB: any = b[key];
+
+        if (key === "creatives") {
+          valA = parseInt(a.creatives, 10) || 0;
+          valB = parseInt(b.creatives, 10) || 0;
+        } else if (key === "outlets") {
+          valA = parseInt(a.outlets, 10) || 0;
+          valB = parseInt(b.outlets, 10) || 0;
+        } else if (key === "runtime") {
+          valA = parseInt(a.runtime, 10) || 0;
+          valB = parseInt(b.runtime, 10) || 0;
+        } else if (key === "lastEdit") {
+          valA = parseLastEditToDate(a.lastEdit).getTime();
+          valB = parseLastEditToDate(b.lastEdit).getTime();
+        } else {
+          valA = String(valA).toLowerCase();
+          valB = String(valB).toLowerCase();
+        }
+
+        if (valA < valB) return direction === 'asc' ? -1 : 1;
+        if (valA > valB) return direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
 
     return result;
-  }, [campaigns, searchTerm, statusFilter, sortConfig]);
+  }, [campaigns, searchTerm, statusFilter, sortConfig, startDate, endDate]);
 
   return (
     <div className="space-y-6 py-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-x-hidden">
@@ -145,13 +207,41 @@ export default function CampaignsPage() {
 
         <div className="flex w-full md:w-auto gap-3 items-center">
           <FilterDropdown
-            options={["All Status", "Live", "Sent", "Approved", "Draft", "Under Modification"]}
+            options={["All Status", "Live", "Sent for Approval", "Approved", "Draft", "Under Modification"]}
             value={statusFilter}
             onChange={setStatusFilter}
             className="flex-1 sm:flex-none"
           />
 
-          <FilterButton label="Last 7 Days" />
+          <div className="relative">
+            <button
+              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              className="flex items-center space-x-2 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[13px] font-bold text-slate-700 shadow-sm hover:border-modRed/20 hover:bg-slate-50 transition-all outline-none cursor-pointer"
+            >
+              <Filter size={14} className={startDate && endDate ? "text-modRed" : "text-slate-400"} />
+              <span>
+                {startDate && endDate
+                  ? `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })}`
+                  : "Filter Date"}
+              </span>
+            </button>
+            <DateRangePickerPopover
+              isOpen={isCalendarOpen}
+              onClose={() => setIsCalendarOpen(false)}
+              initialStartDate={startDate}
+              initialEndDate={endDate}
+              onApply={(start, end) => {
+                setStartDate(start);
+                setEndDate(end);
+                setIsCalendarOpen(false);
+              }}
+              onClear={() => {
+                setStartDate(undefined);
+                setEndDate(undefined);
+                setIsCalendarOpen(false);
+              }}
+            />
+          </div>
 
           <div className="hidden lg:flex items-center space-x-3 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[12px] font-bold text-slate-700 shadow-sm">
             <span className="text-slate-400 font-medium whitespace-nowrap">Rows:</span>

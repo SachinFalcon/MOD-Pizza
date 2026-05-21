@@ -9,6 +9,7 @@ interface FilterDropdownProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  buttonClassName?: string;
 }
 
 export function FilterDropdown({
@@ -17,6 +18,7 @@ export function FilterDropdown({
   value,
   onChange,
   className = "",
+  buttonClassName = "",
 }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -42,7 +44,7 @@ export function FilterDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm cursor-pointer min-w-[130px] active:scale-95"
+        className={buttonClassName || "flex items-center justify-between space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm cursor-pointer min-w-[130px] active:scale-95"}
       >
         <span>{value || label}</span>
         <ChevronDown 

@@ -38,6 +38,7 @@ const STATUS_STYLES: Record<string, { bar: string; badge: string }> = {
   Live:               { bar: "bg-emerald-500",  badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   Approved:           { bar: "bg-blue-500",     badge: "bg-blue-50 text-blue-700 border-blue-200" },
   Sent:               { bar: "bg-violet-500",   badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  "Sent for Approval": { bar: "bg-violet-500",  badge: "bg-violet-50 text-violet-700 border-violet-200" },
   Draft:              { bar: "bg-slate-400",    badge: "bg-slate-50 text-slate-600 border-slate-200" },
   "Under Modification": { bar: "bg-amber-400", badge: "bg-amber-50 text-amber-700 border-amber-200" },
 };

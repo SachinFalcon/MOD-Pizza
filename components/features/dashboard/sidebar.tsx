@@ -25,6 +25,26 @@ interface SidebarProps {
 
 export function Sidebar({ onClose, isCollapsed, onToggleCollapse, isMounted = true }: SidebarProps) {
   const pathname = usePathname();
+  const [hoveredItem, setHoveredItem] = React.useState<{
+    label: string;
+    rect: DOMRect;
+  } | null>(null);
+
+  const handleMouseEnter = (label: string) => (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isCollapsed) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setHoveredItem({ label, rect });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredItem(null);
+  };
+
+  const handleToggleCollapse = () => {
+    setHoveredItem(null);
+    onToggleCollapse();
+  };
 
   return (
     <aside className={`
@@ -68,7 +88,7 @@ export function Sidebar({ onClose, isCollapsed, onToggleCollapse, isMounted = tr
 
         {/* Collapse Toggle Button (Tablet & Desktop Only) */}
         <button 
-          onClick={onToggleCollapse}
+          onClick={handleToggleCollapse}
           className="hidden md:flex absolute -right-3 top-10 h-6 w-6 bg-white border border-slate-200 rounded-full items-center justify-center text-slate-400 hover:text-modRed hover:border-modRed shadow-sm z-10 transition-all"
         >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -77,17 +97,17 @@ export function Sidebar({ onClose, isCollapsed, onToggleCollapse, isMounted = tr
 
       <nav className={`flex-1 ${isCollapsed ? "md:px-2 px-4" : "px-4"} space-y-1 overflow-y-auto mt-4`}>
         <CategoryLabel label="OVERVIEW" isCollapsed={isCollapsed} />
-        <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active={pathname === "/dashboard"} onClick={onClose} isCollapsed={isCollapsed} />
+        <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active={pathname === "/dashboard"} onClick={onClose} isCollapsed={isCollapsed} onMouseEnter={handleMouseEnter("Dashboard")} onMouseLeave={handleMouseLeave} />
 
         <CategoryLabel label="MANAGE" isCollapsed={isCollapsed} />
-        <SidebarItem href="/campaigns" icon={<Megaphone size={18} />} label="Campaigns" active={pathname === "/campaigns"} onClick={onClose} isCollapsed={isCollapsed} />
-        <SidebarItem href="/library" icon={<Library size={18} />} label="Global Library" active={pathname === "/library"} onClick={onClose} isCollapsed={isCollapsed} />
+        <SidebarItem href="/campaigns" icon={<Megaphone size={18} />} label="Campaigns" active={pathname === "/campaigns"} onClick={onClose} isCollapsed={isCollapsed} onMouseEnter={handleMouseEnter("Campaigns")} onMouseLeave={handleMouseLeave} />
+        <SidebarItem href="/library" icon={<Library size={18} />} label="Global Library" active={pathname === "/library"} onClick={onClose} isCollapsed={isCollapsed} onMouseEnter={handleMouseEnter("Global Library")} onMouseLeave={handleMouseLeave} />
 
         <CategoryLabel label="ANALYTICS" isCollapsed={isCollapsed} />
-        <SidebarItem href="/reports" icon={<FileText size={18} />} label="Reports & Insights" active={pathname === "/reports"} onClick={onClose} isCollapsed={isCollapsed} />
+        <SidebarItem href="/reports" icon={<FileText size={18} />} label="Reports & Insights" active={pathname === "/reports"} onClick={onClose} isCollapsed={isCollapsed} onMouseEnter={handleMouseEnter("Reports & Insights")} onMouseLeave={handleMouseLeave} />
 
         <CategoryLabel label="SYSTEM" isCollapsed={isCollapsed} />
-        <SidebarItem href="/settings" icon={<Settings size={18} />} label="Settings" active={pathname === "/settings"} onClick={onClose} isCollapsed={isCollapsed} />
+        <SidebarItem href="/settings" icon={<Settings size={18} />} label="Settings" active={pathname === "/settings"} onClick={onClose} isCollapsed={isCollapsed} onMouseEnter={handleMouseEnter("Settings")} onMouseLeave={handleMouseLeave} />
       </nav>
 
       {/* Storage Indicator at the bottom */}
@@ -113,6 +133,20 @@ export function Sidebar({ onClose, isCollapsed, onToggleCollapse, isMounted = tr
            <span className="text-[10px] font-bold text-modRed mt-2">82%</span>
         </div>
       )}
+
+      {isCollapsed && hoveredItem && (
+        <div 
+          className="fixed z-50 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xl pointer-events-none animate-tooltip whitespace-nowrap"
+          style={{
+            top: hoveredItem.rect.top + hoveredItem.rect.height / 2,
+            left: hoveredItem.rect.right + 8,
+          }}
+        >
+          {hoveredItem.label}
+          {/* Tooltip arrow */}
+          <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-y-4 border-y-transparent border-r-4 border-r-slate-900" />
+        </div>
+      )}
     </aside>
   );
 }
@@ -125,14 +159,36 @@ function CategoryLabel({ label, isCollapsed }: { label: string; isCollapsed: boo
   );
 }
 
-function SidebarItem({ href, icon, label, active = false, onClick, isCollapsed }: { href: string; icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void; isCollapsed: boolean }) {
+function SidebarItem({ 
+  href, 
+  icon, 
+  label, 
+  active = false, 
+  onClick, 
+  isCollapsed,
+  onMouseEnter,
+  onMouseLeave
+}: { 
+  href: string; 
+  icon: React.ReactNode; 
+  label: string; 
+  active?: boolean; 
+  onClick?: () => void; 
+  isCollapsed: boolean;
+  onMouseEnter?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave?: () => void;
+}) {
   return (
     <Link href={href} onClick={onClick}>
-      <div className={`
-        flex items-center rounded-xl cursor-pointer transition-all duration-200 group
-        ${isCollapsed ? "md:justify-center md:p-3 space-x-3 px-4 py-3" : "space-x-3 px-4 py-3"}
-        ${active ? 'bg-modRed text-white shadow-lg shadow-modRed/20' : 'text-slate-500 hover:bg-slate-50'}
-      `}>
+      <div 
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={`
+          flex items-center rounded-xl cursor-pointer transition-all duration-200 group
+          ${isCollapsed ? "md:justify-center md:p-3 space-x-3 px-4 py-3" : "space-x-3 px-4 py-3"}
+          ${active ? 'bg-modRed text-white shadow-lg shadow-modRed/20' : 'text-slate-500 hover:bg-slate-50'}
+        `}
+      >
         <div className={`${active ? 'text-white' : 'text-slate-400 group-hover:text-modRed'} transition-colors shrink-0`}>
           {icon}
         </div>

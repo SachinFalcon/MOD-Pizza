@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { api } from "@/services/mock.service";
 import { 
   Sliders, 
   Monitor, 
@@ -96,6 +97,50 @@ function CustomSelect({ value, onChange, options, className = "" }: CustomSelect
 // ==========================================
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("campaign");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    async function fetchSettingsData() {
+      try {
+        const data = await api.getSettings();
+        if (data) {
+          setDefaultDuration(data.defaultDuration);
+          setDefaultStatus(data.defaultStatus);
+          setConflictStrategy(data.conflictStrategy);
+          setLoopBehavior(data.loopBehavior);
+          setMinPlayTime(data.minPlayTime);
+          setMaxAssets(data.maxAssets);
+          setOverlapWarning(data.overlapWarning);
+          setScreenAssignment(data.screenAssignment);
+
+          setSyncInterval(data.syncInterval);
+          setDeviceOfflineTimeout(data.deviceOfflineTimeout);
+          setReconnectAttempts(data.reconnectAttempts);
+          setOrientation(data.orientation);
+          setResolution(data.resolution);
+          setVolume(data.volume);
+
+          setAllowedFormats(data.allowedFormats);
+          setStartOfWeekLimit(data.startOfWeekLimit);
+          setMaxAssetsCampaign(data.maxAssetsCampaign);
+          setPlaybackMode(data.playbackMode);
+          setScalingMethod(data.scalingMethod);
+          setUnsupportedBehavior(data.unsupportedBehavior);
+          setOptimizationEngine(data.optimizationEngine);
+          setCompressionLevel(data.compressionLevel);
+
+          setEmailAlerts(data.emailAlerts);
+          setCriticalAlertsOnly(data.criticalAlertsOnly);
+          setLoginAttempts(data.loginAttempts);
+          setAlertDelayBuffer(data.alertDelayBuffer);
+          setEscalationTime(data.escalationTime);
+        }
+      } catch (err) {
+        console.error("Failed to load settings from API", err);
+      }
+    }
+    fetchSettingsData();
+  }, []);
 
   // Tab IDs
   const tabs = [
@@ -157,62 +202,94 @@ export default function SettingsPage() {
   // ACTIONS
   // ==========================================
 
-  const handleSave = () => {
-    toast.success("Settings saved successfully!", {
-      description: "System configurations have been updated globally.",
-      duration: 3000,
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await api.saveSettings({
+        defaultDuration,
+        defaultStatus,
+        conflictStrategy,
+        loopBehavior,
+        minPlayTime,
+        maxAssets,
+        overlapWarning,
+        screenAssignment,
+        syncInterval,
+        deviceOfflineTimeout,
+        reconnectAttempts,
+        orientation,
+        resolution,
+        volume,
+        allowedFormats,
+        startOfWeekLimit,
+        maxAssetsCampaign,
+        playbackMode,
+        scalingMethod,
+        unsupportedBehavior,
+        optimizationEngine,
+        compressionLevel,
+        emailAlerts,
+        criticalAlertsOnly,
+        loginAttempts,
+        alertDelayBuffer,
+        escalationTime,
+      });
+      toast.success("Settings saved successfully!", {
+        description: "System configurations have been updated globally.",
+        duration: 3000,
+      });
+    } catch (err) {
+      toast.error("Failed to save settings.", {
+        description: "An error occurred while saving system configurations.",
+        duration: 3000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleReset = () => {
-    // Reset Campaign Rules
-    setDefaultDuration("30 Days");
-    setDefaultStatus("Draft");
-    setConflictStrategy("Manual Override");
-    setLoopBehavior("Loop continuously");
-    setMinPlayTime("10 Seconds");
-    setMaxAssets("50");
-    setOverlapWarning(true);
-    setScreenAssignment("Manual Override");
+  const handleReset = async () => {
+    try {
+      const data = await api.resetSettings();
+      if (data) {
+        setDefaultDuration(data.defaultDuration);
+        setDefaultStatus(data.defaultStatus);
+        setConflictStrategy(data.conflictStrategy);
+        setLoopBehavior(data.loopBehavior);
+        setMinPlayTime(data.minPlayTime);
+        setMaxAssets(data.maxAssets);
+        setOverlapWarning(data.overlapWarning);
+        setScreenAssignment(data.screenAssignment);
 
-    // Reset Screens & Devices
-    setSyncInterval("Every 15 minutes");
-    setDeviceOfflineTimeout("Every 5 minutes");
-    setReconnectAttempts(3);
-    setOrientation("Landscape");
-    setResolution("Every 5 minutes");
-    setVolume(0);
+        setSyncInterval(data.syncInterval);
+        setDeviceOfflineTimeout(data.deviceOfflineTimeout);
+        setReconnectAttempts(data.reconnectAttempts);
+        setOrientation(data.orientation);
+        setResolution(data.resolution);
+        setVolume(data.volume);
 
-    // Reset Media & Playback
-    setAllowedFormats({
-      mp4: true,
-      mov: true,
-      avi: false,
-      webm: true,
-      jpg: true,
-      png: true,
-      gif: false,
-      svg: false
-    });
-    setStartOfWeekLimit("500");
-    setMaxAssetsCampaign("100");
-    setPlaybackMode("Continuous Loop");
-    setScalingMethod("fill");
-    setUnsupportedBehavior("Show Fallback Image");
-    setOptimizationEngine(true);
-    setCompressionLevel("medium");
+        setAllowedFormats(data.allowedFormats);
+        setStartOfWeekLimit(data.startOfWeekLimit);
+        setMaxAssetsCampaign(data.maxAssetsCampaign);
+        setPlaybackMode(data.playbackMode);
+        setScalingMethod(data.scalingMethod);
+        setUnsupportedBehavior(data.unsupportedBehavior);
+        setOptimizationEngine(data.optimizationEngine);
+        setCompressionLevel(data.compressionLevel);
 
-    // Reset Notifications
-    setEmailAlerts(true);
-    setCriticalAlertsOnly(false);
-    setLoginAttempts(5);
-    setAlertDelayBuffer("15");
-    setEscalationTime("30 Minutes");
-
-    toast.info("Settings reset to defaults", {
-      description: "Any unsaved modifications have been discarded.",
-      duration: 3000,
-    });
+        setEmailAlerts(data.emailAlerts);
+        setCriticalAlertsOnly(data.criticalAlertsOnly);
+        setLoginAttempts(data.loginAttempts);
+        setAlertDelayBuffer(data.alertDelayBuffer);
+        setEscalationTime(data.escalationTime);
+      }
+      toast.info("Settings reset to defaults", {
+        description: "Any unsaved modifications have been discarded.",
+        duration: 3000,
+      });
+    } catch (err) {
+      toast.error("Failed to reset settings.");
+    }
   };
 
   const toggleFormat = (key: keyof typeof allowedFormats) => {
@@ -233,17 +310,19 @@ export default function SettingsPage() {
         <div className="flex items-center space-x-3 shrink-0">
           <button 
             onClick={handleReset}
-            className="px-6 py-2.5 bg-white border border-red-205 hover:border-red-300 text-modRed hover:bg-red-50/20 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+            disabled={isSaving}
+            className="px-6 py-2.5 bg-white border border-red-205 hover:border-red-300 text-modRed hover:bg-red-50/20 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RotateCcw size={16} />
             <span>Reset</span>
           </button>
           <button 
             onClick={handleSave}
-            className="px-6 py-2.5 bg-modRed hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-modRed/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+            disabled={isSaving}
+            className="px-6 py-2.5 bg-modRed hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-modRed/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Save size={16} />
-            <span>Save Changes</span>
+            <Save size={16} className={isSaving ? "animate-spin" : ""} />
+            <span>{isSaving ? "Saving..." : "Save Changes"}</span>
           </button>
         </div>
       </div>

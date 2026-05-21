@@ -16,10 +16,11 @@ export function CampaignTab({ searchTerm = "" }: { searchTerm?: string }) {
         // Map to CampaignCardData format
         const mappedData: CampaignCardData[] = data.map((c, idx) => ({
           id: idx + 1,
+          campaignId: c.id,
           title: c.name,
           desc: "Global campaign targeting multiple regions.",
           img: `https://images.unsplash.com/photo-${['1565299624946-b28f40a0ae38', '1574071318508-1cdbab80d002', '1513104890138-7c749659a591', '1571407970349-bc81e7e96d47'][idx % 4]}?w=400&h=300&fit=crop`,
-          loc: "USA & Europe",
+          loc: "United States",
           extra: 1,
           date: "Jan 15, 2026 – Feb 28, 2026",
           archived: c.status === 'Draft'

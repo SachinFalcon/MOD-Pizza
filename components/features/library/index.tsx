@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, Sparkles, Monitor, Grid3X3, X } from "lucide-react";
+import { Upload, Sparkles, Monitor, Grid3X3, X, Calendar } from "lucide-react";
 import { FilterDropdown } from "@/components/atoms/filter-dropdown";
+import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
 import { SearchInput } from "@/components/atoms/search-input";
 import { CampaignTab } from "@/components/organisms/campaign-tab";
 import { AssetsTab } from "@/components/organisms/assets-tab";
@@ -16,7 +17,10 @@ export function LibraryPageContent() {
   const [regionFilter, setRegionFilter] = useState("All Regions");
   const [campaignTypeFilter, setCampaignTypeFilter] = useState("Campaign Type");
   const [statusFilter, setStatusFilter] = useState("Status");
-  const [dateFilter, setDateFilter] = useState("Last 7 Days");
+
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
   // Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -70,7 +74,7 @@ export function LibraryPageContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <FilterDropdown
-            options={["All Regions", "North America", "Europe", "Asia"]}
+            options={["All Regions", "Northeast", "Southeast", "Midwest", "Southwest", "West Coast"]}
             value={regionFilter}
             onChange={setRegionFilter}
           />
@@ -84,10 +88,33 @@ export function LibraryPageContent() {
             value={statusFilter}
             onChange={setStatusFilter}
           />
-          <FilterDropdown
-            options={["Last 7 Days", "Last 30 Days", "All Time"]}
-            value={dateFilter}
-            onChange={setDateFilter}
+          {/* Date Range Filter */}
+          <button
+            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+            className="flex items-center space-x-2 bg-[#F4F4F5] rounded-full px-5 py-2.5 text-[15px] font-medium text-slate-900 cursor-pointer hover:bg-[#E4E4E7] transition-all active:scale-95 shadow-sm"
+          >
+            <Calendar size={18} className={startDate && endDate ? "text-[#A61932]" : ""} />
+            <span>
+              {startDate && endDate
+                ? `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })}`
+                : "All Time"}
+            </span>
+          </button>
+          <DateRangePickerPopover
+            isOpen={isDatePickerOpen}
+            onClose={() => setIsDatePickerOpen(false)}
+            initialStartDate={startDate ?? undefined}
+            initialEndDate={endDate ?? undefined}
+            onApply={(start, end) => {
+              setStartDate(start);
+              setEndDate(end);
+              setIsDatePickerOpen(false);
+            }}
+            onClear={() => {
+              setStartDate(undefined);
+              setEndDate(undefined);
+              setIsDatePickerOpen(false);
+            }}
           />
         </div>
         <div className="relative group">

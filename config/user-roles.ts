@@ -112,7 +112,7 @@ export const USER_PROFILES: Record<string, UserProfileData> = {
     scopeStats: [
       { region: "Global Network", count: 480 },
       { region: "US Regional HQ", count: 240 },
-      { region: "Europe Hub", count: 80 }
+      { region: "Southwest Hub", count: 80 }
     ],
     activeSessions: [
       { device: "MacBook Pro - Chrome", location: "New York, US", loginTime: "Today, 07:15 AM", status: "current" },

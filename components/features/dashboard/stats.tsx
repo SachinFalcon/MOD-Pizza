@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { 
   Megaphone, 
   Clock, 
@@ -15,7 +16,9 @@ import {
   Bell
 } from "lucide-react";
 
-export function KPICard({ title, value, unit = "", trend, iconType }: { title: string; value: string; unit?: string; trend: string; iconType: string }) {
+
+
+export function KPICard({ title, value, unit = "", trend, iconType, href }: { title: string; value: string; unit?: string; trend: string; iconType: string; href?: string }) {
   const isPositive = trend.startsWith('+');
   
   const icons: Record<string, React.ReactNode> = {
@@ -32,8 +35,8 @@ export function KPICard({ title, value, unit = "", trend, iconType }: { title: s
     rocket: "bg-red-50"
   };
 
-  return (
-    <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
+  const card = (
+    <div className={`bg-white rounded-xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full group ${href ? 'cursor-pointer hover:border-modRed/20' : ''}`}>
       <div className="flex justify-between items-start mb-3">
         <h4 className="text-[11px] font-bold text-[#556987] uppercase tracking-wider">{title}</h4>
         <div className={`p-1.5 rounded-md ${bgColors[iconType]}`}>
@@ -51,16 +54,24 @@ export function KPICard({ title, value, unit = "", trend, iconType }: { title: s
         </div>
       </div>
       
-      <div className="mt-auto">
+      <div className="mt-auto flex items-end justify-between">
         <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
           {title === "Live Campaigns" ? "Active campaigns across 212 Outlets" : 
            title === "Awaiting Approval" ? "Avg time taken by publisher to review" :
            title === "Campaigns Created" ? "Total outlets covered in the network" :
            "Outlets displaying your campaigns"}
         </p>
+        {href && (
+          <ArrowUpRight size={14} className="text-slate-300 group-hover:text-modRed transition-colors shrink-0 ml-2" />
+        )}
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block h-full">{card}</Link>;
+  }
+  return card;
 }
 
 export function TaskItem({ title, desc, actionLabel, status }: { title: string; desc: string; actionLabel?: string; status?: string }) {
