@@ -1,47 +1,160 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { 
-  X, 
-  Key, 
-  Edit3, 
-  Globe, 
-  Shield, 
-  Check, 
+import {
+  X,
+  Key,
+  Edit3,
+  Globe,
+  Shield,
+  Check,
   AlertCircle,
   Laptop,
   Smartphone,
-  CheckCircle2
+  CheckCircle2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { 
   USER_PROFILES, 
   getActiveProfile, 
   setActiveProfileKey, 
-  getActiveProfileKey 
+  getActiveProfileKey,
+  UserProfileData
 } from "@/config/user-roles";
+import { api } from "@/services/mock.service";
 
 export default function ProfilePage() {
-  const [activeProfile, setActiveProfile] = useState(() => USER_PROFILES.editor);
-  const [activeKey, setActiveKey] = useState("editor");
+  const [activeProfile, setActiveProfile] = useState<UserProfileData>(getActiveProfile());
+  const [activeKey, setActiveKey] = useState<string>(getActiveProfileKey());
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async (key: string) => {
+    setIsLoading(true);
+    try {
+      const profile = await api.getUserProfile(key);
+      setActiveProfile(profile);
+    } catch (err) {
+      console.error("Failed to fetch user profile", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Sorting state for Access & Permissions
+  const [accessSortBy, setAccessSortBy] = useState<"module" | "access" | null>(null);
+  const [accessSortOrder, setAccessSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Sorting state for Recent Activity Log
+  const [activitySortBy, setActivitySortBy] = useState<"action" | "module" | "date" | "status" | null>(null);
+  const [activitySortOrder, setActivitySortOrder] = useState<"asc" | "desc">("asc");
+
+  // Sorting state for Active Sessions
+  const [sessionsSortBy, setSessionsSortBy] = useState<"device" | "location" | "loginTime" | null>(null);
+  const [sessionsSortOrder, setSessionsSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleAccessSort = (column: "module" | "access") => {
+    if (accessSortBy === column) {
+      if (accessSortOrder === "asc") {
+        setAccessSortOrder("desc");
+      } else {
+        setAccessSortBy(null);
+      }
+    } else {
+      setAccessSortBy(column);
+      setAccessSortOrder("asc");
+    }
+  };
+
+  const handleActivitySort = (column: "action" | "module" | "date" | "status") => {
+    if (activitySortBy === column) {
+      if (activitySortOrder === "asc") {
+        setActivitySortOrder("desc");
+      } else {
+        setActivitySortBy(null);
+      }
+    } else {
+      setActivitySortBy(column);
+      setActivitySortOrder("asc");
+    }
+  };
+
+  const handleSessionsSort = (column: "device" | "location" | "loginTime") => {
+    if (sessionsSortBy === column) {
+      if (sessionsSortOrder === "asc") {
+        setSessionsSortOrder("desc");
+      } else {
+        setSessionsSortBy(null);
+      }
+    } else {
+      setSessionsSortBy(column);
+      setSessionsSortOrder("asc");
+    }
+  };
+
+  const sortedAccessData = useMemo(() => {
+    const data = activeProfile.permissions || [];
+    if (!accessSortBy) return data;
+    return [...data].sort((a, b) => {
+      let valA = a[accessSortBy].toLowerCase();
+      let valB = b[accessSortBy].toLowerCase();
+      if (valA < valB) return accessSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return accessSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [activeProfile.permissions, accessSortBy, accessSortOrder]);
+
+  const sortedActivityLog = useMemo(() => {
+    const data = activeProfile.activityLog || [];
+    if (!activitySortBy) return data;
+    return [...data].sort((a, b) => {
+      let valA = a[activitySortBy].toLowerCase();
+      let valB = b[activitySortBy].toLowerCase();
+      if (valA < valB) return activitySortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return activitySortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [activeProfile.activityLog, activitySortBy, activitySortOrder]);
+
+  const sortedActiveSessions = useMemo(() => {
+    const data = activeProfile.activeSessions || [];
+    if (!sessionsSortBy) return data;
+    return [...data].sort((a, b) => {
+      let valA = a[sessionsSortBy].toLowerCase();
+      let valB = b[sessionsSortBy].toLowerCase();
+      if (valA < valB) return sessionsSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sessionsSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [activeProfile.activeSessions, sessionsSortBy, sessionsSortOrder]);
 
   useEffect(() => {
-    const handleSync = () => {
+    const handleSync = async () => {
+      let currentKey = getActiveProfileKey();
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         const roleParam = params.get("role");
         if (roleParam && USER_PROFILES[roleParam.toLowerCase()]) {
-          localStorage.setItem("user-role", roleParam.toLowerCase());
-          window.dispatchEvent(new Event("role-change"));
+          const newRole = roleParam.toLowerCase();
+          localStorage.setItem("user-role", newRole);
+          currentKey = newRole;
         }
       }
-      setActiveProfile(getActiveProfile());
-      setActiveKey(getActiveProfileKey());
+      setActiveKey(currentKey);
+      await fetchProfile(currentKey);
     };
 
     handleSync();
 
-    window.addEventListener("role-change", handleSync);
-    return () => window.removeEventListener("role-change", handleSync);
+    const onRoleChange = () => {
+      const newKey = getActiveProfileKey();
+      setActiveKey(newKey);
+      fetchProfile(newKey);
+    };
+
+    window.addEventListener("role-change", onRoleChange);
+    return () => window.removeEventListener("role-change", onRoleChange);
   }, []);
 
   return (
@@ -155,25 +268,51 @@ export default function ProfilePage() {
                   Role: {activeProfile.role}
                 </span>
               </div>
-
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm text-left">
                   <thead>
-                    <tr className="border-b border-slate-100 text-left">
-                      <th className="pb-3 font-bold text-slate-400 text-[10px] uppercase tracking-wider">Module</th>
-                      <th className="pb-3 text-right font-bold text-slate-400 text-[10px] uppercase tracking-wider">Access Level</th>
+                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                      <th 
+                        onClick={() => handleAccessSort("module")}
+                        className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Module</span>
+                          {accessSortBy === "module" ? (
+                            accessSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleAccessSort("access")}
+                        className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Access Level</span>
+                          {accessSortBy === "access" ? (
+                            accessSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 font-semibold text-slate-800">
-                    {activeProfile.permissions.map((perm, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="py-4 text-slate-900 text-sm font-bold">{perm.module}</td>
-                        <td className="py-4 text-right">
+                  <tbody>
+                    {sortedAccessData.map((perm, idx) => (
+                      <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 font-bold text-slate-800">{perm.module}</td>
+                        <td className="px-6 py-4">
                           <span className={`px-3 py-1 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
-                            perm.variant === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                            perm.variant === "info" ? "bg-blue-50 text-blue-700 border-blue-100" :
-                            perm.access === "No Access" ? "bg-slate-50 text-slate-400 border-slate-200/50" :
-                            "bg-slate-50 text-slate-600 border-slate-200"
+                            perm.variant === "success"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : perm.variant === "info"
+                              ? "bg-blue-50 text-blue-700 border-blue-100"
+                              : perm.access === "No Access"
+                              ? "bg-slate-50 text-slate-400 border-slate-200/50"
+                              : "bg-slate-50 text-slate-600 border-slate-200"
                           }`}>
                             {perm.access}
                           </span>
@@ -197,14 +336,62 @@ export default function ProfilePage() {
                 <table className="w-full text-sm text-left">
                   <thead>
                     <tr className="border-b border-slate-100 text-slate-400">
-                      <th className="pb-3 font-bold text-[10px] uppercase tracking-wider">Action</th>
-                      <th className="pb-3 font-bold text-[10px] uppercase tracking-wider">Module</th>
-                      <th className="pb-3 font-bold text-[10px] uppercase tracking-wider">Date</th>
-                      <th className="pb-3 font-bold text-[10px] uppercase tracking-wider text-right">Status</th>
+                      <th 
+                        onClick={() => handleActivitySort("action")}
+                        className="pb-3 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-605 transition-colors select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Action</span>
+                          {activitySortBy === "action" ? (
+                            activitySortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleActivitySort("module")}
+                        className="pb-3 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-605 transition-colors select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Module</span>
+                          {activitySortBy === "module" ? (
+                            activitySortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleActivitySort("date")}
+                        className="pb-3 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-605 transition-colors select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Date</span>
+                          {activitySortBy === "date" ? (
+                            activitySortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleActivitySort("status")}
+                        className="pb-3 font-bold text-[10px] uppercase tracking-wider text-right cursor-pointer hover:text-slate-605 transition-colors select-none"
+                      >
+                        <div className="flex items-center justify-end space-x-1">
+                          <span>Status</span>
+                          {activitySortBy === "status" ? (
+                            activitySortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 text-xs font-semibold">
-                    {activeProfile.activityLog.map((log, idx) => (
+                    {sortedActivityLog.map((log, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50">
                         <td className="py-4 font-bold text-slate-900 text-sm">
                           <div>{log.action}</div>
@@ -225,7 +412,7 @@ export default function ProfilePage() {
 
               {/* Mobile View: Sleek native vertical list */}
               <div className="block sm:hidden space-y-4">
-                {activeProfile.activityLog.map((log, idx) => (
+                {sortedActivityLog.map((log, idx) => (
                   <div key={idx} className="flex justify-between items-start p-4 border border-slate-100 rounded-2xl bg-[#F8F9FA]/50 gap-3">
                     <div className="space-y-1">
                       <h4 className="font-bold text-slate-900 text-sm leading-snug">{log.action}</h4>
@@ -265,25 +452,63 @@ export default function ProfilePage() {
                 
                 {/* Desktop View: Full detailed table */}
                 <div className="hidden sm:block overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-sm text-left">
                     <thead>
-                      <tr className="border-b border-slate-100 text-left text-[10px] uppercase font-bold text-slate-400">
-                        <th className="pb-3">Device</th>
-                        <th className="pb-3">Location</th>
-                        <th className="pb-3">Login Time</th>
-                        <th className="pb-3 text-right">Action</th>
+                      <tr className="border-b border-slate-100 bg-slate-50/50">
+                        <th 
+                          onClick={() => handleSessionsSort("device")}
+                          className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Device</span>
+                            {sessionsSortBy === "device" ? (
+                              sessionsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                            ) : (
+                              <ArrowUpDown size={10} className="opacity-40" />
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          onClick={() => handleSessionsSort("location")}
+                          className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Location</span>
+                            {sessionsSortBy === "location" ? (
+                              sessionsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                            ) : (
+                              <ArrowUpDown size={10} className="opacity-40" />
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          onClick={() => handleSessionsSort("loginTime")}
+                          className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Login Time</span>
+                            {sessionsSortBy === "loginTime" ? (
+                              sessionsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                            ) : (
+                              <ArrowUpDown size={10} className="opacity-40" />
+                            )}
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right select-none">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-50 text-xs font-semibold">
-                      {activeProfile.activeSessions.map((session, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50">
-                          <td className="py-4 text-slate-900 font-bold flex items-center gap-2">
-                            {session.device.includes("iPhone") ? <Smartphone size={16} className="text-slate-400" /> : <Laptop size={16} className="text-slate-400" />}
-                            <span>{session.device}</span>
+                    <tbody>
+                      {sortedActiveSessions.map((session, idx) => (
+                        <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4 font-bold text-slate-800">
+                            <span className="flex items-center gap-2">
+                              {session.device.includes("iPhone") ? <Smartphone size={16} className="text-slate-400" /> : <Laptop size={16} className="text-slate-400" />}
+                              {session.device}
+                            </span>
                           </td>
-                          <td className="py-4 text-slate-500 font-medium">{session.location}</td>
-                          <td className="py-4 text-slate-500 font-medium">{session.loginTime}</td>
-                          <td className="py-4 text-right">
+                          <td className="px-6 py-4 text-xs font-semibold text-slate-600">{session.location}</td>
+                          <td className="px-6 py-4 text-xs font-semibold text-slate-600">{session.loginTime}</td>
+                          <td className="px-6 py-4 text-right">
                             {session.status === "current" ? (
                               <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Current</span>
                             ) : (
@@ -298,7 +523,7 @@ export default function ProfilePage() {
 
                 {/* Mobile View: Premium card layout */}
                 <div className="block sm:hidden space-y-3">
-                  {activeProfile.activeSessions.map((session, idx) => (
+                  {sortedActiveSessions.map((session, idx) => (
                     <div key={idx} className="p-4 border border-slate-100 rounded-2xl bg-[#F8F9FA]/50 flex justify-between items-center gap-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-sm">

@@ -1,37 +1,223 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Download, Search, ChevronDown, AlertCircle,
-  ChevronLeft, ChevronRight, FileDown
+  ChevronLeft, ChevronRight, FileDown,
+  ArrowUpDown, ArrowUp, ArrowDown
 } from "lucide-react";
 import { api, DashboardStats } from "@/services/mock.service";
 import { ScreenHealthHeatmap } from "@/components/telemetry/screen-health-heatmap";
 import { CampaignPerformanceChart } from "@/components/telemetry/campaign-performance-chart";
 import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
+import { FilterDropdown } from "@/components/atoms/filter-dropdown";
 
-const DETAILED_CAMPAIGNS = [
-  { name: "Boost Menu Promo", created: "Mar 31", submitted: "Mar 31", approvalType: "Auto", runtime: "20m", status: "Approved", reason: "-" },
-  { name: "BOGO Weekend Pizza", created: "Mar 30", submitted: "Mar 30", approvalType: "Manual", runtime: "48h", status: "Live", reason: "-" },
-  { name: "Late Night Delivery", created: "Mar 29", submitted: "Mar 29", approvalType: "Manual", runtime: "12h", status: "Sent", reason: "Under Review" },
-  { name: "Student Lunch Combo", created: "Mar 28", submitted: "Mar 28", approvalType: "Auto", runtime: "0", status: "Draft", reason: "Missing Info" },
-  { name: "Holiday Family Special", created: "Mar 25", submitted: "Mar 26", approvalType: "Manual", runtime: "72h", status: "Live", reason: "-" },
-  { name: "Friday Night Feasts", created: "Mar 24", submitted: "Mar 24", approvalType: "Auto", runtime: "18h", status: "Approved", reason: "-" },
-  { name: "Cheese Crust Upgrade", created: "Mar 22", submitted: "Mar 22", approvalType: "Manual", runtime: "0", status: "Under Modification", reason: "Creative Update" },
-  { name: "Midweek Crunch Combo", created: "Mar 20", submitted: "Mar 20", approvalType: "Auto", runtime: "8h", status: "Live", reason: "-" },
-  { name: "Veggie Supreme Offer", created: "Mar 18", submitted: "Mar 18", approvalType: "Manual", runtime: "24h", status: "Approved", reason: "-" },
-  { name: "Morning Coffee & Bites", created: "Mar 15", submitted: "Mar 15", approvalType: "Auto", runtime: "0", status: "Draft", reason: "Awaiting Assets" },
+const MOCK_DETAILED_CAMPAIGNS = [
+  { name: "Boost Menu Promo", id: "AD-94821", created: "Mar 31", submitted: "Mar 31", approvalType: "Auto", runtime: "20m", status: "Approved", reason: "-" },
+  { name: "BOGO Weekend Pizza", id: "AD-94823", created: "Mar 30", submitted: "Mar 30", approvalType: "Manual", runtime: "48h", status: "Live", reason: "-" },
+  { name: "Late Night Delivery", id: "AD-94825", created: "Mar 29", submitted: "Mar 29", approvalType: "Manual", runtime: "12h", status: "Sent", reason: "Under Review" },
+  { name: "Student Lunch Combo", id: "AD-94822", created: "Mar 28", submitted: "Mar 28", approvalType: "Auto", runtime: "0", status: "Draft", reason: "Missing Info" },
+  { name: "Holiday Family Special", id: "AD-94821", created: "Mar 25", submitted: "Mar 26", approvalType: "Manual", runtime: "72h", status: "Live", reason: "-" },
+  { name: "Friday Night Feasts", id: "AD-94825", created: "Mar 24", submitted: "Mar 24", approvalType: "Auto", runtime: "18h", status: "Approved", reason: "-" },
+  { name: "Cheese Crust Upgrade", id: "AD-94823", created: "Mar 22", submitted: "Mar 22", approvalType: "Manual", runtime: "0", status: "Under Modification", reason: "Creative Update" },
+  { name: "Midweek Crunch Combo", id: "AD-94822", created: "Mar 20", submitted: "Mar 20", approvalType: "Auto", runtime: "8h", status: "Live", reason: "-" },
+  { name: "Veggie Supreme Offer", id: "AD-94825", created: "Mar 18", submitted: "Mar 18", approvalType: "Manual", runtime: "24h", status: "Approved", reason: "-" },
+  { name: "Morning Coffee & Bites", id: "AD-94824", created: "Mar 15", submitted: "Mar 15", approvalType: "Auto", runtime: "0", status: "Draft", reason: "Awaiting Assets" },
+];
+
+const MOCK_INSIGHTS = [
+  { name: "Late Night Pizza", id: "AD-94825", issue: "Low coverage", rec: "Request wider outlet distribution" },
+  { name: "Student Combo Deal", id: "AD-94822", issue: "Low runtime", rec: "Improve creative quality/length" },
+  { name: "Late Night Pizza", id: "AD-94825", issue: "Low coverage", rec: "Request wider outlet distribution" }
 ];
 
 export default function ReportsPage() {
+  const router = useRouter();
+  const [campaigns, setCampaigns] = useState<any[]>(MOCK_DETAILED_CAMPAIGNS);
+  const [insights, setInsights] = useState<any[]>(MOCK_INSIGHTS);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [selectedDateRange, setSelectedDateRange] = useState<string>("30 Days");
   const [detailedSearchQuery, setDetailedSearchQuery] = useState("");
+  const [regionFilter, setRegionFilter] = useState("All USA");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>(undefined);
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>(undefined);
 
-  const filteredCampaigns = DETAILED_CAMPAIGNS.filter(c =>
+  // Sorting state for Detailed Campaign Data
+  const [reportsSortBy, setReportsSortBy] = useState<"name" | "created" | "submitted" | "approvalType" | "runtime" | "status" | "reason" | null>(null);
+  const [reportsSortOrder, setReportsSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Sorting state for Underperforming Campaign Insights
+  const [insightsSortBy, setInsightsSortBy] = useState<"name" | "issue" | "rec" | null>(null);
+  const [insightsSortOrder, setInsightsSortOrder] = useState<"asc" | "desc">("asc");
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getCampaigns()
+      .then((data) => {
+        if (!isMounted) return;
+        if (data && data.length > 0) {
+          const merged = data.map((c, idx) => {
+            const fallbackById = MOCK_DETAILED_CAMPAIGNS.find(item => item.id === c.id);
+            const fallbackByIndex = MOCK_DETAILED_CAMPAIGNS[idx % MOCK_DETAILED_CAMPAIGNS.length];
+            const fallback = fallbackById || fallbackByIndex || {};
+
+            return {
+              id: c.id,
+              name: c.name,
+              runtime: c.runtime ? c.runtime.replace(/\s*hrs?/gi, "h").replace(/\s*mins?/gi, "m") : (fallback.runtime || "0"),
+              status: c.status || fallback.status || "Draft",
+              created: (c as any).created || fallback.created || "Mar 01",
+              submitted: (c as any).submitted || fallback.submitted || "Mar 01",
+              approvalType: (c as any).approvalType || fallback.approvalType || "Auto",
+              reason: (c as any).reason || fallback.reason || "-",
+            };
+          });
+          setCampaigns(merged);
+
+          // Update insights dynamically based on fetched campaigns
+          const updatedInsights = MOCK_INSIGHTS.map(insight => {
+            const matchingCamp = data.find(c => c.id === insight.id);
+            return {
+              ...insight,
+              name: matchingCamp ? matchingCamp.name : insight.name
+            };
+          });
+          setInsights(updatedInsights);
+        }
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load campaigns in reports page", err);
+        setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleReportsSort = (column: "name" | "created" | "submitted" | "approvalType" | "runtime" | "status" | "reason") => {
+    if (reportsSortBy === column) {
+      if (reportsSortOrder === "asc") {
+        setReportsSortOrder("desc");
+      } else {
+        setReportsSortBy(null);
+      }
+    } else {
+      setReportsSortBy(column);
+      setReportsSortOrder("asc");
+    }
+  };
+
+  const handleInsightsSort = (column: "name" | "issue" | "rec") => {
+    if (insightsSortBy === column) {
+      if (insightsSortOrder === "asc") {
+        setInsightsSortOrder("desc");
+      } else {
+        setInsightsSortBy(null);
+      }
+    } else {
+      setInsightsSortBy(column);
+      setInsightsSortOrder("asc");
+    }
+  };
+
+  // Helper date parser for "MMM DD" (e.g. "Mar 31")
+  const parseReportDate = (dateStr: string) => {
+    const months: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+    const parts = dateStr.toLowerCase().trim().split(/\s+/);
+    if (parts.length >= 2) {
+      const month = months[parts[0]];
+      const day = parseInt(parts[1], 10);
+      if (month !== undefined && !isNaN(day)) {
+        return month * 100 + day;
+      }
+    }
+    return 0;
+  };
+
+  // Helper runtime parser (e.g. "20m", "48h", "0")
+  const parseRuntimeToMins = (runtimeStr: string) => {
+    const str = runtimeStr.toLowerCase().trim();
+    if (str === "0" || !str) return 0;
+    if (str.endsWith("m")) {
+      return parseInt(str, 10) || 0;
+    }
+    if (str.endsWith("h")) {
+      return (parseInt(str, 10) || 0) * 60;
+    }
+    return parseInt(str, 10) || 0;
+  };
+
+  const filteredCampaigns = campaigns.filter(c =>
     c.name.toLowerCase().includes(detailedSearchQuery.toLowerCase())
   );
+
+  const sortedCampaigns = React.useMemo(() => {
+    if (!reportsSortBy) return filteredCampaigns;
+    return [...filteredCampaigns].sort((a, b) => {
+      let valA: any = "";
+      let valB: any = "";
+      
+      if (reportsSortBy === "name") {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      } else if (reportsSortBy === "created") {
+        valA = parseReportDate(a.created);
+        valB = parseReportDate(b.created);
+      } else if (reportsSortBy === "submitted") {
+        valA = parseReportDate(a.submitted);
+        valB = parseReportDate(b.submitted);
+      } else if (reportsSortBy === "approvalType") {
+        valA = a.approvalType.toLowerCase();
+        valB = b.approvalType.toLowerCase();
+      } else if (reportsSortBy === "runtime") {
+        valA = parseRuntimeToMins(a.runtime);
+        valB = parseRuntimeToMins(b.runtime);
+      } else if (reportsSortBy === "status") {
+        valA = a.status.toLowerCase();
+        valB = b.status.toLowerCase();
+      } else if (reportsSortBy === "reason") {
+        valA = a.reason.toLowerCase();
+        valB = b.reason.toLowerCase();
+      }
+      
+      if (typeof valA === "number" && typeof valB === "number") {
+        return reportsSortOrder === "asc" ? valA - valB : valB - valA;
+      }
+      
+      if (valA < valB) return reportsSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return reportsSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredCampaigns, reportsSortBy, reportsSortOrder]);
+
+  const sortedInsights = React.useMemo(() => {
+    if (!insightsSortBy) return insights;
+    return [...insights].sort((a, b) => {
+      let valA = "";
+      let valB = "";
+      if (insightsSortBy === "name") {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      } else if (insightsSortBy === "issue") {
+        valA = a.issue.toLowerCase();
+        valB = b.issue.toLowerCase();
+      } else if (insightsSortBy === "rec") {
+        valA = a.rec.toLowerCase();
+        valB = b.rec.toLowerCase();
+      }
+      if (valA < valB) return insightsSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return insightsSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [insights, insightsSortBy, insightsSortOrder]);
 
   return (
     <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-[#F8F9FA]">
@@ -72,15 +258,13 @@ export default function ReportsPage() {
 
           <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto shrink-0 items-center justify-end">
             {/* Region Selector */}
-            <div className="relative w-[140px] sm:w-[160px]">
-              <select className="w-full pl-6 pr-10 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-sm font-bold text-slate-800 appearance-none focus:ring-2 focus:ring-[#A61932]/5 outline-none cursor-pointer shadow-sm">
-                <option>All USA</option>
-                <option>North</option>
-                <option>South</option>
-                <option>East</option>
-              </select>
-              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-            </div>
+            <FilterDropdown
+              options={["All USA", "North", "South", "East"]}
+              value={regionFilter}
+              onChange={setRegionFilter}
+              className="w-[140px] sm:w-[160px]"
+              buttonClassName="w-full flex items-center justify-between pl-6 pr-4 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-sm font-bold text-slate-800 hover:border-slate-305 hover:bg-slate-50 transition-all shadow-sm cursor-pointer active:scale-95"
+            />
 
             {/* Segmented Date Switcher */}
             <div className="relative">
@@ -257,19 +441,55 @@ export default function ReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 text-left">
-                      <th className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider">Campaign Name</th>
-                      <th className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider">Issue</th>
-                      <th className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider">Recommendation</th>
+                    <tr className="border-b border-slate-100 text-left bg-slate-50/50">
+                      <th 
+                        onClick={() => handleInsightsSort("name")}
+                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Campaign Name</span>
+                          {insightsSortBy === "name" ? (
+                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleInsightsSort("issue")}
+                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Issue</span>
+                          {insightsSortBy === "issue" ? (
+                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleInsightsSort("rec")}
+                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                      >
+                        <div className="flex items-center space-x-1">
+                          <span>Recommendation</span>
+                          {insightsSortBy === "rec" ? (
+                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-40" />
+                          )}
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {[
-                      { name: "Late Night Pizza", issue: "Low coverage", rec: "Request wider outlet distribution" },
-                      { name: "Student Combo Deal", issue: "Low runtime", rec: "Improve creative quality/length" },
-                      { name: "Late Night Pizza", issue: "Low coverage", rec: "Request wider outlet distribution" }
-                    ].map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-all cursor-pointer group">
+                    {sortedInsights.map((item, idx) => (
+                      <tr 
+                        key={idx} 
+                        onClick={() => router.push(`/campaigns/${item.id}?from=reports`)}
+                        className="hover:bg-slate-50 transition-all cursor-pointer group"
+                      >
                         <td className="py-4 px-4 font-bold text-slate-900 text-sm group-hover:text-modRed transition-colors">{item.name}</td>
                         <td className="py-4 px-4">
                           <span className="inline-flex items-center gap-1.5 text-modRed text-xs font-bold px-2.5 py-1 bg-red-50 border border-red-100/50 rounded-lg">
@@ -325,43 +545,146 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-500">
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Campaign</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Created</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Submitted</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Approval Type</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Runtime</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Status</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider">Reason</th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider text-center">Action</th>
+                <tr className="border-b border-slate-100 text-slate-500 bg-slate-50/50">
+                  <th 
+                    onClick={() => handleReportsSort("name")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Campaign</span>
+                      {reportsSortBy === "name" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("created")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Created</span>
+                      {reportsSortBy === "created" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("submitted")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Submitted</span>
+                      {reportsSortBy === "submitted" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("approvalType")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Approval Type</span>
+                      {reportsSortBy === "approvalType" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("runtime")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Runtime</span>
+                      {reportsSortBy === "runtime" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("status")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Status</span>
+                      {reportsSortBy === "status" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => handleReportsSort("reason")}
+                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>Reason</span>
+                      {reportsSortBy === "reason" ? (
+                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                      ) : (
+                        <ArrowUpDown size={10} className="opacity-40" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider text-center select-none">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredCampaigns.map((camp, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/70 transition-all font-medium">
-                    <td className="py-4 px-4 font-bold text-slate-900 text-sm">{camp.name}</td>
-                    <td className="py-4 px-4 text-slate-500 text-xs">{camp.created}</td>
-                    <td className="py-4 px-4 text-slate-500 text-xs">{camp.submitted}</td>
-                    <td className="py-4 px-4 text-slate-500 text-xs">{camp.approvalType}</td>
-                    <td className="py-4 px-4 text-slate-600 text-xs font-semibold">{camp.runtime}</td>
-                    <td className="py-4 px-4">
-                      <span className={`px-2.5 py-1 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
-                        camp.status === "Live" ? "bg-red-50 text-modRed border-red-100/60" :
-                        camp.status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                        camp.status === "Sent" ? "bg-blue-50 text-blue-700 border-blue-100" :
-                        camp.status === "Under Modification" ? "bg-amber-50 text-amber-700 border-amber-100" :
-                        "bg-slate-50 text-slate-600 border-slate-200"
-                      }`}>
-                        {camp.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-slate-500 text-xs">{camp.reason}</td>
-                    <td className="py-4 px-4 text-center">
-                      <button className="text-modRed font-bold text-sm hover:underline underline-offset-2">View</button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredCampaigns.length === 0 && (
+                {sortedCampaigns.map((camp, idx) => {
+                  const handleRowClick = (e: React.MouseEvent) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest("button") || target.closest("a")) {
+                      return;
+                    }
+                    router.push(`/campaigns/${camp.id}?from=reports`);
+                  };
+                  return (
+                    <tr 
+                      key={idx} 
+                      onClick={handleRowClick}
+                      className="hover:bg-slate-50/70 transition-all font-medium cursor-pointer"
+                    >
+                      <td className="py-4 px-4 font-bold text-slate-900 text-sm">
+                        <Link href={`/campaigns/${camp.id}?from=reports`} className="hover:text-modRed transition-colors">
+                          {camp.name}
+                        </Link>
+                      </td>
+                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.created}</td>
+                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.submitted}</td>
+                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.approvalType}</td>
+                      <td className="py-4 px-4 text-slate-600 text-xs font-semibold">{camp.runtime}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2.5 py-1 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
+                          camp.status === "Live" ? "bg-red-50 text-modRed border-red-100/60" :
+                          camp.status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                          camp.status === "Sent" || camp.status === "Sent for Approval" ? "bg-blue-50 text-blue-700 border-blue-100" :
+                          camp.status === "Under Modification" ? "bg-amber-50 text-amber-700 border-amber-100" :
+                          "bg-slate-50 text-slate-600 border-slate-200"
+                        }`}>
+                          {camp.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.reason}</td>
+                      <td className="py-4 px-4 text-center">
+                        <Link href={`/campaigns/${camp.id}?from=reports`} className="text-modRed font-bold text-sm hover:underline underline-offset-2">
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {sortedCampaigns.length === 0 && (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-sm font-semibold text-slate-400">
                       No campaigns found matching search query
@@ -374,7 +697,7 @@ export default function ReportsPage() {
 
           {/* Pagination Footer */}
           <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
-            <span className="text-xs text-slate-500 font-bold">Showing {filteredCampaigns.length} of {DETAILED_CAMPAIGNS.length} campaigns</span>
+            <span className="text-xs text-slate-500 font-bold">Showing {filteredCampaigns.length} of {campaigns.length} campaigns</span>
             <div className="flex gap-2">
               <button className="p-2 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
                 <ChevronLeft size={16} className="text-slate-400" />

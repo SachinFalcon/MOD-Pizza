@@ -24,28 +24,93 @@ import {
   Bell,
   RefreshCw,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   ChevronsUpDown
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { KPICard, TaskItem, QuickActionButton, OpportunityItem, PerformanceGauge } from "@/components/features/dashboard/stats";
 import { USAMap } from "@/components/features/dashboard/usa-map";
-import { api, DashboardStats, Campaign } from "@/services/mock.service";
+import { api, DashboardStats, Campaign, DashboardTask, Opportunity, PerformanceInsights, EditorRanking } from "@/services/mock.service";
+import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
+
+const FALLBACK_TASKS: DashboardTask[] = [
+  { title: "Weekend Combo Deal", desc: "Campaign setup is not yet completed", actionLabel: "Fix Now" },
+  { title: "Cheese Burst Promo", desc: "Publisher requested modification", actionLabel: "Edit" },
+  { title: "Student Combo Deal", desc: "Campaign is ready for approval", actionLabel: "Send" },
+  { title: "Summer Refresh", desc: "Awaiting publisher approval", status: "In Review" }
+];
+
+const FALLBACK_OPPORTUNITIES: Opportunity[] = [
+  { title: "Memorial Day", date: "May 27", sub: "Suggested: BBQ Pizza Offer" },
+  { title: "NBA Playoffs", date: "May 21", sub: "Suggested: Game Night Combo" }
+];
+
+const FALLBACK_INSIGHTS: PerformanceInsights = {
+  approvalRate: 82,
+  bestPerformingDay: "Friday"
+};
+
+const FALLBACK_RANKING: EditorRanking = {
+  rank: 2,
+  hours: "324 screen hours",
+  topCampaign: "Weekend Pizza Offer"
+};
+
+function parseLastEditToDate(lastEditStr: string): Date {
+  const now = new Date();
+  const lower = lastEditStr.toLowerCase().trim();
+  
+  if (lower.includes("now") || lower.includes("min") || lower.includes("hr") || lower.includes("hour")) {
+    return now;
+  }
+  if (lower.includes("yesterday")) {
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    return yesterday;
+  }
+  
+  const parsed = Date.parse(lastEditStr);
+  if (!isNaN(parsed)) {
+    return new Date(parsed);
+  }
+  
+  return now;
+}
 
 export default function EditorDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [tasks, setTasks] = useState<DashboardTask[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [insights, setInsights] = useState<PerformanceInsights | null>(null);
+  const [ranking, setRanking] = useState<EditorRanking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Campaign; direction: 'asc' | 'desc' } | null>(null);
+  
+  // Date Calendar States
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, campaignsData] = await Promise.all([
+      const [statsData, campaignsData, tasksData, opportunitiesData, insightsData, rankingData] = await Promise.all([
         api.getStats(),
-        api.getCampaigns()
+        api.getCampaigns(),
+        api.getDashboardTasks(),
+        api.getDashboardOpportunities(),
+        api.getPerformanceInsights(),
+        api.getEditorRanking()
       ]);
       setStats(statsData);
       setCampaigns(campaignsData);
+      setTasks(tasksData);
+      setOpportunities(opportunitiesData);
+      setInsights(insightsData);
+      setRanking(rankingData);
     } catch (error) {
       console.error("Dashboard data fetch failed", error);
     } finally {
@@ -54,39 +119,83 @@ export default function EditorDashboard() {
   };
 
   const requestSort = (key: keyof Campaign) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === 'asc') {
+        setSortConfig({ key, direction: 'desc' });
+      } else {
+        setSortConfig(null);
+      }
+    } else {
+      setSortConfig({ key, direction: 'asc' });
     }
-    setSortConfig({ key, direction });
   };
 
   const sortedCampaigns = useMemo(() => {
     let result = [...campaigns];
+    
+    // Filter by custom date range if selected
+    if (startDate && endDate) {
+      const startOfDay = new Date(startDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      result = result.filter(camp => {
+        const lastEditDate = parseLastEditToDate(camp.lastEdit);
+        return lastEditDate >= startOfDay && lastEditDate <= endOfDay;
+      });
+    }
+
     if (sortConfig) {
+      const { key, direction } = sortConfig;
       result.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        if (aValue! < bValue!) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue! > bValue!) return sortConfig.direction === 'asc' ? 1 : -1;
+        let valA: any = a[key];
+        let valB: any = b[key];
+        
+        if (key === "outlets") {
+          valA = parseInt(a.outlets, 10) || 0;
+          valB = parseInt(b.outlets, 10) || 0;
+        } else if (key === "runtime") {
+          valA = parseInt(a.runtime, 10) || 0;
+          valB = parseInt(b.runtime, 10) || 0;
+        } else if (key === "lastEdit") {
+          valA = parseLastEditToDate(a.lastEdit).getTime();
+          valB = parseLastEditToDate(b.lastEdit).getTime();
+        } else {
+          valA = String(valA || "").toLowerCase();
+          valB = String(valB || "").toLowerCase();
+        }
+        
+        if (valA < valB) return direction === 'asc' ? -1 : 1;
+        if (valA > valB) return direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
     return result.slice(0, 4);
-  }, [campaigns, sortConfig]);
+  }, [campaigns, sortConfig, startDate, endDate]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const SortHeader = ({ label, sortKey }: { label: string, sortKey: keyof Campaign }) => (
-    <th className="px-4 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-modRed transition-colors" onClick={() => requestSort(sortKey)}>
-      <div className="flex items-center gap-1">
-        {label}
-        <ArrowUpDown size={12} />
-      </div>
-    </th>
-  );
+  const SortHeader = ({ label, sortKey }: { label: string, sortKey: keyof Campaign }) => {
+    const isActive = sortConfig?.key === sortKey;
+    return (
+      <th 
+        className="px-4 py-5 text-xs font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-modRed transition-colors select-none" 
+        onClick={() => requestSort(sortKey)}
+      >
+        <div className="flex items-center gap-1">
+          <span>{label}</span>
+          {isActive ? (
+            sortConfig.direction === 'asc' ? <ArrowUp size={11} className="text-modRed" /> : <ArrowDown size={11} className="text-modRed" />
+          ) : (
+            <ArrowUpDown size={11} className="opacity-40" />
+          )}
+        </div>
+      </th>
+    );
+  };
 
   return (
     <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-[#F9FAFB]">
@@ -105,15 +214,39 @@ export default function EditorDashboard() {
             <RefreshCw size={20} className={isLoading ? "animate-spin" : ""} />
           </button>
           <FilterButton icon={<Globe size={18} strokeWidth={2} />} label="All USA" onClick={() => alert("Region Filter: All USA Selected")} />
-          <FilterButton icon={<Calendar size={18} strokeWidth={2} />} label="Today" onClick={() => alert("Date Filter: Today Selected")} />
+          <div className="relative">
+            <FilterButton 
+              icon={<Calendar size={18} strokeWidth={2} className={startDate && endDate ? "text-modRed" : ""} />} 
+              label={startDate && endDate
+                ? `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })}`
+                : "Today"} 
+              onClick={() => setIsCalendarOpen(!isCalendarOpen)} 
+            />
+            <DateRangePickerPopover
+              isOpen={isCalendarOpen}
+              onClose={() => setIsCalendarOpen(false)}
+              initialStartDate={startDate}
+              initialEndDate={endDate}
+              onApply={(start, end) => {
+                setStartDate(start);
+                setEndDate(end);
+                setIsCalendarOpen(false);
+              }}
+              onClear={() => {
+                setStartDate(undefined);
+                setEndDate(undefined);
+                setIsCalendarOpen(false);
+              }}
+            />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4 px-4">
         {/* 2. Top Row: Metrics and Animated MOD Banner */}
         <div className="col-span-12 lg:col-span-5 grid grid-cols-2 gap-4">
-          <KPICard title="Live Campaigns" value={stats?.liveCampaigns.toString() || "..."} trend="+5%" iconType="megaphone" />
-          <KPICard title="Awaiting Approval" value={stats?.awaitingApproval.toString() || "..."} unit="Hrs" trend="-3%" iconType="clock" />
+          <KPICard title="Live Campaigns" value={stats?.liveCampaigns.toString() || "..."} trend="+5%" iconType="megaphone" href="/campaigns?status=Live" />
+          <KPICard title="Awaiting Approval" value={stats?.awaitingApproval.toString() || "..."} unit="Hrs" trend="-3%" iconType="clock" href="/campaigns?status=Sent+for+Approval" />
           <KPICard title="Campaigns Created" value={stats?.campaignsCreated.toString() || "..."} trend="-2%" iconType="target" />
           <KPICard title="Avg Coverage" value={stats ? `${stats.avgCoverage}%` : "..."} trend="+0.2%" iconType="rocket" />
         </div>
@@ -173,10 +306,15 @@ export default function EditorDashboard() {
               <button className="text-xs font-semibold text-modRed hover:underline underline-offset-4 uppercase">View All Tasks</button>
             </div>
             <div className="grid grid-cols-1 gap-3">
-              <TaskItem title="Weekend Combo Deal" desc="Campaign setup is not yet completed" actionLabel="Fix Now" />
-              <TaskItem title="Cheese Burst Promo" desc="Publisher requested modification" actionLabel="Edit" />
-              <TaskItem title="Student Combo Deal" desc="Campaign is ready for approval" actionLabel="Send" />
-              <TaskItem title="Summer Refresh" desc="Awaiting publisher approval" status="In Review" />
+              {(tasks.length > 0 ? tasks : FALLBACK_TASKS).map((task, idx) => (
+                <TaskItem 
+                  key={idx} 
+                  title={task.title} 
+                  desc={task.desc} 
+                  actionLabel={task.actionLabel} 
+                  status={task.status} 
+                />
+              ))}
             </div>
           </div>
 
@@ -219,7 +357,7 @@ export default function EditorDashboard() {
                     outlets={camp.outlets}
                     runtime={camp.runtime}
                     coverage={75}
-                    status={camp.status === 'Draft' ? 'Draft' : camp.status === 'Approved' ? 'Approved' : 'Sent'} 
+                    status={camp.status === 'Draft' ? 'Draft' : camp.status === 'Approved' ? 'Approved' : camp.status === 'Sent for Approval' ? 'Sent for Approval' : 'Sent'} 
                   />
                 ))}
               </tbody>
@@ -258,11 +396,11 @@ export default function EditorDashboard() {
                 <Trophy size={14} className="text-white" />
                 <span>Editor Ranking</span>
               </div>
-              <h3 className="text-3xl font-black tracking-tight text-modRed">Your Rank #2</h3>
-              <p className="text-sm text-white/80 font-medium mt-1">Top: Weekend Pizza Offer</p>
+              <h3 className="text-3xl font-black tracking-tight text-modRed">Your Rank #{ranking?.rank ?? FALLBACK_RANKING.rank}</h3>
+              <p className="text-sm text-white/80 font-medium mt-1">Top: {ranking?.topCampaign ?? FALLBACK_RANKING.topCampaign}</p>
             </div>
             <div className="relative z-10 mt-5">
-              <div className="inline-flex items-center px-4 py-2 bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-widest border border-slate-700">324 screen hours</div>
+              <div className="inline-flex items-center px-4 py-2 bg-slate-800 rounded-lg text-xs font-bold uppercase tracking-widest border border-slate-700">{ranking?.hours ?? FALLBACK_RANKING.hours}</div>
             </div>
             <div className="absolute right-0 bottom-0 text-white/5 select-none pointer-events-none transform translate-x-2 translate-y-2"><Trophy size={110} /></div>
           </div>
@@ -291,8 +429,14 @@ export default function EditorDashboard() {
               </div>
             </div>
             <div className="space-y-6 px-1">
-              <OpportunityItem title="Memorial Day" date="May 27" sub="Suggested: BBQ Pizza Offer" />
-              <OpportunityItem title="NBA Playoffs" date="May 21" sub="Suggested: Game Night Combo" />
+              {(opportunities.length > 0 ? opportunities : FALLBACK_OPPORTUNITIES).map((opp, idx) => (
+                <OpportunityItem 
+                  key={idx}
+                  title={opp.title}
+                  date={opp.date}
+                  sub={opp.sub}
+                />
+              ))}
             </div>
           </div>
 
@@ -304,7 +448,7 @@ export default function EditorDashboard() {
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Approval Rate</p>
                 <p className="text-4xl font-bold text-slate-900 flex items-center justify-center tracking-tighter">
-                  82% <ArrowUpRight size={28} strokeWidth={2.5} className="ml-2 text-[#10B981]" />
+                  {insights?.approvalRate ?? FALLBACK_INSIGHTS.approvalRate}% <ArrowUpRight size={28} strokeWidth={2.5} className="ml-2 text-[#10B981]" />
                 </p>
               </div>
 
@@ -313,7 +457,7 @@ export default function EditorDashboard() {
               <div className="w-full">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Best Performing Day</p>
                 <p className="text-4xl font-bold text-[#10B981] flex items-center justify-center tracking-tighter">
-                  Friday <Zap size={24} strokeWidth={2.5} className="ml-2 text-[#10B981] fill-[#10B981]/20" />
+                  {insights?.bestPerformingDay ?? FALLBACK_INSIGHTS.bestPerformingDay} <Zap size={24} strokeWidth={2.5} className="ml-2 text-[#10B981] fill-[#10B981]/20" />
                 </p>
                 <p className="text-sm text-slate-500 font-medium mt-3">Highest engagement peak</p>
               </div>
@@ -339,8 +483,21 @@ function FilterButton({ icon, label, onClick }: { icon: React.ReactNode; label: 
 }
 
 function CampaignDataRow({ name, id, outlets, runtime, coverage, status }: { name: string; id: string; outlets: string; runtime: string; coverage: number; status: string }) {
+  const router = useRouter();
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) {
+      return;
+    }
+    router.push(`/campaigns/${id}`);
+  };
+
   return (
-    <tr className="hover:bg-[#FCFDFD] transition-colors group">
+    <tr 
+      onClick={handleRowClick}
+      className="hover:bg-[#FCFDFD] transition-colors group cursor-pointer"
+    >
       <td className="px-6 py-4">
         <Link href={`/campaigns/${id}`} className="text-sm font-bold text-slate-900 hover:text-modRed transition-colors">
           {name}
@@ -371,11 +528,13 @@ function CampaignStatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     "Approved": "bg-emerald-50 text-emerald-700 border-emerald-100",
     "Sent": "bg-blue-50 text-blue-700 border-blue-100",
+    "Sent for Approval": "bg-blue-50 text-blue-700 border-blue-100",
     "Draft": "bg-slate-50 text-slate-600 border-slate-200",
   };
   const icons: Record<string, React.ReactNode> = {
     "Approved": <CheckCircle2 size={12} />,
     "Sent": <ExternalLink size={12} />,
+    "Sent for Approval": <ExternalLink size={12} />,
     "Draft": <AlertCircle size={12} />,
   };
   return (

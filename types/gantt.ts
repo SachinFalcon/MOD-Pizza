@@ -22,6 +22,7 @@ export type GanttTaskStatus =
   | "Approved"
   | "Live"
   | "Sent"
+  | "Sent for Approval"
   | "Under Modification";
 
 export interface GanttTask {

@@ -1,6 +1,7 @@
 import React from "react";
 import { MoreVertical, Play, Clock, ExternalLink, AlertCircle, CheckCircle2, Send } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface CampaignRowProps {
   name: string;
@@ -15,8 +16,21 @@ interface CampaignRowProps {
 }
 
 export function CampaignTableRow({ name, id, outlets, runtime, coverage, status, color, creatives, lastEdit }: CampaignRowProps) {
+  const router = useRouter();
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) {
+      return;
+    }
+    router.push(`/campaigns/${id}`);
+  };
+
   return (
-    <tr className="hover:bg-slate-50/80 transition-colors group border-b border-slate-100 last:border-0">
+    <tr 
+      onClick={handleRowClick}
+      className="hover:bg-slate-50/80 transition-colors group border-b border-slate-100 last:border-0 cursor-pointer"
+    >
       <td className="px-6 py-5">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-md bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
@@ -56,8 +70,21 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
 }
 
 export function CampaignMobileRow({ name, id, outlets, runtime, coverage, status, color, creatives, lastEdit }: CampaignRowProps) {
+  const router = useRouter();
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) {
+      return;
+    }
+    router.push(`/campaigns/${id}`);
+  };
+
   return (
-    <div className="p-4 space-y-4 border-b border-slate-100 last:border-0">
+    <div 
+      onClick={handleRowClick}
+      className="p-4 space-y-4 border-b border-slate-100 last:border-0 cursor-pointer hover:bg-slate-50/30 transition-colors"
+    >
       <div className="flex justify-between items-start">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
@@ -101,6 +128,7 @@ export function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     "Live": "bg-emerald-50 text-emerald-600 border-emerald-100",
     "Sent": "bg-indigo-50 text-indigo-600 border-indigo-100",
+    "Sent for Approval": "bg-indigo-50 text-indigo-600 border-indigo-100",
     "Under Modification": "bg-amber-50 text-amber-600 border-amber-100",
     "Approved": "bg-emerald-50/60 text-emerald-500 border-emerald-100/50",
     "Draft": "bg-slate-50 text-slate-600 border-slate-100",
@@ -109,6 +137,7 @@ export function StatusBadge({ status }: { status: string }) {
   const icons: Record<string, React.ReactNode> = {
     "Live": <div className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />,
     "Sent": <Send size={10} />,
+    "Sent for Approval": <Send size={10} />,
     "Under Modification": <AlertCircle size={12} />,
     "Approved": <CheckCircle2 size={12} />,
   };
