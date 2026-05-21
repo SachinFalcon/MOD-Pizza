@@ -12,7 +12,12 @@ export function generateStaticParams() {
 }
 
 import CampaignDetailsClient from "@/components/features/campaign-details/campaign-details-client";
+import { Suspense } from "react";
 
 export default function CampaignDetailsPage() {
-  return <CampaignDetailsClient />;
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500 font-semibold">Loading Campaign Details...</div>}>
+      <CampaignDetailsClient />
+    </Suspense>
+  );
 }
