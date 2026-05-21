@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@theme {
+  --font-sans: var(--font-poppins), "Barlow", "Brandon Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-oswald), "Knockout 48 Featherweight", "Brandon Grotesque", sans-serif;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+/* ── shadcn/ui CSS Variables — MOD Red brand mapping ──────────────────── */
+:root {
+  --background: 0 0% 98%;
+  --foreground: 222 47% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* MOD Red: #BD1720 → hsl(357, 80%, 44%) */
+  --primary: 357 80% 44%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 215 20% 96%;
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 215 20% 96%;
+  --muted-foreground: 215 16% 47%;
+
+  --accent: 215 20% 96%;
+  --accent-foreground: 222 47% 11%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 215 20% 91%;
+  --input: 215 20% 91%;
+  --ring: 357 80% 44%;
+
+  --radius: 0.5rem;
+
+  /* Legacy tokens */
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 249, 250, 251;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+

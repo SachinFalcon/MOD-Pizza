@@ -1,0 +1,25 @@
+MOD CMS FRONTEND TECHNOLOGY STACK RECOMMENDATIONS
+--------------------------------------------------
+
+1. CORE ARCHITECTURE & STATE MANAGEMENT
+   - TanStack Query: Manages background telemetry polling (60s heartbeat) and server-side state synchronization.
+   - Zustand: Handles global RBAC-aware state (Admin/Publisher/Editor roles) and UI-specific session data.
+
+2. SCHEDULING & GANTT ENGINE
+   - Bryntum Gantt: Provides high-performance, enterprise-grade scheduling, drag-and-drop interaction, and native timezone normalization.
+
+3. DATA VISUALIZATION
+   - Apache ECharts: Optimized for rendering real-time regional health heatmaps and uptime histograms with high data density.
+
+4. FORMS & VALIDATION
+   - React Hook Form + Zod: Ensures rigorous schema-based validation for campaign metadata, screen provisioning, and operational inputs.
+
+5. ASSET & DATA HANDLING
+   - Uppy: Facilitates large asset uploads (MP4/JPG) with reliable progress monitoring and S3 integration.
+   - Papa Parse: Performs high-speed, client-side CSV parsing for bulk screen provisioning and import workflows.
+
+6. UI & COMPONENT FOUNDATION
+   - shadcn/ui: A clean, modular, and accessible component library that integrates seamlessly with Tailwind CSS to ensure a maintainable and consistent Control Tower dashboard.
+
+--------------------------------------------------
+Rationale: This stack is selected to meet the MOD CMS BRD performance targets (under 2s load time, 5-minute latency tolerance) and security requirements through modular, type-safe, and high-performance industry-standard tools.

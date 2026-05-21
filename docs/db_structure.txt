@@ -1,0 +1,269 @@
+========================================================================
+             MOD PIZZA DIGITAL DASHBOARD - DATABASE STRUCTURE
+========================================================================
+This document outlines the relational PostgreSQL database schema structure 
+designed to back the MOD Pizza Digital Display Dashboard frontend.
+
+------------------------------------------------------------------------
+1. ENTITY RELATIONSHIP DIAGRAM (ERD SUMMARY)
+------------------------------------------------------------------------
+
+  [users] ──(1:N)──> [user_sessions]
+     │
+     ├──(1:N)──> [activity_logs]
+     │
+     └──(1:N)──> [campaigns] ──(N:N via campaign_outlets)──> [outlets]
+                                  │
+                                  └──(N:N via campaign_screens)──> [screens]
+
+  [outlets] ──(1:N)──> [screens]
+
+  [templates] (Standalone assets catalog referenced in campaigns)
+
+------------------------------------------------------------------------
+2. TABLE STRUCTURES & SPECIFICATIONS
+------------------------------------------------------------------------
+
+### 2.1 Table: `users`
+Stores user profile information, authentication metadata, designations, and roles.
+
+| Column Name          | Data Type                | Constraints                     | Description                                   |
+|----------------------|--------------------------|---------------------------------|-----------------------------------------------|
+| `id`                 | `UUID`                   | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique identifier for each user profile       |
+| `name`               | `VARCHAR(100)`           | NOT NULL                        | User's full name                              |
+| `email`              | `VARCHAR(255)`           | NOT NULL, UNIQUE                | Email address (login username)                |
+| `password_hash`      | `VARCHAR(255)`           | NOT NULL                        | Securely hashed password                      |
+| `role`               | `VARCHAR(20)`            | NOT NULL                        | System Access Role ('Admin', 'Publisher', 'Editor') |
+| `designation`        | `VARCHAR(150)`           | NOT NULL                        | Job designation title                         |
+| `phone`              | `VARCHAR(25)`            | NOT NULL                        | Direct contact phone number                   |
+| `scope_region`       | `VARCHAR(50)`            | NOT NULL                        | Assigned coverage (e.g. 'Chicago HQ')         |
+| `avatar_url`         | `VARCHAR(255)`           |                                 | Path or URL to profile avatar portrait image   |
+| `timezone`           | `VARCHAR(50)`            | DEFAULT 'UTC-05:00'             | Preferred timezone selection                 |
+| `two_factor_enabled` | `BOOLEAN`                | DEFAULT FALSE                   | Status of 2FA security setting                |
+| `joined_at`          | `TIMESTAMP WITH TZ`      | DEFAULT NOW()                   | User creation date                           |
+| `created_at`         | `TIMESTAMP WITH TZ`      | DEFAULT NOW()                   | Audit timestamp                              |
+| `updated_at`         | `TIMESTAMP WITH TZ`      | DEFAULT NOW()                   | Audit timestamp for updates                  |
+
+---
+
+### 2.2 Table: `user_sessions`
+Tracks active security sessions and browser logins for audit and revocation.
+
+| Column Name  | Data Type          | Constraints                        | Description                                  |
+|--------------|--------------------|------------------------------------|----------------------------------------------|
+| `id`         | `UUID`             | PRIMARY KEY                        | Unique session token ID                      |
+| `user_id`    | `UUID`             | FK referencing `users(id)` ON DELETE CASCADE | Owner of this session                        |
+| `device`     | `VARCHAR(150)`     | NOT NULL                           | User agent description (e.g., 'MacBook Pro') |
+| `location`   | `VARCHAR(100)`     | NOT NULL                           | Geolocated login region                      |
+| `ip_address` | `VARCHAR(45)`      | NOT NULL                           | IPv4 or IPv6 address                         |
+| `login_time` | `TIMESTAMP WITH TZ`| DEFAULT NOW()                      | Timestamp of login                           |
+| `status`     | `VARCHAR(15)`      | DEFAULT 'active'                   | Session status ('current', 'active', 'revoke')|
+
+---
+
+### 2.3 Table: `activity_logs`
+ chronological audit log of all system changes performed by users.
+
+| Column Name  | Data Type          | Constraints                        | Description                                  |
+|--------------|--------------------|------------------------------------|----------------------------------------------|
+| `id`         | `UUID`             | PRIMARY KEY                        | Unique log entry ID                          |
+| `user_id`    | `UUID`             | FK referencing `users(id)` ON DELETE CASCADE | Performed by this user                       |
+| `action`     | `VARCHAR(255)`     | NOT NULL                           | Audit message (e.g., 'Created New Campaign')|
+| `module`     | `VARCHAR(50)`      | NOT NULL                           | Targeted panel ('Campaigns', 'Library', etc.) |
+| `status`     | `VARCHAR(15)`      | DEFAULT 'SUCCESS'                  | Outcome status ('SUCCESS', 'FAILED')         |
+| `created_at` | `TIMESTAMP WITH TZ`| DEFAULT NOW()                      | Time action was recorded                     |
+
+---
+
+### 2.4 Table: `outlets`
+Physical retail location outlets hosting digital screens.
+
+| Column Name | Data Type      | Constraints | Description                                     |
+|-------------|----------------|-------------|-------------------------------------------------|
+| `id`        | `UUID`         | PRIMARY KEY | Unique outlet ID                                |
+| `name`      | `VARCHAR(150)` | NOT NULL    | Outlet branch name (e.g., 'Chicago Downtown')   |
+| `region`    | `VARCHAR(50)`  | NOT NULL    | Geographic territory ('West', 'South', 'East')  |
+| `address`   | `TEXT`         |             | Physical street address                         |
+| `city`      | `VARCHAR(100)` |             | Location city                                   |
+| `state`     | `VARCHAR(50)`  |             | Location state                                  |
+
+---
+
+### 2.5 Table: `screens`
+Digital billboards/screens installed inside specific outlets.
+
+| Column Name | Data Type      | Constraints | Description                                     |
+|-------------|----------------|-------------|-------------------------------------------------|
+| `id`        | `UUID`         | PRIMARY KEY | Unique screen device ID                         |
+| `outlet_id` | `UUID`         | FK referencing `outlets(id)` ON DELETE CASCADE | Outlet host location                            |
+| `name`      | `VARCHAR(150)` | NOT NULL    | Device layout tag (e.g., 'Display Row 1 Screen B')|
+| `status`    | `VARCHAR(15)`  | DEFAULT 'Active' | Device power status ('Active', 'Offline')       |
+
+---
+
+### 2.6 Table: `campaigns`
+Promotional schedules submitted, approved, and broadcasted to screens.
+
+| Column Name           | Data Type          | Constraints               | Description                                   |
+|-----------------------|--------------------|---------------------------|-----------------------------------------------|
+| `id`                  | `UUID`             | PRIMARY KEY               | Unique campaign ID                            |
+| `name`                | `VARCHAR(150)`     | NOT NULL                  | Promotional title                             |
+| `creator_id`          | `UUID`             | FK referencing `users(id)` | Author of the campaign                        |
+| `created_at`          | `TIMESTAMP WITH TZ`| DEFAULT NOW()             | Initial save draft date                       |
+| `submitted_at`        | `TIMESTAMP WITH TZ`|                           | Submission date for review                   |
+| `approval_type`       | `VARCHAR(15)`      | NOT NULL                  | Processing ('Auto', 'Manual')                 |
+| `runtime_seconds`     | `INTEGER`          | DEFAULT 0                 | Campaign display duration (in seconds)        |
+| `status`              | `VARCHAR(30)`      | DEFAULT 'Draft'           | Workflow state ('Live', 'Approved', 'Sent')   |
+| `reason`              | `VARCHAR(255)`     |                           | Status comment or review rejection reason     |
+| `coverage_percentage` | `NUMERIC(5,2)`     | DEFAULT 0.00              | Screen target coverage statistic              |
+
+---
+
+### 2.7 Table: `campaign_outlets` (Join Table)
+Many-to-Many mapping linking campaigns to physical outlets.
+
+| Column Name   | Data Type | Constraints                                      | Description                     |
+|---------------|-----------|--------------------------------------------------|---------------------------------|
+| `campaign_id` | `UUID`    | PRIMARY KEY, FK referencing `campaigns(id)` ON DELETE CASCADE | Associated campaign             |
+| `outlet_id`   | `UUID`    | PRIMARY KEY, FK referencing `outlets(id)` ON DELETE CASCADE   | Assigned target location outlet |
+
+---
+
+### 2.8 Table: `campaign_screens` (Join Table)
+Many-to-Many mapping targeting campaigns to specific digital display devices.
+
+| Column Name   | Data Type | Constraints                                      | Description                     |
+|---------------|-----------|--------------------------------------------------|---------------------------------|
+| `campaign_id` | `UUID`    | PRIMARY KEY, FK referencing `campaigns(id)` ON DELETE CASCADE | Associated campaign             |
+| `screen_id`   | `UUID`    | PRIMARY KEY, FK referencing `screens(id)` ON DELETE CASCADE   | Assigned screen device          |
+
+---
+
+### 2.9 Table: `templates`
+Media files and pre-made graphic canvas files used in campaigns.
+
+| Column Name     | Data Type          | Constraints   | Description                                     |
+|-----------------|--------------------|---------------|-------------------------------------------------|
+| `id`            | `UUID`             | PRIMARY KEY   | Unique template ID                              |
+| `title`         | `VARCHAR(150)`     | NOT NULL      | Graphic file name                               |
+| `duration`      | `INTEGER`          | NOT NULL      | Default runtime (in seconds)                    |
+| `used_count`    | `INTEGER`          | DEFAULT 0     | Number of campaigns utilizing this graphic      |
+| `badge`         | `VARCHAR(20)`      |               | Display tags ('New', 'Popular', 'Promo')        |
+| `thumbnail_url` | `VARCHAR(255)`     | NOT NULL      | Link to low-resolution thumbnail image          |
+| `media_url`     | `VARCHAR(255)`     | NOT NULL      | Link to high-definition source video/canvas asset|
+| `created_at`    | `TIMESTAMP WITH TZ`| DEFAULT NOW() | File upload date                                |
+
+
+========================================================================
+3. SQL DATABASE SCHEMAS (DDL SCRIPT)
+========================================================================
+
+```sql
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 1. Create Users Table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('Admin', 'Publisher', 'Editor')),
+    designation VARCHAR(150) NOT NULL,
+    phone VARCHAR(25) NOT NULL,
+    scope_region VARCHAR(50) NOT NULL,
+    avatar_url VARCHAR(255),
+    timezone VARCHAR(50) DEFAULT 'UTC-05:00',
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Create User Sessions Table
+CREATE TABLE user_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    device VARCHAR(150) NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    login_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    status VARCHAR(15) DEFAULT 'active' CHECK (status IN ('current', 'active', 'revoke'))
+);
+
+-- 3. Create Activity Logs Table
+CREATE TABLE activity_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    action VARCHAR(255) NOT NULL,
+    module VARCHAR(50) NOT NULL,
+    status VARCHAR(15) DEFAULT 'SUCCESS' CHECK (status IN ('SUCCESS', 'FAILED')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 4. Create Outlets Table
+CREATE TABLE outlets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(150) NOT NULL,
+    region VARCHAR(50) NOT NULL CHECK (region IN ('West', 'South', 'Midwest', 'East', 'North')),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(50)
+);
+
+-- 5. Create Screens Table
+CREATE TABLE screens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    outlet_id UUID NOT NULL REFERENCES outlets(id) ON DELETE CASCADE,
+    name VARCHAR(150) NOT NULL,
+    status VARCHAR(15) DEFAULT 'Active' CHECK (status IN ('Active', 'Offline'))
+);
+
+-- 6. Create Campaigns Table
+CREATE TABLE campaigns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(150) NOT NULL,
+    creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    submitted_at TIMESTAMP WITH TIME ZONE,
+    approval_type VARCHAR(15) NOT NULL CHECK (approval_type IN ('Auto', 'Manual')),
+    runtime_seconds INTEGER DEFAULT 0 CHECK (runtime_seconds >= 0),
+    status VARCHAR(30) DEFAULT 'Draft' CHECK (status IN ('Approved', 'Live', 'Sent', 'Draft', 'Under Modification')),
+    reason VARCHAR(255),
+    coverage_percentage NUMERIC(5,2) DEFAULT 0.00
+);
+
+-- 7. Create Campaign Outlets Join Table
+CREATE TABLE campaign_outlets (
+    campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    outlet_id UUID NOT NULL REFERENCES outlets(id) ON DELETE CASCADE,
+    PRIMARY KEY (campaign_id, outlet_id)
+);
+
+-- 8. Create Campaign Screens Join Table
+CREATE TABLE campaign_screens (
+    campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    screen_id UUID NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
+    PRIMARY KEY (campaign_id, screen_id)
+);
+
+-- 9. Create Templates Table
+CREATE TABLE templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(150) NOT NULL,
+    duration INTEGER NOT NULL CHECK (duration > 0),
+    used_count INTEGER DEFAULT 0 CHECK (used_count >= 0),
+    badge VARCHAR(20) CHECK (badge IN ('New', 'Popular', 'Promo')),
+    thumbnail_url VARCHAR(255) NOT NULL,
+    media_url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for performance optimization
+CREATE INDEX idx_sessions_user ON user_sessions(user_id);
+CREATE INDEX idx_logs_user ON activity_logs(user_id);
+CREATE INDEX idx_screens_outlet ON screens(outlet_id);
+CREATE INDEX idx_campaigns_creator ON campaigns(creator_id);
+CREATE INDEX idx_campaigns_status ON campaigns(status);
+```
+========================================================================
