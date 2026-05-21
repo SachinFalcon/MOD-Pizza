@@ -267,7 +267,7 @@ export default function CampaignDetailsPage() {
           {[
             { id: "overview", label: "Overview" },
             { id: "schedule", label: "Schedule" },
-            // { id: "creatives", label: "Creatives" }
+            { id: "creatives", label: "Creatives" }
           ].map(tab => {
             const isSelected = activeTab === tab.id;
             return (

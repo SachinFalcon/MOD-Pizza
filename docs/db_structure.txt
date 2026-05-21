@@ -12,13 +12,19 @@ designed to back the MOD Pizza Digital Display Dashboard frontend.
      │
      ├──(1:N)──> [activity_logs]
      │
-     └──(1:N)──> [campaigns] ──(N:N via campaign_outlets)──> [outlets]
-                                  │
-                                  └──(N:N via campaign_screens)──> [screens]
+     ├──(1:N)──> [campaigns] ──(N:N via campaign_outlets)──> [outlets]
+     │                             │
+     │                             ├──(N:N via campaign_screens)──> [screens] ──(1:N)──> [screen_health_logs]
+     │                             │
+     │                             └──(N:N via campaign_assets)──> [assets]
+     │
+     └──(1:N via role)──> [role_permissions] ──(N:1)──> [permissions]
 
   [outlets] ──(1:N)──> [screens]
 
   [templates] (Standalone assets catalog referenced in campaigns)
+
+  [system_settings] (Global application settings configuration)
 
 ------------------------------------------------------------------------
 2. TABLE STRUCTURES & SPECIFICATIONS
@@ -33,12 +39,12 @@ Stores user profile information, authentication metadata, designations, and role
 | `name`               | `VARCHAR(100)`           | NOT NULL                        | User's full name                              |
 | `email`              | `VARCHAR(255)`           | NOT NULL, UNIQUE                | Email address (login username)                |
 | `password_hash`      | `VARCHAR(255)`           | NOT NULL                        | Securely hashed password                      |
-| `role`               | `VARCHAR(20)`            | NOT NULL                        | System Access Role ('Admin', 'Publisher', 'Editor') |
+| `role`               | `VARCHAR(20)`            | NOT NULL CHECK (role IN ('Admin', 'Publisher', 'Editor')) | System Access Role |
 | `designation`        | `VARCHAR(150)`           | NOT NULL                        | Job designation title                         |
 | `phone`              | `VARCHAR(25)`            | NOT NULL                        | Direct contact phone number                   |
 | `scope_region`       | `VARCHAR(50)`            | NOT NULL                        | Assigned coverage (e.g. 'Chicago HQ')         |
 | `avatar_url`         | `VARCHAR(255)`           |                                 | Path or URL to profile avatar portrait image   |
-| `timezone`           | `VARCHAR(50)`            | DEFAULT 'UTC-05:00'             | Preferred timezone selection                 |
+| `timezone`           | `VARCHAR(100)`           | DEFAULT 'UTC-05:00'             | Preferred timezone selection                 |
 | `two_factor_enabled` | `BOOLEAN`                | DEFAULT FALSE                   | Status of 2FA security setting                |
 | `joined_at`          | `TIMESTAMP WITH TZ`      | DEFAULT NOW()                   | User creation date                           |
 | `created_at`         | `TIMESTAMP WITH TZ`      | DEFAULT NOW()                   | Audit timestamp                              |
@@ -57,12 +63,12 @@ Tracks active security sessions and browser logins for audit and revocation.
 | `location`   | `VARCHAR(100)`     | NOT NULL                           | Geolocated login region                      |
 | `ip_address` | `VARCHAR(45)`      | NOT NULL                           | IPv4 or IPv6 address                         |
 | `login_time` | `TIMESTAMP WITH TZ`| DEFAULT NOW()                      | Timestamp of login                           |
-| `status`     | `VARCHAR(15)`      | DEFAULT 'active'                   | Session status ('current', 'active', 'revoke')|
+| `status`     | `VARCHAR(15)`      | DEFAULT 'active' CHECK (status IN ('current', 'active', 'revoke')) | Session status |
 
 ---
 
 ### 2.3 Table: `activity_logs`
- chronological audit log of all system changes performed by users.
+Chronological audit log of all system changes performed by users.
 
 | Column Name  | Data Type          | Constraints                        | Description                                  |
 |--------------|--------------------|------------------------------------|----------------------------------------------|
@@ -70,7 +76,7 @@ Tracks active security sessions and browser logins for audit and revocation.
 | `user_id`    | `UUID`             | FK referencing `users(id)` ON DELETE CASCADE | Performed by this user                       |
 | `action`     | `VARCHAR(255)`     | NOT NULL                           | Audit message (e.g., 'Created New Campaign')|
 | `module`     | `VARCHAR(50)`      | NOT NULL                           | Targeted panel ('Campaigns', 'Library', etc.) |
-| `status`     | `VARCHAR(15)`      | DEFAULT 'SUCCESS'                  | Outcome status ('SUCCESS', 'FAILED')         |
+| `status`     | `VARCHAR(15)`      | DEFAULT 'SUCCESS' CHECK (status IN ('SUCCESS', 'FAILED')) | Outcome status              |
 | `created_at` | `TIMESTAMP WITH TZ`| DEFAULT NOW()                      | Time action was recorded                     |
 
 ---
@@ -82,7 +88,7 @@ Physical retail location outlets hosting digital screens.
 |-------------|----------------|-------------|-------------------------------------------------|
 | `id`        | `UUID`         | PRIMARY KEY | Unique outlet ID                                |
 | `name`      | `VARCHAR(150)` | NOT NULL    | Outlet branch name (e.g., 'Chicago Downtown')   |
-| `region`    | `VARCHAR(50)`  | NOT NULL    | Geographic territory ('West', 'South', 'East')  |
+| `region`    | `VARCHAR(50)`  | NOT NULL CHECK (region IN ('West', 'South', 'Midwest', 'East', 'North')) | Geographic region |
 | `address`   | `TEXT`         |             | Physical street address                         |
 | `city`      | `VARCHAR(100)` |             | Location city                                   |
 | `state`     | `VARCHAR(50)`  |             | Location state                                  |
@@ -90,14 +96,16 @@ Physical retail location outlets hosting digital screens.
 ---
 
 ### 2.5 Table: `screens`
-Digital billboards/screens installed inside specific outlets.
+Digital billboards/screens installed inside specific outlets, with health tracking fields.
 
-| Column Name | Data Type      | Constraints | Description                                     |
-|-------------|----------------|-------------|-------------------------------------------------|
-| `id`        | `UUID`         | PRIMARY KEY | Unique screen device ID                         |
-| `outlet_id` | `UUID`         | FK referencing `outlets(id)` ON DELETE CASCADE | Outlet host location                            |
-| `name`      | `VARCHAR(150)` | NOT NULL    | Device layout tag (e.g., 'Display Row 1 Screen B')|
-| `status`    | `VARCHAR(15)`  | DEFAULT 'Active' | Device power status ('Active', 'Offline')       |
+| Column Name      | Data Type          | Constraints | Description                                     |
+|------------------|--------------------|-------------|-------------------------------------------------|
+| `id`             | `UUID`             | PRIMARY KEY | Unique screen device ID                         |
+| `outlet_id`      | `UUID`             | FK referencing `outlets(id)` ON DELETE CASCADE | Outlet host location                            |
+| `name`           | `VARCHAR(150)`     | NOT NULL    | Device layout tag (e.g., 'Display Row 1 Screen B')|
+| `status`         | `VARCHAR(15)`      | DEFAULT 'Online' CHECK (status IN ('Online', 'Degraded', 'Offline')) | Device status |
+| `uptime_percent` | `NUMERIC(5,2)`     | DEFAULT 100.00 CHECK (uptime_percent BETWEEN 0 AND 100) | Uptime telemetry tracking |
+| `last_ping`      | `TIMESTAMP WITH TZ`| DEFAULT NOW() | Timestamp of last heartbeat received from device |
 
 ---
 
@@ -108,14 +116,14 @@ Promotional schedules submitted, approved, and broadcasted to screens.
 |-----------------------|--------------------|---------------------------|-----------------------------------------------|
 | `id`                  | `UUID`             | PRIMARY KEY               | Unique campaign ID                            |
 | `name`                | `VARCHAR(150)`     | NOT NULL                  | Promotional title                             |
-| `creator_id`          | `UUID`             | FK referencing `users(id)` | Author of the campaign                        |
+| `creator_id`          | `UUID`             | FK referencing `users(id)` ON DELETE SET NULL | Author of the campaign                    |
 | `created_at`          | `TIMESTAMP WITH TZ`| DEFAULT NOW()             | Initial save draft date                       |
 | `submitted_at`        | `TIMESTAMP WITH TZ`|                           | Submission date for review                   |
-| `approval_type`       | `VARCHAR(15)`      | NOT NULL                  | Processing ('Auto', 'Manual')                 |
-| `runtime_seconds`     | `INTEGER`          | DEFAULT 0                 | Campaign display duration (in seconds)        |
-| `status`              | `VARCHAR(30)`      | DEFAULT 'Draft'           | Workflow state ('Live', 'Approved', 'Sent')   |
+| `approval_type`       | `VARCHAR(15)`      | NOT NULL CHECK (approval_type IN ('Auto', 'Manual')) | Review type                 |
+| `runtime_seconds`     | `INTEGER`          | DEFAULT 0 CHECK (runtime_seconds >= 0) | Campaign display duration (in seconds)       |
+| `status`              | `VARCHAR(30)`      | DEFAULT 'Draft' CHECK (status IN ('Approved', 'Live', 'Sent', 'Draft', 'Under Modification', 'Awaiting Approval', 'Rejected')) | Workflow status |
 | `reason`              | `VARCHAR(255)`     |                           | Status comment or review rejection reason     |
-| `coverage_percentage` | `NUMERIC(5,2)`     | DEFAULT 0.00              | Screen target coverage statistic              |
+| `coverage_percentage` | `NUMERIC(5,2)`     | DEFAULT 0.00 CHECK (coverage_percentage BETWEEN 0 AND 100) | Target screen coverage percent |
 
 ---
 
@@ -140,18 +148,118 @@ Many-to-Many mapping targeting campaigns to specific digital display devices.
 ---
 
 ### 2.9 Table: `templates`
-Media files and pre-made graphic canvas files used in campaigns.
+Pre-made graphic canvas files utilized as layout frameworks.
 
 | Column Name     | Data Type          | Constraints   | Description                                     |
 |-----------------|--------------------|---------------|-------------------------------------------------|
 | `id`            | `UUID`             | PRIMARY KEY   | Unique template ID                              |
-| `title`         | `VARCHAR(150)`     | NOT NULL      | Graphic file name                               |
-| `duration`      | `INTEGER`          | NOT NULL      | Default runtime (in seconds)                    |
-| `used_count`    | `INTEGER`          | DEFAULT 0     | Number of campaigns utilizing this graphic      |
-| `badge`         | `VARCHAR(20)`      |               | Display tags ('New', 'Popular', 'Promo')        |
+| `title`         | `VARCHAR(150)`     | NOT NULL      | Graphic template title                          |
+| `duration`      | `INTEGER`          | NOT NULL CHECK (duration > 0) | Default runtime (in seconds)                    |
+| `used_count`    | `INTEGER`          | DEFAULT 0 CHECK (used_count >= 0) | Number of campaigns utilizing this template |
+| `badge`         | `VARCHAR(20)`      | CHECK (badge IN ('New', 'Popular', 'Promo')) | Display tags                       |
 | `thumbnail_url` | `VARCHAR(255)`     | NOT NULL      | Link to low-resolution thumbnail image          |
 | `media_url`     | `VARCHAR(255)`     | NOT NULL      | Link to high-definition source video/canvas asset|
 | `created_at`    | `TIMESTAMP WITH TZ`| DEFAULT NOW() | File upload date                                |
+
+---
+
+### 2.10 Table: `assets`
+Raw image/video media files uploaded under Library -> Assets.
+
+| Column Name  | Data Type          | Constraints   | Description                                     |
+|--------------|--------------------|---------------|-------------------------------------------------|
+| `id`         | `UUID`             | PRIMARY KEY   | Unique asset ID                                 |
+| `title`      | `VARCHAR(150)`     | NOT NULL      | File title name                                 |
+| `resolution` | `VARCHAR(50)`      | NOT NULL      | Asset pixel dimensions (e.g. '1920x1080')       |
+| `file_size`  | `VARCHAR(50)`      | NOT NULL      | Display size format (e.g. '24.5 MB')            |
+| `type`       | `VARCHAR(20)`      | NOT NULL CHECK (type IN ('VIDEO', 'IMAGE')) | Media format classification      |
+| `used_count` | `INTEGER`          | DEFAULT 0 CHECK (used_count >= 0) | Associated campaigns referencing this file |
+| `url`        | `VARCHAR(255)`     | NOT NULL      | Storage location path / endpoint URI            |
+| `status`     | `VARCHAR(20)`      | DEFAULT 'Uploaded' CHECK (status IN ('Syncing', 'Uploaded', 'Failed')) | Processing status |
+| `created_at` | `TIMESTAMP WITH TZ`| DEFAULT NOW() | File uploading timestamp                        |
+
+---
+
+### 2.11 Table: `campaign_assets` (Join Table)
+Many-to-Many mapping linking campaigns to assets with sequencing attributes (for Playlists).
+
+| Column Name   | Data Type | Constraints                                      | Description                     |
+|---------------|-----------|--------------------------------------------------|---------------------------------|
+| `campaign_id` | `UUID`    | PRIMARY KEY, FK referencing `campaigns(id)` ON DELETE CASCADE | Associated campaign             |
+| `asset_id`    | `UUID`    | PRIMARY KEY, FK referencing `assets(id)` ON DELETE CASCADE    | Assigned media asset            |
+| `play_order`  | `INTEGER` | NOT NULL DEFAULT 1 CHECK (play_order > 0)        | Sequencing index inside campaign|
+
+---
+
+### 2.12 Table: `permissions`
+Global catalog of access control security modules.
+
+| Column Name   | Data Type      | Constraints | Description                                     |
+|---------------|----------------|-------------|-------------------------------------------------|
+| `id`          | `UUID`         | PRIMARY KEY | Unique module permission ID                     |
+| `module`      | `VARCHAR(100)` | NOT NULL UNIQUE | Module name (e.g., 'Campaign Management')   |
+| `description` | `VARCHAR(255)` |             | Brief description of module permissions         |
+
+---
+
+### 2.13 Table: `role_permissions`
+Relates designations/roles to system modules with customized access level restrictions.
+
+| Column Name    | Data Type      | Constraints | Description                                     |
+|----------------|----------------|-------------|-------------------------------------------------|
+| `role`         | `VARCHAR(20)`  | PRIMARY KEY, CHECK (role IN ('Admin', 'Publisher', 'Editor')) | System Access Role |
+| `permission_id`| `UUID`         | PRIMARY KEY, FK referencing `permissions(id)` ON DELETE CASCADE | Module security constraint |
+| `access_level` | `VARCHAR(30)`  | NOT NULL CHECK (access_level IN ('Full Access', 'Read Only', 'No Access', 'View Only', 'Manage')) | Permission state |
+
+---
+
+### 2.14 Table: `screen_health_logs`
+Chronological telemetry dataset storing screen heartbeat activity and uptime metrics (backs Reports charts).
+
+| Column Name      | Data Type          | Constraints | Description                                     |
+|------------------|--------------------|-------------|-------------------------------------------------|
+| `id`             | `UUID`             | PRIMARY KEY | Unique telemetry event log record ID            |
+| `screen_id`      | `UUID`             | FK referencing `screens(id)` ON DELETE CASCADE | Associated screen device         |
+| `status`         | `VARCHAR(15)`      | NOT NULL CHECK (status IN ('Online', 'Degraded', 'Offline')) | Uptime state   |
+| `uptime_percent` | `NUMERIC(5,2)`     | NOT NULL DEFAULT 100.00 CHECK (uptime_percent BETWEEN 0 AND 100) | Recording period value |
+| `pinged_at`      | `TIMESTAMP WITH TZ`| DEFAULT NOW() | Heartbeat ping timing receipt                |
+
+---
+
+### 2.15 Table: `system_settings`
+Global system parameters configuration table. Enforces a single row design layout.
+
+| Column Name                        | Data Type      | Constraints | Description                                     |
+|------------------------------------|----------------|-------------|-------------------------------------------------|
+| `id`                               | `INTEGER`      | PRIMARY KEY, DEFAULT 1 CHECK (id = 1) | Single-row singleton enforcement constraint |
+| `default_campaign_duration_days`   | `INTEGER`      | DEFAULT 30  | Duration for new campaign drafts                |
+| `default_campaign_status`          | `VARCHAR(30)`  | DEFAULT 'Draft' | Startup state for campaigns                 |
+| `conflict_handling_strategy`       | `VARCHAR(50)`  | DEFAULT 'Manual Override' | Policy on overlapping runs             |
+| `default_loop_behavior`            | `VARCHAR(50)`  | DEFAULT 'Loop continuously' | Screen video cycling type           |
+| `min_play_time_seconds`            | `INTEGER`      | DEFAULT 10  | Hard minimum asset duration limit               |
+| `max_assets_per_campaign`          | `INTEGER`      | DEFAULT 50  | Asset playlist count limit                      |
+| `campaign_overlap_warning_enabled` | `BOOLEAN`      | DEFAULT TRUE | Alert triggers for conflicting times           |
+| `screen_assignment_rule`           | `VARCHAR(50)`  | DEFAULT 'Manual Override' | Screens assignment rule strategy |
+| `screen_sync_interval_minutes`     | `INTEGER`      | DEFAULT 15  | Sync polling duration                           |
+| `offline_fallback_asset_id`        | `UUID`         | FK referencing `assets(id)` ON DELETE SET NULL | Fallback content media file |
+| `device_offline_timeout_minutes`   | `INTEGER`      | DEFAULT 5   | Deadline to tag offline status                  |
+| `reconnect_attempts`               | `INTEGER`      | DEFAULT 3   | Maximum count of automatic reconnections        |
+| `default_screen_orientation`       | `VARCHAR(20)`  | DEFAULT 'Landscape' | Aspect orientation configuration        |
+| `default_screen_resolution`        | `VARCHAR(50)`  | DEFAULT '1920x1080' | Aspect screen display dimensions        |
+| `default_volume_level`             | `INTEGER`      | DEFAULT 0 CHECK (default_volume_level BETWEEN 0 AND 100) | Default audio decibels |
+| `allowed_media_formats`            | `VARCHAR(100)` | DEFAULT 'mp4,mov,webm,jpg,png' | Upload format whitelist       |
+| `upload_limit_per_week`            | `INTEGER`      | DEFAULT 500 | Global weekly batch upload cap                  |
+| `playback_mode`                    | `VARCHAR(50)`  | DEFAULT 'Continuous Loop' | Global media loop option              |
+| `video_scaling_method`             | `VARCHAR(30)`  | DEFAULT 'fill' | Viewport video resizing format               |
+| `unsupported_format_behavior`      | `VARCHAR(50)`  | DEFAULT 'Show Fallback Image' | Behavior for invalid codecs       |
+| `auto_optimization_enabled`        | `BOOLEAN`      | DEFAULT TRUE | Real-time codec transcoding optimizer state     |
+| `content_compression_level`        | `VARCHAR(20)`  | DEFAULT 'medium' | Compression parameters                      |
+| `email_alerts_enabled`             | `BOOLEAN`      | DEFAULT TRUE | Master trigger for email log reports            |
+| `critical_alerts_only`             | `BOOLEAN`      | DEFAULT FALSE | Limits alerts to critical notifications only   |
+| `max_login_attempts`               | `INTEGER`      | DEFAULT 5   | Security rate-limit threshold for authentication|
+| `alert_delay_buffer_minutes`       | `INTEGER`      | DEFAULT 15  | Grace period before alerts are sent out         |
+| `escalation_time_minutes`          | `INTEGER`      | DEFAULT 30  | Alert escalation timer                          |
+| `updated_at`                       | `TIMESTAMP`    | DEFAULT NOW() | System setting update modification timestamp  |
 
 
 ========================================================================
@@ -173,7 +281,7 @@ CREATE TABLE users (
     phone VARCHAR(25) NOT NULL,
     scope_region VARCHAR(50) NOT NULL,
     avatar_url VARCHAR(255),
-    timezone VARCHAR(50) DEFAULT 'UTC-05:00',
+    timezone VARCHAR(100) DEFAULT 'UTC-05:00',
     two_factor_enabled BOOLEAN DEFAULT FALSE,
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -216,7 +324,9 @@ CREATE TABLE screens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     outlet_id UUID NOT NULL REFERENCES outlets(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
-    status VARCHAR(15) DEFAULT 'Active' CHECK (status IN ('Active', 'Offline'))
+    status VARCHAR(15) DEFAULT 'Online' CHECK (status IN ('Online', 'Degraded', 'Offline')),
+    uptime_percent NUMERIC(5,2) DEFAULT 100.00 CHECK (uptime_percent BETWEEN 0.00 AND 100.00),
+    last_ping TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 6. Create Campaigns Table
@@ -228,9 +338,9 @@ CREATE TABLE campaigns (
     submitted_at TIMESTAMP WITH TIME ZONE,
     approval_type VARCHAR(15) NOT NULL CHECK (approval_type IN ('Auto', 'Manual')),
     runtime_seconds INTEGER DEFAULT 0 CHECK (runtime_seconds >= 0),
-    status VARCHAR(30) DEFAULT 'Draft' CHECK (status IN ('Approved', 'Live', 'Sent', 'Draft', 'Under Modification')),
+    status VARCHAR(30) DEFAULT 'Draft' CHECK (status IN ('Approved', 'Live', 'Sent', 'Draft', 'Under Modification', 'Awaiting Approval', 'Rejected')),
     reason VARCHAR(255),
-    coverage_percentage NUMERIC(5,2) DEFAULT 0.00
+    coverage_percentage NUMERIC(5,2) DEFAULT 0.00 CHECK (coverage_percentage BETWEEN 0.00 AND 100.00)
 );
 
 -- 7. Create Campaign Outlets Join Table
@@ -259,11 +369,93 @@ CREATE TABLE templates (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 10. Create Assets Table
+CREATE TABLE assets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(150) NOT NULL,
+    resolution VARCHAR(50) NOT NULL,
+    file_size VARCHAR(50) NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('VIDEO', 'IMAGE')),
+    used_count INTEGER DEFAULT 0 CHECK (used_count >= 0),
+    url VARCHAR(255) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Uploaded' CHECK (status IN ('Syncing', 'Uploaded', 'Failed')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 11. Create Campaign Assets Join Table
+CREATE TABLE campaign_assets (
+    campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    asset_id UUID NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+    play_order INTEGER NOT NULL DEFAULT 1 CHECK (play_order > 0),
+    PRIMARY KEY (campaign_id, asset_id)
+);
+
+-- 12. Create Permissions Table
+CREATE TABLE permissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    module VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(255)
+);
+
+-- 13. Create Role Permissions Table
+CREATE TABLE role_permissions (
+    role VARCHAR(20) NOT NULL CHECK (role IN ('Admin', 'Publisher', 'Editor')),
+    permission_id UUID NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    access_level VARCHAR(30) NOT NULL CHECK (access_level IN ('Full Access', 'Read Only', 'No Access', 'View Only', 'Manage')),
+    PRIMARY KEY (role, permission_id)
+);
+
+-- 14. Create Screen Health Logs Table
+CREATE TABLE screen_health_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    screen_id UUID NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
+    status VARCHAR(15) NOT NULL CHECK (status IN ('Online', 'Degraded', 'Offline')),
+    uptime_percent NUMERIC(5,2) NOT NULL DEFAULT 100.00 CHECK (uptime_percent BETWEEN 0.00 AND 100.00),
+    pinged_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 15. Create System Settings Table
+CREATE TABLE system_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    default_campaign_duration_days INTEGER DEFAULT 30,
+    default_campaign_status VARCHAR(30) DEFAULT 'Draft',
+    conflict_handling_strategy VARCHAR(50) DEFAULT 'Manual Override',
+    default_loop_behavior VARCHAR(50) DEFAULT 'Loop continuously',
+    min_play_time_seconds INTEGER DEFAULT 10,
+    max_assets_per_campaign INTEGER DEFAULT 50,
+    campaign_overlap_warning_enabled BOOLEAN DEFAULT TRUE,
+    screen_assignment_rule VARCHAR(50) DEFAULT 'Manual Override',
+    screen_sync_interval_minutes INTEGER DEFAULT 15,
+    offline_fallback_asset_id UUID REFERENCES assets(id) ON DELETE SET NULL,
+    device_offline_timeout_minutes INTEGER DEFAULT 5,
+    reconnect_attempts INTEGER DEFAULT 3,
+    default_screen_orientation VARCHAR(20) DEFAULT 'Landscape',
+    default_screen_resolution VARCHAR(50) DEFAULT '1920x1080',
+    default_volume_level INTEGER DEFAULT 0 CHECK (default_volume_level BETWEEN 0 AND 100),
+    allowed_media_formats VARCHAR(100) DEFAULT 'mp4,mov,webm,jpg,png',
+    upload_limit_per_week INTEGER DEFAULT 500,
+    playback_mode VARCHAR(50) DEFAULT 'Continuous Loop',
+    video_scaling_method VARCHAR(30) DEFAULT 'fill',
+    unsupported_format_behavior VARCHAR(50) DEFAULT 'Show Fallback Image',
+    auto_optimization_enabled BOOLEAN DEFAULT TRUE,
+    content_compression_level VARCHAR(20) DEFAULT 'medium',
+    email_alerts_enabled BOOLEAN DEFAULT TRUE,
+    critical_alerts_only BOOLEAN DEFAULT FALSE,
+    max_login_attempts INTEGER DEFAULT 5,
+    alert_delay_buffer_minutes INTEGER DEFAULT 15,
+    escalation_time_minutes INTEGER DEFAULT 30,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes for performance optimization
 CREATE INDEX idx_sessions_user ON user_sessions(user_id);
 CREATE INDEX idx_logs_user ON activity_logs(user_id);
 CREATE INDEX idx_screens_outlet ON screens(outlet_id);
 CREATE INDEX idx_campaigns_creator ON campaigns(creator_id);
 CREATE INDEX idx_campaigns_status ON campaigns(status);
+CREATE INDEX idx_assets_status ON assets(status);
+CREATE INDEX idx_campaign_assets_cid ON campaign_assets(campaign_id);
+CREATE INDEX idx_screen_health_sid ON screen_health_logs(screen_id);
+CREATE INDEX idx_role_permissions_role ON role_permissions(role);
 ```
 ========================================================================
