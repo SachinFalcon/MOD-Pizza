@@ -49,8 +49,8 @@ Higher levels include all lower-level permissions. A `Full Access` user can do e
 
 | Field | Editor | Publisher | Admin |
 |---|---|---|---|
-| **Example User** | Nolan Schleifer | Sarah Connor | Nolan Smith |
-| **Email** | nolan.schleifer@mtas.com | sarah.connor@mtas.com | nolan.hq@modpizza.com |
+| **Example User** | Dev Sachin | Sarah Connor | Dev Sachin |
+| **Email** | dev.sachin@mtas.com | sarah.connor@mtas.com | dev.sachin@modpizza.com |
 | **Scope** | Chicago HQ | New York HQ | Global Operations HQ |
 | **Timezone** | UTC-05:00 (EST) | UTC-05:00 (EST) | UTC-05:00 (EST) |
 

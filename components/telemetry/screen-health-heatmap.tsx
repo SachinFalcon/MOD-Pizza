@@ -8,10 +8,9 @@ import React, { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import { useActivityHeatmap } from "@/hooks/use-telemetry";
 
-const HOURS = Array.from({ length: 24 }, (_, i) =>
-  i === 0 ? "12am" : i < 12 ? `${i}am` : i === 12 ? "12pm" : `${i - 12}pm`
-);
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DISPLAY_HOURS = ["09:00 AM", "12:00 PM", "03:00 PM", "05:00 PM", "09:00 PM"];
+const HOUR_INDICES = [9, 12, 15, 17, 21];
+const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export function ScreenHealthHeatmap() {
   const { data: matrix, isLoading } = useActivityHeatmap();
@@ -19,49 +18,57 @@ export function ScreenHealthHeatmap() {
   const option = useMemo(() => {
     if (!matrix) return {};
 
-    // Flatten to [hour, day, value] triples for ECharts heatmap
+    // Flatten to [dayIndex, hourIndex, value] triples for ECharts heatmap
     const seriesData: [number, number, number][] = [];
-    matrix.forEach((row, h) =>
-      row.forEach((val, d) => seriesData.push([h, d, val]))
-    );
+    HOUR_INDICES.forEach((h, i) => {
+      DAYS.forEach((_, d) => {
+        // xIndex = d (DAYS), yIndex = i (DISPLAY_HOURS)
+        seriesData.push([d, i, matrix[h][d]]);
+      });
+    });
 
     return {
       backgroundColor: "transparent",
       tooltip: {
         position: "top",
         formatter: (p: { data: [number, number, number] }) =>
-          `${DAYS[p.data[1]]} ${HOURS[p.data[0]]}: <b>${p.data[2]}%</b> activity`,
+          `${DAYS[p.data[0]]} ${DISPLAY_HOURS[p.data[1]]}: <b>${p.data[2]}%</b> activity`,
       },
-      grid: { top: "8%", bottom: "14%", left: "8%", right: "4%" },
+      grid: { top: "5%", bottom: "0%", left: "12%", right: "2%" },
       xAxis: {
         type: "category",
-        data: HOURS,
+        data: DAYS,
         axisLabel: {
-          fontSize: 9,
+          fontSize: 10,
           color: "#94a3b8",
-          interval: 2,
-          rotate: 0,
+          fontWeight: "600",
+          margin: 12,
         },
-        splitArea: { show: true },
+        splitArea: { show: false },
+        axisLine: { show: false },
+        axisTick: { show: false },
       },
       yAxis: {
         type: "category",
-        data: DAYS,
-        axisLabel: { fontSize: 11, color: "#475569", fontWeight: "bold" },
-        splitArea: { show: true },
+        data: DISPLAY_HOURS,
+        inverse: true, // 09:00 AM at the top
+        axisLabel: { 
+          fontSize: 10, 
+          color: "#94a3b8", 
+          fontWeight: "500",
+          margin: 16,
+        },
+        splitArea: { show: false },
+        axisLine: { show: false },
+        axisTick: { show: false },
       },
       visualMap: {
+        show: false, // Hidden because the image has a custom HTML legend instead
         min: 0,
         max: 100,
         calculable: true,
-        orient: "horizontal",
-        left: "center",
-        bottom: "0%",
-        itemWidth: 12,
-        itemHeight: 100,
-        textStyle: { fontSize: 10, color: "#94a3b8" },
         inRange: {
-          color: ["#fff1f2", "#fecdd3", "#f87171", "#ef4444", "#BD1720"],
+          color: ["#FFF0F1", "#FFCCD0", "#FAA0A9", "#F26D7D", "#D84A5C"], 
         },
       },
       series: [
@@ -69,6 +76,11 @@ export function ScreenHealthHeatmap() {
           type: "heatmap",
           data: seriesData,
           label: { show: false },
+          itemStyle: {
+            borderRadius: 2, // reduced curvature
+            borderWidth: 3, // reduced spacing (controls gap between blocks)
+            borderColor: "#fff", 
+          },
           emphasis: {
             itemStyle: {
               shadowBlur: 10,

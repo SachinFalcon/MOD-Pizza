@@ -28,7 +28,7 @@ export default function LoginPage() {
               <label className="block text-xs font-medium text-modGrey-300 uppercase tracking-widest mb-1">Email Address</label>
               <input 
                 type="email" 
-                placeholder="nolan.schleifer@modpizza.com"
+                placeholder="dev.sachin@modpizza.com"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm focus:border-modRed focus:outline-none focus:ring-1 focus:ring-modRed transition-all"
               />
             </div>

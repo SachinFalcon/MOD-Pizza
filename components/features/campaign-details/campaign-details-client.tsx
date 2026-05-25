@@ -35,6 +35,7 @@ import { api, Campaign, CampaignOutlet, PlaybackAsset, CampaignAsset, Comment } 
 import { FilterDropdown } from "@/components/atoms/filter-dropdown";
 import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { getActiveProfile } from "@/config/user-roles";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
@@ -56,7 +57,7 @@ const FALLBACK_COMMENTS: Comment[] = [
     id: 1,
     author: "You",
     role: "",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
+    avatar: "/images/BMW_S_1000_RR_Winglet_4_cb2f77e0e7.png",
     time: "2 hours ago",
     text: "The typography on the main banner needs slightly more leading. It feels a bit cramped for an 'editorial' feel."
   },
@@ -72,8 +73,8 @@ const FALLBACK_COMMENTS: Comment[] = [
     id: 3,
     author: "You",
     role: "",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-    time: "25 mins ago",
+    avatar: "/images/BMW_S_1000_RR_Winglet_4_cb2f77e0e7.png",
+    time: "2 hours ago",
     text: "Campaign targets for EMEA are slightly high. Do we have the additional spend for the Italian market expansion?"
   }
 ];
@@ -340,104 +341,107 @@ export default function CampaignDetailsClient() {
     );
   }
 
+  const profile = getActiveProfile();
+
   return (
-    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-[#F9FAFB]">
+    <div className="min-h-screen bg-[#F9FAFB] animate-in fade-in duration-500">
 
       {/* ======================================================== */}
       {/* 1. HEADER & BREADCRUMBS */}
       {/* ======================================================== */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] mb-6">
+      <div className="w-full bg-gradient-to-r from-[#FFF0F2] via-white to-[#FFD2D6] border-b border-slate-100 pb-6 pt-8 px-6 md:px-8">
+        <div className="max-w-[1600px] mx-auto">
 
-        {/* Navigation row */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-2 text-[11px] font-bold tracking-widest text-slate-400">
-            <Link href={backHref} className="hover:text-modRed transition-colors uppercase">{backLabel}</Link>
-            <span>&gt;</span>
-            <span className="text-modRed uppercase">DETAILS</span>
-          </div>
-          <Link href={backHref} className="h-8 w-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:border-modRed hover:text-modRed hover:bg-red-50/20 transition-all active:scale-90">
-            <X size={16} />
-          </Link>
-        </div>
-
-        {/* Campaign Info header row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-start space-x-4">
-            {/* Small image preview of pizza */}
-            <div className="h-16 w-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-sm relative group cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
-              <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=120&h=120&fit=crop" alt="Pizza preview" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Play size={16} className="text-white fill-white" />
-              </div>
+          {/* Navigation row */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold tracking-widest text-slate-400">
+              <Link href={backHref} className="hover:text-modRed transition-colors uppercase">{backLabel}</Link>
+              <span className="text-slate-350 font-normal text-sm select-none">›</span>
+              <span className="text-modRed uppercase">DETAILS</span>
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">{campaign.name}</h2>
-                <div className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${campaign.status === "Live"
-                  ? "bg-[#E6F4EA] text-[#137333] border-[#CEEAD6]"
-                  : campaign.status === "Sent for Approval"
-                    ? "bg-[#EEF2FF] text-[#4F46E5] border-[#E0E7FF]"
-                    : campaign.status === "Under Modification"
-                      ? "bg-[#FEF7E0] text-[#B06000] border-[#FEEFC3]"
-                      : "bg-slate-50 text-slate-500 border-slate-200"
-                  }`}>
-                  {campaign.status === "Live" && <span className="h-1.5 w-1.5 rounded-full bg-[#137333] animate-pulse" />}
-                  {campaign.status === "Sent for Approval" && <Send size={10} className="text-[#4F46E5]" />}
-                  <span>{campaign.status}</span>
+            <Link href={backHref} className="h-8 w-8 rounded-full bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-slate-500 transition-all active:scale-90 shadow-sm">
+              <X size={14} className="stroke-[2.5]" />
+            </Link>
+          </div>
+
+          {/* Campaign Info header row */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-start space-x-4">
+              {/* Small image preview of pizza */}
+              <div className="h-16 w-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-sm relative group cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=120&h=120&fit=crop" alt="Pizza preview" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play size={16} className="text-white fill-white" />
                 </div>
               </div>
-              <p className="text-xs font-semibold text-slate-400 mt-2">
-                ID: {campaign.id} • Seasonal Promotion • Created by Sarah Jenkins
-              </p>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-none">{campaign.name}</h2>
+                  <div className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full border text-xs font-medium ${campaign.status === "Live"
+                    ? "bg-[#F0FDF4] text-[#166534] border-[#DCFCE7]"
+                    : campaign.status === "Sent for Approval"
+                      ? "bg-[#EFF6FF] text-[#1E40AF] border-[#DBEAFE]"
+                      : campaign.status === "Under Modification"
+                        ? "bg-[#FFF7ED] text-[#9A3412] border-[#FFEDD5]"
+                        : "bg-slate-50 text-slate-500 border-slate-200"
+                    }`}>
+                    {campaign.status === "Live" && <span className="h-1.5 w-1.5 rounded-full bg-[#166534]" />}
+                    <span>{campaign.status}</span>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-slate-400 mt-2">
+                  ID: {campaign.id} • Seasonal Promotion • Created by Sarah Jenkins
+                </p>
+              </div>
             </div>
+
+            <button
+              onClick={() => setIsPreviewOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-modRed hover:bg-red-700 text-white rounded-lg font-bold text-xs md:text-sm shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <div className="border border-white/80 rounded-md p-0.5 flex items-center justify-center w-5 h-5 shrink-0">
+                <Play size={10} className="fill-white text-white translate-x-[0.5px]" />
+              </div>
+              <span>Preview</span>
+            </button>
           </div>
 
-          <button
-            onClick={() => setIsPreviewOpen(true)}
-            className="flex items-center space-x-2 px-6 py-3 bg-modRed hover:bg-red-750 text-white rounded-xl font-bold text-sm shadow-md shadow-modRed/10 hover:shadow-lg transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            <Play size={16} className="fill-white" />
-            <span>Preview</span>
-          </button>
+          {/* Tab Selection */}
+          <div className="flex space-x-8 border-t border-slate-100 mt-8 pt-4">
+            {[
+              { id: "overview", label: "Overview" },
+              { id: "schedule", label: "Schedule" },
+              { id: "creatives", label: "Creatives" }
+            ].map(tab => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`relative py-2 text-sm font-bold transition-colors cursor-pointer select-none ${isSelected ? "text-modRed" : "text-slate-400 hover:text-slate-650"
+                    }`}
+                >
+                  <span>{tab.label}</span>
+                  {isSelected && (
+                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-modRed rounded-full animate-in fade-in zoom-in-50 duration-200" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-
-        {/* Tab Selection */}
-        <div className="flex space-x-8 border-t border-slate-100 mt-8 pt-4">
-          {[
-            { id: "overview", label: "Overview" },
-            { id: "schedule", label: "Schedule" },
-            { id: "creatives", label: "Creatives" }
-          ].map(tab => {
-            const isSelected = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`relative py-2 text-sm font-bold transition-colors cursor-pointer select-none ${isSelected ? "text-modRed" : "text-slate-400 hover:text-slate-600"
-                  }`}
-              >
-                <span>{tab.label}</span>
-                {isSelected && (
-                  <span className="absolute bottom-0 left-0 w-full h-[3px] bg-modRed rounded-full animate-in fade-in zoom-in-50 duration-200" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
       </div>
 
-      {/* ======================================================== */}
-      {/* 2. TAB CONTENTS: OVERVIEW */}
-      {/* ======================================================== */}
-      {activeTab === "overview" && (
+      {/* Main Content Area */}
+      <div className="py-8 max-w-[1600px] mx-auto px-6 md:px-8">
+        {activeTab === "overview" && (
         <div className="space-y-6 animate-in fade-in duration-300">
 
           {/* Top Metric Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {/* Card 1: Outlet Coverage */}
-            <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Outlet Coverage</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -445,13 +449,13 @@ export default function CampaignDetailsClient() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-3xl font-black text-slate-900 tracking-tight">{campaign.outlets} <span className="text-sm font-bold text-slate-500">Outlets</span></p>
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">{campaign.outlets} <span className="text-sm font-semibold text-slate-500">Outlets</span></p>
                 <p className="text-xs font-medium text-slate-400 mt-1 leading-normal">Outlets currently displaying this campaign</p>
               </div>
             </div>
 
             {/* Card 2: Assigned Team */}
-            <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assigned Team</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -462,14 +466,14 @@ export default function CampaignDetailsClient() {
                 <div className="flex items-center space-x-2">
                   <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop" alt="Editor Avatar" className="w-8 h-8 rounded-full border border-slate-100" />
                   <div>
-                    <span className="text-[10px] font-black text-slate-400 block uppercase leading-none">EDITOR</span>
-                    <span className="text-xs font-bold text-slate-800 block mt-0.5">Mike Ross</span>
+                    <span className="text-[10px] font-bold text-slate-400 block uppercase leading-none">EDITOR</span>
+                    <span className="text-xs font-semibold text-slate-800 block mt-0.5">Mike Ross</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop" alt="Publisher Avatar" className="w-8 h-8 rounded-full border border-slate-100" />
                   <div>
-                    <span className="text-[10px] font-black text-slate-400 block uppercase leading-none">PUBLISHER</span>
+                    <span className="text-[10px] font-bold text-slate-400 block uppercase leading-none">PUBLISHER</span>
                     <span className="text-xs font-bold text-slate-800 block mt-0.5">Sarah Chen</span>
                   </div>
                 </div>
@@ -478,7 +482,7 @@ export default function CampaignDetailsClient() {
             </div>
 
             {/* Card 3: Campaign Runtime */}
-            <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Campaign Runtime</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -486,7 +490,7 @@ export default function CampaignDetailsClient() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-3xl font-black text-slate-900 tracking-tight">{campaign.runtime}</p>
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">{campaign.runtime}</p>
                 <p className="text-xs font-medium text-slate-400 mt-1 leading-normal">Total time this campaign has played across all screens</p>
               </div>
             </div>
@@ -500,11 +504,11 @@ export default function CampaignDetailsClient() {
             <div className="col-span-12 lg:col-span-8 space-y-6">
 
               {/* Campaign Details Box */}
-              <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 md:p-8 shadow-sm">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-4 mb-6">
-                  <h3 className="text-base font-bold text-slate-800">Campaign Details</h3>
-                  <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
-                </div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">Campaign Details</h3>
+                <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
+              </div>
+              <div className="bg-white border border-slate-100 rounded-lg p-6 md:p-8 shadow-sm">
 
                 <div className="space-y-6">
                   <p className="text-sm text-slate-600 font-medium leading-relaxed">
@@ -531,7 +535,7 @@ export default function CampaignDetailsClient() {
                   </div>
 
                   {/* Notes Alert box */}
-                  <div className="bg-[#F8F9FA] border border-slate-200/50 rounded-2xl p-5 flex items-start space-x-3 mt-4">
+                  <div className="bg-[#F8F9FA] border border-slate-200/50 rounded-lg p-5 flex items-start space-x-3 mt-4">
                     <AlertCircle size={18} className="text-slate-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-1.5">NOTES</span>
@@ -544,48 +548,46 @@ export default function CampaignDetailsClient() {
               </div>
 
               {/* Geographic Deployment Box */}
-              <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 md:p-8 shadow-sm">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-4 mb-6">
-                  <h3 className="text-base font-bold text-slate-800">Geographic Deployment</h3>
-                  <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
-                </div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">Geographic Deployment</h3>
+                <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
+              </div>
 
-                {/* Plain Map with Red Dots */}
-                <div className="w-full relative flex items-center justify-center bg-slate-50 rounded-2xl p-4 min-h-[300px]">
-                  <ComposableMap projection="geoAlbersUsa" className="w-full h-auto max-h-[350px]">
-                    <Geographies geography={geoUrl}>
-                      {({ geographies }: { geographies: any[] }) =>
-                        geographies.map((geo: any) => (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill="#E5E7EB"
-                            stroke="#FFFFFF"
-                            strokeWidth={0.5}
-                            style={{
-                              default: { outline: "none" },
-                              hover: { fill: "#D1D5DB", outline: "none" },
-                              pressed: { outline: "none" }
-                            }}
-                          />
-                        ))
-                      }
-                    </Geographies>
+              {/* Plain Map with Red Dots */}
+              <div className="w-full relative flex items-center justify-center bg-slate-50 rounded-lg p-8 min-h-[600px]">
+                <ComposableMap projection="geoAlbersUsa" className="w-full h-auto max-h-[560px]">
+                  <Geographies geography={geoUrl}>
+                    {({ geographies }: { geographies: any[] }) =>
+                      geographies.map((geo: any) => (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          fill="#E5E7EB"
+                          stroke="#FFFFFF"
+                          strokeWidth={0.5}
+                          style={{
+                            default: { outline: "none" },
+                            hover: { fill: "#D1D5DB", outline: "none" },
+                            pressed: { outline: "none" }
+                          }}
+                        />
+                      ))
+                    }
+                  </Geographies>
 
-                    {MAP_MARKERS.map(({ name, coordinates, markerOffset }) => (
-                      <Marker key={name} coordinates={coordinates as any}>
-                        <circle r={6} fill="#BD1720" stroke="#FFFFFF" strokeWidth={1.5} className="animate-pulse shadow-md" />
-                        <text
-                          textAnchor="middle"
-                          y={markerOffset}
-                          style={{ fontFamily: "sans-serif", fontSize: "8px", fill: "#4B5563", fontWeight: "bold" }}
-                        >
-                          {name}
-                        </text>
-                      </Marker>
-                    ))}
-                  </ComposableMap>
-                </div>
+                  {MAP_MARKERS.map(({ name, coordinates, markerOffset }) => (
+                    <Marker key={name} coordinates={coordinates as any}>
+                      <circle r={6} fill="#BD1720" stroke="#FFFFFF" strokeWidth={1.5} className="animate-pulse shadow-md" />
+                      <text
+                        textAnchor="middle"
+                        y={markerOffset}
+                        style={{ fontFamily: "sans-serif", fontSize: "8px", fill: "#4B5563", fontWeight: "bold" }}
+                      >
+                        {name}
+                      </text>
+                    </Marker>
+                  ))}
+                </ComposableMap>
               </div>
 
             </div>
@@ -594,100 +596,126 @@ export default function CampaignDetailsClient() {
             <div className="col-span-12 lg:col-span-4 space-y-6">
 
               {/* Coverage circular chart */}
-              <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 shadow-sm flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest self-start">Campaign Coverage</span>
-
-                {/* SVG Circular Donut Chart */}
-                <div className="relative h-40 w-40 flex items-center justify-center my-6">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                    {/* Background Circle */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#F3F4F6"
-                      strokeWidth="8"
-                      fill="transparent"
-                    />
-                    {/* Fill Circle (98.6%) */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#A61932"
-                      strokeWidth="8"
-                      fill="transparent"
-                      strokeDasharray="251.2"
-                      strokeDashoffset={251.2 - (251.2 * 98.6) / 100}
-                      strokeLinecap="round"
-                      className="transition-all duration-1000 ease-out"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-2xl font-black text-slate-900 tracking-tighter">98.6%</span>
-                  </div>
+              <div>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">Campaign Coverage</h3>
                 </div>
+                <div className="flex flex-col items-center justify-center text-center">
+                  {/* SVG Circular Donut Chart */}
+                  <div className="relative h-40 w-40 flex items-center justify-center my-6">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      {/* Background Circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        stroke="#F3F4F6"
+                        strokeWidth="8"
+                        fill="transparent"
+                      />
+                      {/* Fill Circle (98.6%) */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        stroke="#A61932"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray="251.2"
+                        strokeDashoffset={251.2 - (251.2 * 98.6) / 100}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000 ease-out"
+                      />
+                    </svg>
+                    <div className="absolute flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold text-slate-900 tracking-tighter">98.6%</span>
+                    </div>
+                  </div>
 
-                <p className="text-xs font-semibold text-slate-400 max-w-[240px] leading-relaxed mb-2">
-                  98.6% percentage of total screens are currently displaying this campaign.
-                </p>
+                  <p className="text-xs font-semibold text-slate-400 max-w-[240px] leading-relaxed mb-2">
+                    98.6% percentage of total screens are currently displaying this campaign.
+                  </p>
+                </div>
               </div>
 
               {/* Comments Thread Section */}
-              <div className="bg-white border border-slate-100 rounded-[1.8rem] p-6 shadow-sm">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">Comments Thread</span>
+              <div>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">Comments Thread</h3>
+                </div>
 
                 {/* Message items list */}
-                <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1 mb-6">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl p-4 transition-all">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center space-x-2">
-                          <img src={comment.avatar} alt={comment.author} className="w-7 h-7 rounded-full border" />
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold text-slate-800">{comment.author}</span>
-                              {comment.role && (
-                                <span className="bg-red-50 text-modRed border border-red-100 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-wide">
-                                  {comment.role}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] font-semibold text-slate-400 block leading-none mt-0.5">{comment.time}</span>
+                <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1 mb-4">
+                  {comments.map((comment) => {
+                    const isYou = comment.author === "You";
+                    return (
+                      <div key={comment.id} className="space-y-1">
+                        <div className="bg-white border border-slate-100 rounded-lg p-4 shadow-sm flex flex-col transition-all">
+                          <div className="flex justify-between items-start mb-2">
+                            {!isYou ? (
+                              <div className="flex justify-between items-start w-full">
+                                <div className="flex items-center space-x-2">
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-bold text-slate-800">{comment.author}</span>
+                                      {comment.role && (
+                                        <span className="bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                          {comment.role}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] font-semibold text-slate-400 block leading-none mt-1">{comment.time}</span>
+                                  </div>
+                                </div>
+                                <img src={comment.avatar} alt={comment.author} className="w-8 h-8 rounded-full border border-slate-100 object-cover" />
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                <img src={profile.avatarUrl} alt="You" className="w-8 h-8 rounded-full border border-slate-100 object-cover" />
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-slate-800">You</span>
+                                  </div>
+                                  <span className="text-[10px] font-semibold text-slate-400 block leading-none mt-1">{comment.time}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
+                          <p className="text-xs text-slate-600 font-medium leading-relaxed mt-1">{comment.text}</p>
+                        </div>
+                        <div className={`flex ${isYou ? "justify-start" : "justify-end"} px-2`}>
+                          <button className="text-[10px] font-bold text-[#1A73E8] hover:underline cursor-pointer">Reply</button>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed">{comment.text}</p>
-                      <button className="text-[10px] font-bold text-modRed hover:underline mt-2 tracking-wide uppercase">Reply</button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Comment Form input */}
-                <form onSubmit={handleAddComment} className="border border-slate-200 rounded-2xl p-3 flex flex-col space-y-3 bg-white focus-within:ring-2 focus-within:ring-modRed/25 transition-all">
+                <form onSubmit={handleAddComment} className="rounded-lg p-4 flex flex-col space-y-3 bg-[#F3F4F6] transition-all">
                   <textarea
                     placeholder="Write a comment..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     className="w-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none resize-none h-14 bg-transparent"
                   />
-                  <div className="flex justify-between items-center border-t border-slate-100 pt-2.5">
+                  <div className="flex justify-between items-center border-t border-slate-200/50 pt-2.5">
                     <div className="flex items-center space-x-2 text-slate-400">
-                      <button type="button" className="p-1 hover:text-modRed hover:bg-red-50/20 rounded-md transition-colors"><Paperclip size={14} /></button>
-                      <button type="button" className="p-1 hover:text-modRed hover:bg-red-50/20 rounded-md transition-colors"><Smile size={14} /></button>
-                      <button type="button" className="p-1 hover:text-modRed hover:bg-red-50/20 rounded-md transition-colors"><AtSign size={14} /></button>
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><Paperclip size={14} /></button>
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><Smile size={14} /></button>
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><AtSign size={14} /></button>
                     </div>
                     <button
                       type="submit"
                       disabled={!newComment.trim() || isSubmittingComment}
-                      className={`h-7 w-7 rounded-lg flex items-center justify-center text-white transition-all active:scale-90 cursor-pointer ${
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-white transition-all active:scale-90 cursor-pointer ${
                         newComment.trim() && !isSubmittingComment ? "bg-modRed hover:bg-red-750" : "bg-slate-350 cursor-not-allowed"
                       }`}
                     >
                       {isSubmittingComment ? (
                         <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Send size={12} className="fill-white" />
+                        <Send size={12} className="fill-white translate-x-[-0.5px]" />
                       )}
                     </button>
                   </div>
@@ -708,7 +736,7 @@ export default function CampaignDetailsClient() {
         <div className="space-y-6 animate-in fade-in duration-300">
 
           {/* Outlet Schedule Filter Controls */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
             <div className="relative flex-1 w-full group">
               <input
                 type="text"
@@ -742,14 +770,14 @@ export default function CampaignDetailsClient() {
           </div>
 
           {/* Table list card */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50">
                     <th
                       onClick={() => handleScheduleSort("name")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
                         <span>OUTLET NAME & ID</span>
@@ -762,7 +790,7 @@ export default function CampaignDetailsClient() {
                     </th>
                     <th
                       onClick={() => handleScheduleSort("city")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
                         <span>LOCATION</span>
@@ -774,21 +802,8 @@ export default function CampaignDetailsClient() {
                       </div>
                     </th>
                     <th
-                      onClick={() => handleScheduleSort("schedule")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>SCHEDULE INDICATOR</span>
-                        {scheduleSortBy === "schedule" ? (
-                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                        ) : (
-                          <ArrowUpDown size={10} className="opacity-40" />
-                        )}
-                      </div>
-                    </th>
-                    <th
                       onClick={() => handleScheduleSort("status")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
                         <span>STATUS</span>
@@ -800,8 +815,21 @@ export default function CampaignDetailsClient() {
                       </div>
                     </th>
                     <th
+                      onClick={() => handleScheduleSort("schedule")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>SCHEDULE INDICATOR</span>
+                        {scheduleSortBy === "schedule" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
                       onClick={() => handleScheduleSort("window")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
                         <span>DAILY WINDOW</span>
@@ -826,7 +854,7 @@ export default function CampaignDetailsClient() {
                           <tr>
                             <td colSpan={5} className="px-6 py-4">
                               <div className="flex items-center space-x-3">
-                                <span className="text-[10px] font-black text-modRed tracking-widest uppercase shrink-0">
+                                <span className="text-[10px] font-bold text-modRed tracking-widest uppercase shrink-0">
                                   {outlet.startLabel}
                                 </span>
                                 <div className="h-px bg-red-100 flex-1" />
@@ -840,6 +868,18 @@ export default function CampaignDetailsClient() {
                             <span className="text-[10px] font-semibold text-slate-450 block mt-0.5">ID: {outlet.id}</span>
                           </td>
                           <td className="px-6 py-4 text-xs font-semibold text-slate-600">{outlet.city}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider border ${
+                              outlet.status === "Active"
+                                ? "bg-[#F0FDF4] text-[#166534] border-[#DCFCE7]"
+                                : "bg-[#FFF7ED] text-[#9A3412] border-[#FFEDD5]"
+                            }`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${
+                                outlet.status === "Active" ? "bg-[#166534]" : "bg-[#9A3412]"
+                              }`} />
+                              <span>{outlet.status.toUpperCase()}</span>
+                            </span>
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 w-full max-w-[200px]">
                               <span>Dec 01</span>
@@ -857,18 +897,6 @@ export default function CampaignDetailsClient() {
                               <span>Dec 31</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                              outlet.status === "Active"
-                                ? "bg-[#E6F4EA] text-[#137333] border-[#CEEAD6]"
-                                : "bg-[#FEF7E0] text-[#B06000] border-[#FEEFC3]"
-                            }`}>
-                              <span className={`h-1.5 w-1.5 rounded-full ${
-                                outlet.status === "Active" ? "bg-[#137333]" : "bg-[#B06000]"
-                              }`} />
-                              <span>{outlet.status}</span>
-                            </span>
-                          </td>
                           <td className="px-6 py-4 text-xs font-semibold text-slate-600 font-mono">{outlet.window}</td>
                         </tr>
                       </React.Fragment>
@@ -879,7 +907,7 @@ export default function CampaignDetailsClient() {
             </div>
 
             {/* Pagination Footer */}
-            <div className="flex justify-between items-center px-6 py-4 border-t border-slate-100 text-xs font-bold text-slate-500 bg-white">
+            <div className="flex justify-between items-center px-6 py-4 text-xs font-bold text-slate-500 bg-transparent">
               <span>Showing 9 of 122 Outlets</span>
               <div className="flex items-center space-x-1.5">
                 <button type="button" className="px-2 py-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">Prev</button>
@@ -900,23 +928,23 @@ export default function CampaignDetailsClient() {
       {activeTab === "creatives" && (
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* Playback Sequence Table */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="text-base font-bold text-slate-800">Creative Playback Sequence</h3>
-              <span className="bg-[#FFF2F2] text-modRed px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                {playbackSequence.length} Items Total
-              </span>
-            </div>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Creative Playback Sequence</h3>
+            <span className="bg-[#FFF2F2] text-modRed px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+              {playbackSequence.length} Items Total
+            </span>
+          </div>
+          <div className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50">
                     <th
                       onClick={() => handleCreativesSort("name")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
-                        <span>ASSET NAME</span>
+                        <span>OUTLET NAME & ID</span>
                         {creativesSortBy === "name" ? (
                           creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
                         ) : (
@@ -926,10 +954,10 @@ export default function CampaignDetailsClient() {
                     </th>
                     <th
                       onClick={() => handleCreativesSort("type")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
-                        <span>TYPE</span>
+                        <span>LOCATION</span>
                         {creativesSortBy === "type" ? (
                           creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
                         ) : (
@@ -939,10 +967,10 @@ export default function CampaignDetailsClient() {
                     </th>
                     <th
                       onClick={() => handleCreativesSort("duration")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
-                        <span>DURATION</span>
+                        <span>SCHEDULE INDICATOR</span>
                         {creativesSortBy === "duration" ? (
                           creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
                         ) : (
@@ -952,10 +980,10 @@ export default function CampaignDetailsClient() {
                     </th>
                     <th
                       onClick={() => handleCreativesSort("resolution")}
-                      className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-650 transition-colors select-none"
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
                     >
                       <div className="flex items-center space-x-1">
-                        <span>RESOLUTION</span>
+                        <span>STATUS</span>
                         {creativesSortBy === "resolution" ? (
                           creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
                         ) : (
@@ -963,8 +991,8 @@ export default function CampaignDetailsClient() {
                         )}
                       </div>
                     </th>
-                    <th className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-6 py-4 select-none">
-                      PREVIEW
+                    <th className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 select-none">
+                      DAILY WINDOW
                     </th>
                   </tr>
                 </thead>
@@ -988,7 +1016,7 @@ export default function CampaignDetailsClient() {
                         </div>
                       </td>
                       <td className="px-6 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
                           item.type === "VIDEO"
                             ? "bg-[#E8F0FE] text-[#1967D2] border-[#D2E3FC]"
                             : "bg-[#FFEFE2] text-[#C26400] border-[#FFE0C2]"
@@ -1002,7 +1030,7 @@ export default function CampaignDetailsClient() {
                         <button
                           type="button"
                           onClick={() => setIsPreviewOpen(true)}
-                          className="text-xs font-black text-modRed hover:text-red-750 transition-colors uppercase tracking-wider cursor-pointer"
+                          className="text-xs font-bold text-modRed hover:text-red-750 transition-colors uppercase tracking-wider cursor-pointer"
                         >
                           Preview
                         </button>
@@ -1015,23 +1043,23 @@ export default function CampaignDetailsClient() {
           </div>
 
           {/* Creative assets grid section */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
-            <div className="flex justify-between items-center border-b border-slate-50 pb-4 mb-6">
-              <h3 className="text-base font-bold text-slate-800">Creative Assets Grid</h3>
+          <div className="flex justify-between items-center mb-4 mt-6">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Creative Assets Grid</h3>
 
-              <div className="flex items-center space-x-2">
-                <Filter size={14} className="text-slate-400" />
-                <FilterDropdown
-                  options={["All Types", "Video", "Image"]}
-                  value={creativeFilter}
-                  onChange={setCreativeFilter}
-                />
-              </div>
+            <div className="flex items-center space-x-2">
+              <Filter size={14} className="text-slate-400" />
+              <FilterDropdown
+                options={["All Types", "Video", "Image"]}
+                value={creativeFilter}
+                onChange={setCreativeFilter}
+              />
             </div>
+          </div>
+          <div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredAssets.map((asset, idx) => (
-                <div key={idx} className="bg-white border border-slate-200/50 rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-all group">
+                <div key={idx} className="bg-white border border-slate-200/50 rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-all group">
                   <div className="h-44 bg-slate-100 relative overflow-hidden">
                     <img src={asset.img} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>
@@ -1043,19 +1071,19 @@ export default function CampaignDetailsClient() {
 
                     <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-2 border-t border-slate-50">
                       <div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block leading-none">TYPE</span>
-                        <span className="text-[11px] font-bold text-slate-750 block mt-1">{asset.type}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">TYPE</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.type}</span>
                       </div>
                       <div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block leading-none">DURATION</span>
-                        <span className="text-[11px] font-bold text-slate-750 block mt-1">{asset.duration}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">DURATION</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.duration}</span>
                       </div>
                       <div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block leading-none">RESOLUTION</span>
-                        <span className="text-[11px] font-bold text-slate-750 block mt-1">{asset.res}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">RESOLUTION</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.res}</span>
                       </div>
                       <div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block leading-none">SIZE</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">SIZE</span>
                         <span className="text-[11px] font-bold text-slate-750 block mt-1">{asset.size}</span>
                       </div>
                     </div>
@@ -1063,7 +1091,7 @@ export default function CampaignDetailsClient() {
                     <button
                       type="button"
                       onClick={() => setIsPreviewOpen(true)}
-                      className="w-full mt-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer text-center"
+                      className="w-full mt-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-all cursor-pointer text-center"
                     >
                       Preview
                     </button>
@@ -1073,7 +1101,8 @@ export default function CampaignDetailsClient() {
             </div>
           </div>
         </div>
-      )}
+        )}
+      </div>
 
       {/* ======================================================== */}
       {/* 5. INTERACTIVE VIDEO PREVIEW MODAL */}

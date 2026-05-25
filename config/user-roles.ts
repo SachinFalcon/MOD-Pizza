@@ -19,15 +19,15 @@ export interface UserProfileData {
 export const USER_PROFILES: Record<string, UserProfileData> = {
   editor: {
     id: "editor",
-    name: "Nolan Schleifer",
+    name: "Dev Sachin",
     role: "Editor",
     roleLabel: "CAMPAIGN EDITOR",
-    email: "nolan.schleifer@mtas.com",
+    email: "dev.sachin@mtas.com",
     phone: "+1 874 345 2289",
     scope: "Chicago HQ",
     joined: "Jan 12, 2023",
     lastLogin: "Today, 09:12 AM",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    avatarUrl: "/images/BMW_S_1000_RR_Winglet_4_cb2f77e0e7.png",
     timezone: "UTC-05:00 (EST - New York)",
     permissions: [
       { module: "Campaign Management", access: "Full Access", variant: "success" },
@@ -87,15 +87,15 @@ export const USER_PROFILES: Record<string, UserProfileData> = {
   },
   admin: {
     id: "admin",
-    name: "Nolan Smith",
+    name: "Dev Sachin",
     role: "Admin",
     roleLabel: "SUPER ADMINISTRATOR",
-    email: "nolan.hq@modpizza.com",
+    email: "dev.sachin@modpizza.com",
     phone: "+1 874 345 0000",
     scope: "Global Operations HQ",
     joined: "Oct 01, 2020",
     lastLogin: "Today, 07:15 AM",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    avatarUrl: "/images/BMW_S_1000_RR_Winglet_4_cb2f77e0e7.png",
     timezone: "UTC-05:00 (EST - New York)",
     permissions: [
       { module: "Campaign Management", access: "Full Access", variant: "success" },

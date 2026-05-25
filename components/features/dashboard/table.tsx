@@ -31,7 +31,7 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
       onClick={handleRowClick}
       className="hover:bg-slate-50/80 transition-colors group border-b border-slate-100 last:border-0 cursor-pointer"
     >
-      <td className="px-6 py-5">
+      <td className="px-6 py-3">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-md bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
              <img src={`https://picsum.photos/seed/${id}/100/100`} alt="Creative" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
@@ -44,13 +44,13 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
           </div>
         </div>
       </td>
-      <td className="px-4 py-5 text-[13px] font-semibold text-slate-800">{creatives || "3 Assets"}</td>
-      <td className="px-4 py-5 text-[13px] font-semibold text-slate-800">{outlets}</td>
-      <td className="px-4 py-5">
+      <td className="px-4 py-3 text-[13px] font-semibold text-slate-800">{creatives || "3 Assets"}</td>
+      <td className="px-4 py-3 text-[13px] font-semibold text-slate-800">{outlets}</td>
+      <td className="px-4 py-3">
         <StatusBadge status={status} />
       </td>
-      <td className="px-4 py-5 text-[13px] font-semibold text-slate-800">{runtime}</td>
-      <td className="px-4 py-5">
+      <td className="px-4 py-3 text-[13px] font-semibold text-slate-800">{runtime}</td>
+      <td className="px-4 py-3">
         {lastEdit?.includes("ago") ? (
           <div className="flex items-center space-x-2 text-slate-500">
             <Clock size={14} />
@@ -60,7 +60,7 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
           <span className="text-[13px] font-medium text-slate-500">{lastEdit || "Mar 10, 2026"}</span>
         )}
       </td>
-      <td className="px-6 py-5 text-right">
+      <td className="px-6 py-3 text-right">
         <button className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-slate-600 transition-all">
           <MoreVertical size={18} />
         </button>

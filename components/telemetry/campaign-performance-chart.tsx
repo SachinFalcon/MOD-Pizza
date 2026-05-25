@@ -29,9 +29,9 @@ export function CampaignPerformanceChart() {
           </div>
 
           {/* Progress Bar */}
-          <div className="h-3.5 bg-[#FCF5F5] rounded-full overflow-hidden w-full">
+          <div className="h-3.5 bg-[#FCF5F5] rounded-md overflow-hidden w-full">
             <div 
-              className="h-full bg-[#A61932] rounded-full transition-all duration-500" 
+              className="h-full bg-gradient-to-r from-red-500 to-[#A61932] rounded-md transition-all duration-500" 
               style={{ width: `${item.coverage}%` }}
             />
           </div>

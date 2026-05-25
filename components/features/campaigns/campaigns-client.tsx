@@ -94,11 +94,7 @@ export default function CampaignsClient() {
 
   const requestSort = (key: keyof Campaign) => {
     if (sortConfig && sortConfig.key === key) {
-      if (sortConfig.direction === 'asc') {
-        setSortConfig({ key, direction: 'desc' });
-      } else {
-        setSortConfig(null);
-      }
+      setSortConfig({ key, direction: sortConfig.direction === 'asc' ? 'desc' : 'asc' });
     } else {
       setSortConfig({ key, direction: 'asc' });
     }
@@ -287,43 +283,43 @@ export default function CampaignsClient() {
           <table className="w-full text-left border-collapse hidden md:table">
             <thead>
               <tr className="bg-[#F3F4F6] border-b border-slate-200">
-                <th className="px-6 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('name')}>
+                <th className="px-6 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('name')}>
                   <div className="flex items-center space-x-1">
                     <span>Campaign Name &amp; ID</span>
                     <SortIcon active={sortConfig?.key === 'name'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('creatives')}>
+                <th className="px-4 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('creatives')}>
                   <div className="flex items-center space-x-1">
                     <span>Creatives</span>
                     <SortIcon active={sortConfig?.key === 'creatives'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('outlets')}>
+                <th className="px-4 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('outlets')}>
                   <div className="flex items-center space-x-1">
                     <span>Target Outlets</span>
                     <SortIcon active={sortConfig?.key === 'outlets'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('status')}>
+                <th className="px-4 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('status')}>
                   <div className="flex items-center space-x-1">
                     <span>Status</span>
                     <SortIcon active={sortConfig?.key === 'status'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('runtime')}>
+                <th className="px-4 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('runtime')}>
                   <div className="flex items-center space-x-1">
                     <span>Runtime</span>
                     <SortIcon active={sortConfig?.key === 'runtime'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-4 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('lastEdit')}>
+                <th className="px-4 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('lastEdit')}>
                   <div className="flex items-center space-x-1">
                     <span>Last Edit</span>
                     <SortIcon active={sortConfig?.key === 'lastEdit'} direction={sortConfig?.direction} />
                   </div>
                 </th>
-                <th className="px-6 py-5 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider text-right">Action</th>
+                <th className="px-6 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">

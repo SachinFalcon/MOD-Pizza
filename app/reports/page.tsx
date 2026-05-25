@@ -27,9 +27,9 @@ const MOCK_DETAILED_CAMPAIGNS = [
 ];
 
 const MOCK_INSIGHTS = [
-  { name: "Late Night Pizza", id: "AD-94825", issue: "Low coverage", rec: "Request wider outlet distribution" },
-  { name: "Student Combo Deal", id: "AD-94822", issue: "Low runtime", rec: "Improve creative quality/length" },
-  { name: "Late Night Pizza", id: "AD-94825", issue: "Low coverage", rec: "Request wider outlet distribution" }
+  { id: "cp-001", name: "Late Night Pizza", issue: "Low coverage", rec: "Request wider outlet distribution" },
+  { id: "cp-002", name: "Student Combo Deal", issue: "Low runtime", rec: "Improve creative quality/length" },
+  { id: "cp-003", name: "Late Night Pizza", issue: "Low coverage", rec: "Request wider outlet distribution" },
 ];
 
 export default function ReportsPage() {
@@ -241,7 +241,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Main Grid Content */}
-      <div className="px-4 space-y-6">
+      <div className="px-4 space-y-4">
         
         {/* 2. Search & Filter Bar */}
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
@@ -251,7 +251,7 @@ export default function ReportsPage() {
               placeholder="Search...."
               value={detailedSearchQuery}
               onChange={(e) => setDetailedSearchQuery(e.target.value)}
-              className="w-full pl-6 pr-12 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-[#A61932]/5 focus:border-[#A61932]/30 outline-none transition-all shadow-sm"
+              className="w-full pl-6 pr-12 py-3.5 bg-white border border-slate-200/80 rounded-md text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-[#A61932]/5 focus:border-[#A61932]/30 outline-none transition-all shadow-sm"
             />
             <Search size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-950 font-bold pointer-events-none" />
           </div>
@@ -263,7 +263,7 @@ export default function ReportsPage() {
               value={regionFilter}
               onChange={setRegionFilter}
               className="w-[140px] sm:w-[160px]"
-              buttonClassName="w-full flex items-center justify-between pl-6 pr-4 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-sm font-bold text-slate-800 hover:border-slate-305 hover:bg-slate-50 transition-all shadow-sm cursor-pointer active:scale-95"
+              buttonClassName="w-full flex items-center justify-between pl-6 pr-4 py-3.5 bg-white border border-slate-200/80 rounded-md text-sm font-bold text-slate-800 hover:border-slate-305 hover:bg-slate-50 transition-all shadow-sm cursor-pointer active:scale-95"
             />
 
             {/* Segmented Date Switcher */}
@@ -323,10 +323,10 @@ export default function ReportsPage() {
         </div>
 
         {/* 3. ROW 1: Campaign Performance Leaderboard & Coverage Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           
           {/* Left Card: Campaign Performance Leaderboard */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[380px]">
+          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-900">Campaign Performance Leaderboard</h3>
@@ -336,8 +336,8 @@ export default function ReportsPage() {
               </div>
               <CampaignPerformanceChart />
             </div>
-            <div className="border-t border-slate-50 pt-4 mt-2">
-              <button className="w-full py-2.5 text-[#A61932] font-bold text-sm hover:bg-red-50 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <div className="border-t border-slate-50 pt-3 mt-2">
+              <button className="w-full py-2 text-[#A61932] font-bold text-sm hover:bg-red-50 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                 <span>View Full Report</span>
                 <span>→</span>
               </button>
@@ -345,189 +345,168 @@ export default function ReportsPage() {
           </div>
 
           {/* Right Card: Coverage Distribution */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[380px]">
+          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
             <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-6">Coverage Distribution</h3>
-              <div className="space-y-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Coverage Distribution</h3>
+              <div className="space-y-4">
                 {[
-                  { label: "81-100%", count: 12, bar: 100 },
-                  { label: "61-80%", count: 34, bar: 85 },
-                  { label: "0-40%", count: 3, bar: 15 }
+                  { label: "81-100%", count: 12, bar: 45, color: "bg-[#A91D22]" },
+                  { label: "61-80%", count: 24, bar: 75, color: "bg-[#C86875]" },
+                  { label: "41-60%", count: 8, bar: 30, color: "bg-[#D49CA5]" },
+                  { label: "21-40%", count: 5, bar: 20, color: "bg-[#E4C7CB]" },
+                  { label: "11-20%", count: 2, bar: 10, color: "bg-[#FCD5D9]" },
+                  { label: "0-10%", count: 1, bar: 5, color: "bg-[#FFF0F1]" }
                 ].map((item, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-slate-700">{item.label}</span>
-                      <span className="text-slate-500">{item.count} Campaigns</span>
+                  <div key={idx} className="flex items-center gap-4">
+                    <div className="w-20 text-sm font-semibold text-slate-700">{item.label}</div>
+                    <div className="flex-1 h-6 bg-[#F1F3F5] rounded-sm overflow-hidden">
+                      <div className={`h-full ${item.color} rounded-sm transition-all duration-500`} style={{ width: `${item.bar}%` }} />
                     </div>
-                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-modRed rounded-full" style={{ width: `${item.bar}%` }} />
-                    </div>
+                    <div className="w-6 text-right text-sm font-bold text-slate-900">{item.count}</div>
                   </div>
                 ))}
               </div>
             </div>
             
-            <div className="mt-8 pt-4 border-t border-slate-50">
-              <p className="text-xs text-slate-500 italic leading-relaxed">
-                <span className="font-bold text-slate-800">Insight:</span> Most campaigns achieved 81-100% higher coverage but 3 campaigns had limited distribution.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. ROW 2: Campaign Activity Heatmap & Campaign Lifecycle Funnel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          
-          {/* Left Card: Campaign Activity Heatmap — ECharts */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[380px]">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Campaign Activity Heatmap</h3>
-              <div className="flex gap-4 items-center text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <div className="flex gap-1.5 items-center"><div className="w-3 h-3 bg-red-100 rounded-sm" /><span>LOW</span></div>
-                <div className="flex gap-1.5 items-center"><div className="w-3 h-3 bg-modRed rounded-sm" /><span>PEAK</span></div>
-              </div>
-            </div>
-            <ScreenHealthHeatmap />
-            <div className="mt-3 pt-3 border-t border-slate-50">
-              <p className="text-xs text-slate-500 italic leading-relaxed">
-                <span className="font-bold text-slate-800">Insights:</span> Peak runtime occurs Friday–Sunday evenings. Opportunity: Weekday mornings show low activity.
-              </p>
-            </div>
-          </div>
-
-          {/* Right Card: Campaign Lifecycle Funnel */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[380px]">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-6">Campaign Lifecycle Funnel</h3>
-              <div className="space-y-4">
-                {[
-                  { stage: "Draft", count: 19, color: "bg-slate-400" },
-                  { stage: "Submitted", count: 12, color: "bg-modRed" },
-                  { stage: "In Review", count: 9, color: "bg-emerald-500" },
-                  { stage: "Approved", count: 5, color: "bg-blue-500" },
-                  { stage: "Running", count: 4, color: "bg-indigo-600" }
-                ].map((item, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">{item.stage}</span>
-                      <span className="text-slate-500">{item.count}</span>
-                    </div>
-                    <div className="h-9 bg-slate-50 border border-slate-100/50 rounded-xl flex items-center p-1 overflow-hidden">
-                      <div 
-                        className={`${item.color} text-white text-[11px] font-bold h-full flex items-center px-3 rounded-lg transition-all duration-500`}
-                        style={{ width: `${Math.max(22, (item.count / 19) * 100)}%` }}
-                      >
-                        {item.count}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            <div className="mt-5">
+              <div className="border-l-4 border-[#A91D22] pl-4 bg-[#F8F9FA] py-3.5 pr-3 rounded-r-md">
+                <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                  <span className="font-bold text-slate-800">Insight:</span> Most campaigns achieved 61-80% outlet coverage, but a few campaigns had limited distribution.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 5. ROW 3: Underperforming Campaign Insights & Average Approval Time */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* 4. ROW 2: Underperforming Campaign Insights & Campaign Lifecycle Funnel */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           
           {/* Left Card: Underperforming Campaign Insights */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[260px]">
+          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
             <div>
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-bold text-slate-900">Underperforming Campaign Insights</h3>
-                <button className="text-xs font-bold text-modRed hover:underline underline-offset-2">Click row to drill in</button>
+                <button className="text-xs font-bold text-modRed bg-red-50 px-2.5 py-1 rounded-md hover:bg-red-100 transition-colors">Click row to drill in</button>
               </div>
               
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100 text-left bg-slate-50/50">
-                      <th 
-                        onClick={() => handleInsightsSort("name")}
-                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Campaign Name</span>
-                          {insightsSortBy === "name" ? (
-                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                          ) : (
-                            <ArrowUpDown size={10} className="opacity-40" />
-                          )}
-                        </div>
+                      <th className="py-2.5 px-4 font-bold text-slate-600 text-[10px] uppercase tracking-wider select-none">
+                        Campaign Name
                       </th>
-                      <th 
-                        onClick={() => handleInsightsSort("issue")}
-                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Issue</span>
-                          {insightsSortBy === "issue" ? (
-                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                          ) : (
-                            <ArrowUpDown size={10} className="opacity-40" />
-                          )}
-                        </div>
+                      <th className="py-2.5 px-4 font-bold text-slate-600 text-[10px] uppercase tracking-wider select-none">
+                        Issue
                       </th>
-                      <th 
-                        onClick={() => handleInsightsSort("rec")}
-                        className="py-3 px-4 font-bold text-slate-400 text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
-                      >
-                        <div className="flex items-center space-x-1">
-                          <span>Recommendation</span>
-                          {insightsSortBy === "rec" ? (
-                            insightsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                          ) : (
-                            <ArrowUpDown size={10} className="opacity-40" />
-                          )}
-                        </div>
+                      <th className="py-2.5 px-4 font-bold text-slate-600 text-[10px] uppercase tracking-wider select-none">
+                        Recommendation
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {sortedInsights.map((item, idx) => (
-                      <tr 
-                        key={idx} 
-                        onClick={() => router.push(`/campaigns/${item.id}?from=reports`)}
-                        className="hover:bg-slate-50 transition-all cursor-pointer group"
-                      >
-                        <td className="py-4 px-4 font-bold text-slate-900 text-sm group-hover:text-modRed transition-colors">{item.name}</td>
-                        <td className="py-4 px-4">
-                          <span className="inline-flex items-center gap-1.5 text-modRed text-xs font-bold px-2.5 py-1 bg-red-50 border border-red-100/50 rounded-lg">
-                            <AlertCircle size={13} /> {item.issue}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-slate-600 text-xs font-medium">{item.rec}</td>
-                      </tr>
-                    ))}
+                    {sortedInsights.map((item, idx) => {
+                      const isLowRuntime = item.issue.toLowerCase().includes("runtime");
+                      return (
+                        <tr 
+                          key={idx} 
+                          onClick={() => router.push(`/campaigns/${item.id}?from=reports`)}
+                          className="hover:bg-slate-50 transition-all cursor-pointer group"
+                        >
+                          <td className="py-2 px-4 font-bold text-slate-900 text-sm group-hover:text-modRed transition-colors">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-7 h-7 rounded-sm bg-slate-100 flex-shrink-0 relative overflow-hidden">
+                                <img src={`https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=200&auto=format&fit=crop&${idx}`} alt="Pizza" className="object-cover w-full h-full" />
+                              </div>
+                              <div>
+                                <div className="leading-tight">{item.name}</div>
+                                <div className="text-[10px] text-slate-400 font-normal mt-0.5">#Camp0{idx+1}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2 px-4">
+                            <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${isLowRuntime ? 'text-amber-500' : 'text-modRed'}`}>
+                              <AlertCircle size={13} /> {item.issue}
+                            </span>
+                          </td>
+                          <td className="py-2 px-4 text-slate-600 text-xs font-medium">{item.rec}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
 
-          {/* Right Card: Average Approval Time */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-2xl border border-slate-100 p-6 shadow-sm min-h-[260px]">
+          {/* Right Card: Campaign Lifecycle Funnel */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
             <div>
-              <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight">2.3 Days</h3>
-              <p className="text-[10px] font-bold text-modRed uppercase tracking-widest mt-1.5">AVERAGE APPROVAL TIME</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-3">Campaign Lifecycle Funnel</h3>
+              <div className="space-y-2">
+                {[
+                  { stage: "Draft", count: 18, color: "bg-slate-400" },
+                  { stage: "Submitted", count: 12, color: "bg-[#A91D22]" },
+                  { stage: "Review", count: 7, color: "bg-[#F59E0B]" },
+                  { stage: "Approved", count: 5, color: "bg-[#10B981]" },
+                  { stage: "Running", count: 4, color: "bg-[#3B82F6]" }
+                ].map((item, idx) => (
+                  <div key={idx} className="relative h-8 flex bg-[#F1F3F5] rounded-md overflow-hidden">
+                    <div 
+                      className={`${item.color} h-full text-white text-xs font-bold flex items-center justify-between px-4 rounded-md transition-all duration-500`}
+                      style={{ width: `${Math.max(25, (item.count / 18) * 100)}%` }}
+                    >
+                      <span>{item.stage}</span>
+                      <span>{item.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             
-            <div className="p-4 bg-red-50/50 border border-red-100/60 rounded-xl mt-6">
-              <p className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
-                <span>⚠️</span> Peak Runtime Hours
-              </p>
-              <p className="text-slate-600 text-xs mt-1.5 leading-relaxed font-medium">
-                Friday-Sunday evenings show peak activity. Opportunity: Weekday mornings show low activity.
-              </p>
+            <div className="mt-4 text-center">
+              <h3 className="text-3xl font-extrabold text-[#A61932] tracking-tight leading-none">2.3 Days</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">AVERAGE APPROVAL TIME</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. ROW 3: Campaign Activity Heatmap */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <div className="col-span-12 flex flex-col bg-white rounded-md border border-slate-100 p-5 shadow-sm min-h-[380px]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-slate-900">Campaign Activity Heatmap</h3>
+              <div className="flex gap-4 items-center text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                <div className="flex gap-2 items-center">
+                  <span>LOW RUNTIME</span>
+                  <div className="flex gap-0.5">
+                    <div className="w-4 h-2.5 bg-[#FFF0F1] rounded-xs" />
+                    <div className="w-4 h-2.5 bg-[#FFCCD0] rounded-xs" />
+                    <div className="w-4 h-2.5 bg-[#FAA0A9] rounded-xs" />
+                    <div className="w-4 h-2.5 bg-[#F26D7D] rounded-xs" />
+                    <div className="w-4 h-2.5 bg-[#D84A5C] rounded-xs" />
+                  </div>
+                  <span>PEAK RUNTIME</span>
+                </div>
+              </div>
+            </div>
+            <ScreenHealthHeatmap />
+            <div className="mt-4 pt-4 border-t border-slate-50">
+              <div className="flex items-start gap-2">
+                <div className="w-4 h-4 rounded-full border border-modRed text-modRed flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">!</div>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  <span className="font-bold text-slate-900">Insight:</span> Peak runtime occurs Friday-Sunday evenings. <span className="text-modRed font-semibold">Opportunity:</span> Weekday mornings show low activity.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 6. ROW 4: Detailed Campaign Data */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm col-span-12">
+        <div className="bg-white rounded-md border border-slate-100 p-5 shadow-sm col-span-12">
           
           {/* Card Header with Search Input */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
             <h3 className="text-lg font-bold text-slate-900">Detailed Campaign Data</h3>
             <div className="relative group">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-modRed transition-colors" />
@@ -548,7 +527,7 @@ export default function ReportsPage() {
                 <tr className="border-b border-slate-100 text-slate-500 bg-slate-50/50">
                   <th 
                     onClick={() => handleReportsSort("name")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Campaign</span>
@@ -561,7 +540,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("created")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Created</span>
@@ -574,7 +553,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("submitted")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Submitted</span>
@@ -587,7 +566,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("approvalType")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Approval Type</span>
@@ -600,7 +579,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("runtime")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Runtime</span>
@@ -613,7 +592,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("status")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Status</span>
@@ -626,7 +605,7 @@ export default function ReportsPage() {
                   </th>
                   <th 
                     onClick={() => handleReportsSort("reason")}
-                    className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Reason</span>
@@ -637,7 +616,7 @@ export default function ReportsPage() {
                       )}
                     </div>
                   </th>
-                  <th className="py-4 px-4 font-bold text-[10px] uppercase tracking-wider text-center select-none">Action</th>
+                  <th className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider text-center select-none">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -655,17 +634,17 @@ export default function ReportsPage() {
                       onClick={handleRowClick}
                       className="hover:bg-slate-50/70 transition-all font-medium cursor-pointer"
                     >
-                      <td className="py-4 px-4 font-bold text-slate-900 text-sm">
+                      <td className="py-2 px-4 font-bold text-slate-900 text-sm">
                         <Link href={`/campaigns/${camp.id}?from=reports`} className="hover:text-modRed transition-colors">
                           {camp.name}
                         </Link>
                       </td>
-                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.created}</td>
-                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.submitted}</td>
-                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.approvalType}</td>
-                      <td className="py-4 px-4 text-slate-600 text-xs font-semibold">{camp.runtime}</td>
-                      <td className="py-4 px-4">
-                        <span className={`px-2.5 py-1 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
+                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.created}</td>
+                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.submitted}</td>
+                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.approvalType}</td>
+                      <td className="py-2 px-4 text-slate-600 text-xs font-semibold">{camp.runtime}</td>
+                      <td className="py-2 px-4">
+                        <span className={`px-2.5 py-0.5 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
                           camp.status === "Live" ? "bg-red-50 text-modRed border-red-100/60" :
                           camp.status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
                           camp.status === "Sent" || camp.status === "Sent for Approval" ? "bg-blue-50 text-blue-700 border-blue-100" :
@@ -675,8 +654,8 @@ export default function ReportsPage() {
                           {camp.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-slate-500 text-xs">{camp.reason}</td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.reason}</td>
+                      <td className="py-2 px-4 text-center">
                         <Link href={`/campaigns/${camp.id}?from=reports`} className="text-modRed font-bold text-sm hover:underline underline-offset-2">
                           View
                         </Link>
@@ -696,15 +675,15 @@ export default function ReportsPage() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100 px-4">
             <span className="text-xs text-slate-500 font-bold">Showing {filteredCampaigns.length} of {campaigns.length} campaigns</span>
             <div className="flex gap-2">
-              <button className="p-2 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
+              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
                 <ChevronLeft size={16} className="text-slate-400" />
               </button>
-              <span className="px-3.5 py-2 rounded-xl bg-modRed text-white text-xs font-bold shadow-md shadow-modRed/10">1</span>
-              <span className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-bold cursor-pointer">2</span>
-              <button className="p-2 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
+              <span className="px-3 py-1.5 rounded-xl bg-modRed text-white text-xs font-bold shadow-md shadow-modRed/10">1</span>
+              <span className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-bold cursor-pointer">2</span>
+              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
                 <ChevronRight size={16} className="text-slate-400" />
               </button>
             </div>
