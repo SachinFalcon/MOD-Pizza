@@ -156,7 +156,7 @@ export function SingleDateTimePickerPopover({
       {/* Modal Content */}
       <div
         ref={containerRef}
-        className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 z-10 w-[340px] animate-in zoom-in-95 duration-200"
+        className="relative bg-white rounded-2xl border border-slate-200 p-5 z-10 w-[340px] animate-in zoom-in-95 duration-200 shadow-[(0,0,0,0.18)]"
       >
         <div className="flex justify-between items-center mb-3">
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Date & Time</span>
@@ -289,7 +289,7 @@ export function SingleDateTimePickerPopover({
                     onClick={() => handleDayClick(day)}
                     className={`h-9 w-9 text-xs font-bold transition-all relative flex items-center justify-center ${
                       active
-                        ? "bg-[#A61932] text-white rounded-full shadow-[0_2px_4px_rgba(166,25,50,0.25)] z-10"
+                        ? "bg-[#A61932] text-white rounded-full shadow-[(0,0,0,0.18)] z-10"
                         : "text-slate-800 hover:bg-slate-100 rounded-full"
                     }`}
                   >
@@ -337,22 +337,14 @@ export function SingleDateTimePickerPopover({
                 <button
                   type="button"
                   onClick={() => setAmpm("AM")}
-                  className={`px-2 py-0.5 text-[10px] font-black rounded transition-all ${
-                    ampm === "AM"
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-100"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
+                  className={`px-2 py-0.5 text-[10px] font-black rounded transition-all ${ ampm === "AM" ? " bg-white text-slate-900 border border-slate-100" : "text-slate-400 hover:text-slate-600" }`}
                 >
                   AM
                 </button>
                 <button
                   type="button"
                   onClick={() => setAmpm("PM")}
-                  className={`px-2 py-0.5 text-[10px] font-black rounded transition-all ${
-                    ampm === "PM"
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-100"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
+                  className={`px-2 py-0.5 text-[10px] font-black rounded transition-all ${ ampm === "PM" ? " bg-white text-slate-900 border border-slate-100" : "text-slate-400 hover:text-slate-600" }`}
                 >
                   PM
                 </button>
@@ -471,7 +463,7 @@ function CustomTimeDropdown({ value, options, onChange, isOpen, onToggle, label 
       {isOpen && (
         <div 
           ref={menuRef}
-          className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 w-[70px] bg-white border border-slate-200 rounded-xl shadow-xl py-1 max-h-[160px] overflow-y-auto z-[200] animate-in fade-in slide-in-from-bottom-2 duration-150 [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.1)_transparent]"
+          className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 w-[70px] bg-white border border-slate-200 rounded-xl py-1 max-h-[160px] overflow-y-auto z-[200] animate-in fade-in slide-in-from-bottom-2 duration-150 [scrollbar-width:thin] [scrollbar-color:rgba(0,0,0,0.1)_transparent] shadow-[(0,0,0,0.18)]"
         >
           <div className="text-[9px] font-black text-slate-400 text-center uppercase tracking-wider py-1 border-b border-slate-50 sticky top-0 bg-white z-10">
             {label}

@@ -98,7 +98,7 @@ export function CreateCampaignModal({ isOpen, onClose, onCampaignCreated }: Crea
         />
 
         {/* Modal Content */}
-        <div className="relative bg-white w-full max-w-sm md:max-w-2xl lg:max-w-5xl rounded-[1.5rem] shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 overflow-hidden">
+        <div className="relative bg-white w-full max-w-sm md:max-w-2xl lg:max-w-5xl rounded-[1.5rem] flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300 overflow-hidden shadow-[(0,0,0,0.18)]">
 
           {/* Header */}
           <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4 flex justify-between items-start bg-white z-10 relative gap-4">
@@ -407,7 +407,7 @@ function StepBasics({
             placeholder="e.g. Summer Promotion 2026"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none"
+            className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none"
           />
         </div>
 
@@ -418,7 +418,7 @@ function StepBasics({
             type="text"
             placeholder="CAM-88291-SR24"
             readOnly
-            className="w-full bg-white border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium text-slate-500 outline-none"
+            className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium text-slate-500 outline-none"
           />
         </div>
 
@@ -427,7 +427,7 @@ function StepBasics({
           <input
             type="text"
             placeholder="#MODPIZZA"
-            className="w-full bg-white border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none"
+            className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none"
           />
         </div> */}
         {/* Dropdowns */}
@@ -438,10 +438,7 @@ function StepBasics({
               type="button"
               disabled={isEditor}
               onClick={() => setIsTypeOpen(!isTypeOpen)}
-              className={`w-full flex items-center justify-between border rounded-lg py-2.5 px-4 text-sm font-medium transition-all outline-none text-left
-                ${isEditor
-                  ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                  : "bg-white border-slate-200 text-slate-700 focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b]"}`}
+              className={`w-full flex items-center justify-between border rounded-lg py-2.5 px-4 text-sm font-medium transition-all outline-none text-left ${isEditor ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed" : " bg-white border-slate-200 text-slate-700 focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b]"}`}
             >
               <div className="flex items-center space-x-2">
                 {typeOptions.find(o => o.value === campaignType)?.icon}
@@ -455,7 +452,7 @@ function StepBasics({
             </button>
 
             {!isEditor && isTypeOpen && (
-              <div className="absolute left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
                 {typeOptions.map((opt) => {
                   const isSelected = opt.value === campaignType;
                   return (
@@ -488,7 +485,7 @@ function StepBasics({
               placeholder="MM/DD/YYYY, --:-- --"
               readOnly
               onClick={() => setIsStartCalendarOpen(true)}
-              className="w-full bg-white border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none cursor-pointer"
+              className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none cursor-pointer"
             />
             <Calendar size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
@@ -503,7 +500,7 @@ function StepBasics({
               placeholder="MM/DD/YYYY, --:-- --"
               readOnly
               onClick={() => setIsEndCalendarOpen(true)}
-              className="w-full bg-white border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none cursor-pointer"
+              className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-2.5 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none cursor-pointer"
             />
             <Calendar size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
@@ -518,10 +515,7 @@ function StepBasics({
               type="button"
               disabled={isEditor}
               onClick={() => setIsPriorityOpen(!isPriorityOpen)}
-              className={`w-full flex items-center justify-between border rounded-lg py-2.5 px-4 text-sm font-medium transition-all outline-none text-left
-                ${isEditor
-                  ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed"
-                  : "bg-white border-slate-200 text-slate-700 focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b]"}`}
+              className={`w-full flex items-center justify-between border rounded-lg py-2.5 px-4 text-sm font-medium transition-all outline-none text-left ${isEditor ? "bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed" : " bg-white border-slate-200 text-slate-700 focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b]"}`}
             >
               <div className="flex items-center space-x-2">
                 {priorityOptions.find(o => o.value === playbackPriority)?.icon}
@@ -535,7 +529,7 @@ function StepBasics({
             </button>
 
             {!isEditor && isPriorityOpen && (
-              <div className="absolute left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
                 {priorityOptions.map((opt) => {
                   const isSelected = opt.value === playbackPriority;
                   return (
@@ -584,7 +578,7 @@ function StepBasics({
         <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-1.5">
             <label className="text-[13px] font-bold text-slate-700">Publisher Context</label>
-            <div className="bg-white border border-slate-100 p-0 rounded-lg flex items-center shadow-sm">
+            <div className="bg-white border border-slate-100 p-0 rounded-lg flex items-center">
               <div className="flex-1 py-3 px-1">
                 <div className="text-[13px] font-medium text-slate-700 flex items-center">
                   Alina Sophia (Regional Publisher)
@@ -612,7 +606,7 @@ function StepBasics({
           <label className="text-[11px] font-black text-slate-800 uppercase tracking-widest">NOTE</label>
           <textarea
             placeholder="Add editorial notes for the publisher..."
-            className="w-full bg-white border border-slate-200 rounded-lg py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none h-20 resize-none text-slate-400"
+            className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-200 rounded-lg py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-[#991b1b]/20 focus:border-[#991b1b] transition-all outline-none h-20 resize-none text-slate-400"
           />
         </div>
       </div>
@@ -622,8 +616,7 @@ function StepBasics({
 
 function TypeOption({ icon, label, sublabel, active = false }: { icon: React.ReactNode, label: string, sublabel?: string, active?: boolean }) {
   return (
-    <div className={`flex flex-col items-center justify-center py-4 rounded-lg border transition-all cursor-pointer group
-      ${active ? 'bg-[#FFF5F5] border-[#991b1b] text-[#991b1b]' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'}`}>
+    <div className={`flex flex-col items-center justify-center py-4 rounded-lg border transition-all cursor-pointer group ${active ? 'bg-[#FFF5F5] border-[#991b1b] text-[#991b1b]' : ' bg-white border-slate-200 text-slate-700 hover:border-slate-300'}`}>
       <div className={`mb-1 transition-transform group-hover:scale-110 ${active ? 'text-[#991b1b]' : 'text-slate-400'}`}>{icon}</div>
       <span className="text-[13px] font-bold">{label}</span>
       {sublabel && <span className="text-[10px] font-medium text-slate-400">{sublabel}</span>}
@@ -805,7 +798,7 @@ function StepTargeting({
               <ChevronDown size={14} className={`absolute right-3 text-slate-400 transition-transform ${isRegionOpen ? "rotate-180" : ""}`} />
             </button>
             {isRegionOpen && (
-              <div className="absolute left-0 mt-1 min-w-[180px] bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 mt-1 min-w-[180px] bg-white border border-slate-200 rounded-xl py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150 shadow-[(0,0,0,0.18)]">
                 <button
                   type="button"
                   onClick={() => handleRegionSelect("Region")}
@@ -829,14 +822,13 @@ function StepTargeting({
             <button
               type="button"
               onClick={() => { if (selectedRegion) { setIsStateOpen(!isStateOpen); setIsRegionOpen(false); setIsLocalityOpen(false); } }}
-              className={`bg-white border border-slate-200 rounded-full py-2.5 pl-4 pr-8 text-sm font-medium outline-none flex items-center gap-1 transition-all ${selectedRegion ? "text-slate-700 hover:border-slate-300 cursor-pointer" : "text-slate-400 cursor-not-allowed opacity-60"
-                }`}
+              className={`bg-white border border-slate-200 rounded-full py-2.5 pl-4 pr-8 text-sm font-medium outline-none flex items-center gap-1 transition-all ${selectedRegion ? "text-slate-700 hover:border-slate-300 cursor-pointer" : "text-slate-400 cursor-not-allowed opacity-60" }`}
             >
               <span className={selectedState ? "text-[#991b1b] font-bold" : ""}>{targeting.state}</span>
               <ChevronDown size={14} className={`absolute right-3 text-slate-400 transition-transform ${isStateOpen ? "rotate-180" : ""}`} />
             </button>
             {isStateOpen && selectedRegion && (
-              <div className="absolute left-0 mt-1 min-w-[200px] bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 mt-1 min-w-[200px] bg-white border border-slate-200 rounded-xl py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150 shadow-[(0,0,0,0.18)]">
                 <button
                   type="button"
                   onClick={() => { setTargeting({ ...targeting, state: "State", locality: "Locality" }); setIsStateOpen(false); }}
@@ -860,14 +852,13 @@ function StepTargeting({
             <button
               type="button"
               onClick={() => { if (selectedState) { setIsLocalityOpen(!isLocalityOpen); setIsRegionOpen(false); setIsStateOpen(false); } }}
-              className={`bg-white border border-slate-200 rounded-full py-2.5 pl-4 pr-8 text-sm font-medium outline-none flex items-center gap-1 transition-all ${selectedState ? "text-slate-700 hover:border-slate-300 cursor-pointer" : "text-slate-400 cursor-not-allowed opacity-60"
-                }`}
+              className={`bg-white border border-slate-200 rounded-full py-2.5 pl-4 pr-8 text-sm font-medium outline-none flex items-center gap-1 transition-all ${selectedState ? "text-slate-700 hover:border-slate-300 cursor-pointer" : "text-slate-400 cursor-not-allowed opacity-60" }`}
             >
               <span className={targeting.locality !== "Locality" ? "text-[#991b1b] font-bold" : ""}>{targeting.locality}</span>
               <ChevronDown size={14} className={`absolute right-3 text-slate-400 transition-transform ${isLocalityOpen ? "rotate-180" : ""}`} />
             </button>
             {isLocalityOpen && selectedState && (
-              <div className="absolute right-0 mt-1 min-w-[200px] bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-1 min-w-[200px] bg-white border border-slate-200 rounded-xl py-1.5 z-[60] animate-in fade-in slide-in-from-top-2 duration-150 shadow-[(0,0,0,0.18)]">
                 <button
                   type="button"
                   onClick={() => { setTargeting({ ...targeting, locality: "Locality" }); setIsLocalityOpen(false); }}
@@ -898,7 +889,7 @@ function StepTargeting({
         </button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-[(0,0,0,0.18)]">
         <table className="w-full text-left">
           <thead className="bg-[#F8FAFC] border-b border-slate-200">
             <tr>
@@ -978,7 +969,7 @@ function TargetingRow({ id, name, loc, active, screens, checked }: { id: string,
       </td>
       <td className="px-4 py-4 text-[13px] font-medium text-slate-600">{screens}</td>
       <td className="px-6 py-4 text-right">
-        <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 shadow-sm">
+        <button className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600">
           <Eye size={16} />
         </button>
       </td>
@@ -1005,7 +996,7 @@ function StepMedia({
       <div className="border-2 border-dashed border-[#FCA5A5] bg-[#FEF2F2] rounded-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-white/50"></div>
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-red-100">
+          <div className="w-12 h-12 bg-[rgba(247,241,233,0.35)] rounded-full flex items-center justify-center mb-4 border border-red-100">
             <CloudUpload size={24} className="text-[#991b1b]" />
           </div>
           <h4 className="text-[#991b1b] font-bold text-[16px] mb-2">Drag & Drop Files Here</h4>
@@ -1049,7 +1040,7 @@ function StepMedia({
 
 function MediaItem({ id, title, meta, type, time, status, img }: any) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors group">
+    <div className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors group shadow-[(0,0,0,0.18)]">
       <GripVertical size={16} className="text-slate-300 cursor-grab shrink-0" />
       <span className="text-[13px] font-medium text-slate-400 w-4 text-center shrink-0">{id}</span>
       <img src={img} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
@@ -1133,7 +1124,7 @@ function StepReview({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Campaign Details */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden flex flex-col shadow-[(0,0,0,0.18)]">
           <div className="p-5 flex-1">
             <div className="text-[14px] font-bold text-slate-900 mb-4">Campaign Details</div>
 
@@ -1172,7 +1163,7 @@ function StepReview({
         </div>
 
         {/* Targeting Summary */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col">
+        <div className="bg-white border border-slate-100 rounded-2xl flex flex-col shadow-[(0,0,0,0.18)]">
           <div className="p-5 flex-1 flex flex-col">
             <div className="text-[14px] font-bold text-slate-900 mb-4">Targeting Summary</div>
             <div className="grid grid-cols-3 gap-3 mb-6 flex-1">

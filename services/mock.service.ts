@@ -225,7 +225,7 @@ const DEFAULT_SETTINGS: SettingsData = {
   deviceOfflineTimeout: "Every 5 minutes",
   reconnectAttempts: 3,
   orientation: "Landscape",
-  resolution: "Every 5 minutes",
+  resolution: "1920x1080 (1080p)",
   volume: 0,
 
   allowedFormats: {

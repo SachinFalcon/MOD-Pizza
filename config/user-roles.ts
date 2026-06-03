@@ -53,15 +53,15 @@ export const USER_PROFILES: Record<string, UserProfileData> = {
   },
   publisher: {
     id: "publisher",
-    name: "Sarah Connor",
+    name: "Dev Ajay",
     role: "Publisher",
     roleLabel: "CONTENT PUBLISHER",
-    email: "sarah.connor@mtas.com",
+    email: "dev.ajay@mtas.com",
     phone: "+1 874 345 9901",
     scope: "New York HQ",
     joined: "Feb 18, 2022",
     lastLogin: "Today, 08:30 AM",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     timezone: "UTC-05:00 (EST - New York)",
     permissions: [
       { module: "Campaign Management", access: "Full Access", variant: "success" },

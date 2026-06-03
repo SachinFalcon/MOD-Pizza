@@ -38,8 +38,8 @@ const colorScale = scaleLinear<string>()
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill={cur ? colorScale(cur.value) : "#F3F4F6"}
-                      stroke="#FFFFFF"
+                      fill={cur ? colorScale(cur.value) : "#E1DCD3"}
+                      stroke="rgba(247, 241, 233, 0.35)"
                       strokeWidth={0.5}
                       style={{
                         default: { outline: "none" },
@@ -55,28 +55,30 @@ const colorScale = scaleLinear<string>()
         </div>
   
         {/* Map Legend (from high-fidelity screenshot) */}
-        <div className="mt-2 md:mt-8 pt-6 md:pt-12 border-t border-slate-50 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-12 mb-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Low Coverage</span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">High Coverage</span>
+        <div className="mt-4 pt-4 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
+          <div className="space-y-1.5 w-full md:w-[260px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-medium text-slate-500">Low Coverage</span>
+              <span className="text-[12px] font-medium text-slate-500">High Coverage</span>
+            </div>
+            <div className="flex items-center space-x-[2px] w-full">
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+                <div
+                  key={i}
+                  className="h-2.5 flex-1 rounded-sm"
+                  style={{ backgroundColor: colorScale(i * 11.1) }}
+                ></div>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center space-x-1">
-            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <div
-                key={i}
-                className="h-3 w-8 rounded-sm"
-                style={{ backgroundColor: colorScale(i * 14) }}
-              ></div>
-            ))}
+          <div className="text-right shrink-0">
+            <div className="bg-[#FFF1F2] px-3.5 py-2 rounded-[6px]">
+              <p className="text-[12px] text-slate-600 font-medium">
+                Color intensity reflects campaign coverage across states
+              </p>
+            </div>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] text-slate-400 font-medium italic opacity-80 max-w-[280px]">
-            Color Intensity reflects campaign coverage across states
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

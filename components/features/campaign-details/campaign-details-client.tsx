@@ -441,7 +441,7 @@ export default function CampaignDetailsClient() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {/* Card 1: Outlet Coverage */}
-            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Outlet Coverage</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -455,7 +455,7 @@ export default function CampaignDetailsClient() {
             </div>
 
             {/* Card 2: Assigned Team */}
-            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assigned Team</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -482,7 +482,7 @@ export default function CampaignDetailsClient() {
             </div>
 
             {/* Card 3: Campaign Runtime */}
-            <div className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
               <div className="flex justify-between items-start">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Campaign Runtime</span>
                 <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
@@ -508,7 +508,7 @@ export default function CampaignDetailsClient() {
                 <h3 className="text-sm font-bold text-slate-900 tracking-tight">Campaign Details</h3>
                 <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
               </div>
-              <div className="bg-white border border-slate-100 rounded-lg p-6 md:p-8 shadow-sm">
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 md:p-8">
 
                 <div className="space-y-6">
                   <p className="text-sm text-slate-600 font-medium leading-relaxed">
@@ -535,7 +535,7 @@ export default function CampaignDetailsClient() {
                   </div>
 
                   {/* Notes Alert box */}
-                  <div className="bg-[#F8F9FA] border border-slate-200/50 rounded-lg p-5 flex items-start space-x-3 mt-4">
+                  <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/50 rounded-lg p-5 flex items-start space-x-3 mt-4">
                     <AlertCircle size={18} className="text-slate-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-1.5">NOTES</span>
@@ -650,7 +650,7 @@ export default function CampaignDetailsClient() {
                     const isYou = comment.author === "You";
                     return (
                       <div key={comment.id} className="space-y-1">
-                        <div className="bg-white border border-slate-100 rounded-lg p-4 shadow-sm flex flex-col transition-all">
+                        <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-4 flex flex-col transition-all">
                           <div className="flex justify-between items-start mb-2">
                             {!isYou ? (
                               <div className="flex justify-between items-start w-full">
@@ -743,7 +743,7 @@ export default function CampaignDetailsClient() {
                 placeholder="Search by Outlet ID..."
                 value={scheduleSearch}
                 onChange={(e) => setScheduleSearch(e.target.value)}
-                className="w-full bg-[#F8F9FA] border border-slate-150 rounded-xl py-2.5 pl-4 pr-12 text-xs font-semibold focus:ring-2 focus:ring-modRed/10 focus:border-modRed/20 transition-all outline-none text-slate-800 placeholder-slate-400"
+                className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-150 rounded-xl py-2.5 pl-4 pr-12 text-xs font-semibold focus:ring-2 focus:ring-modRed/10 focus:border-modRed/20 transition-all outline-none text-slate-800 placeholder-slate-400"
               />
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-modRed transition-colors" size={16} />
             </div>
@@ -1059,7 +1059,7 @@ export default function CampaignDetailsClient() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredAssets.map((asset, idx) => (
-                <div key={idx} className="bg-white border border-slate-200/50 rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-all group">
+                <div key={idx} className="bg-[rgba(255,255,255,0.75)] border border-slate-200/50 rounded-lg overflow-hidden -[0_2px_8px_rgba(0,0,0,0.01)] hover: transition-all group">
                   <div className="h-44 bg-slate-100 relative overflow-hidden">
                     <img src={asset.img} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>

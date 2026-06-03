@@ -44,7 +44,7 @@ export function FilterDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={buttonClassName || "flex items-center justify-between space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm cursor-pointer min-w-[130px] active:scale-95"}
+        className={buttonClassName || "flex items-center justify-between space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer min-w-[130px] active:scale-95 shadow-[(0,0,0,0.18)]"}
       >
         <span>{value || label}</span>
         <ChevronDown 
@@ -55,7 +55,7 @@ export function FilterDropdown({
 
       {/* Dropdown Options Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 min-w-full w-[180px] bg-white border border-slate-100 rounded-xl shadow-xl py-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute left-0 mt-2 min-w-full w-[180px] bg-white border border-slate-100 rounded-xl py-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150 shadow-[(0,0,0,0.18)]">
           {options.map((option) => {
             const isSelected = option === value;
             return (

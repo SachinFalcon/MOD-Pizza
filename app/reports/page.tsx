@@ -101,11 +101,7 @@ export default function ReportsPage() {
 
   const handleReportsSort = (column: "name" | "created" | "submitted" | "approvalType" | "runtime" | "status" | "reason") => {
     if (reportsSortBy === column) {
-      if (reportsSortOrder === "asc") {
-        setReportsSortOrder("desc");
-      } else {
-        setReportsSortBy(null);
-      }
+      setReportsSortOrder(prev => prev === "asc" ? "desc" : "asc");
     } else {
       setReportsSortBy(column);
       setReportsSortOrder("asc");
@@ -114,11 +110,7 @@ export default function ReportsPage() {
 
   const handleInsightsSort = (column: "name" | "issue" | "rec") => {
     if (insightsSortBy === column) {
-      if (insightsSortOrder === "asc") {
-        setInsightsSortOrder("desc");
-      } else {
-        setInsightsSortBy(null);
-      }
+      setInsightsSortOrder(prev => prev === "asc" ? "desc" : "asc");
     } else {
       setInsightsSortBy(column);
       setInsightsSortOrder("asc");
@@ -220,7 +212,7 @@ export default function ReportsPage() {
   }, [insights, insightsSortBy, insightsSortOrder]);
 
   return (
-    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-[#F8F9FA]">
+    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-transparent">
       
       {/* 1. Header Title & Action Buttons */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 mb-6 px-4">
@@ -229,7 +221,7 @@ export default function ReportsPage() {
           <p className="text-sm font-medium text-slate-500 mt-1">Track performance, monitor activity, and gain actionable insights across the platform.</p>
         </div>
         <div className="flex gap-3 shrink-0">
-          <button className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-white border border-[#FDE8E8] text-[#A61932] rounded-xl font-bold text-sm hover:bg-[#FDF2F2] transition-all shadow-sm active:scale-95">
+          <button className="flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[rgba(255,255,255,0.75)] border border-[#FDE8E8] text-[#A61932] rounded-xl font-bold text-sm hover:bg-[#FDF2F2] transition-all active:scale-95 shadow-[(0,0,0,0.18)]">
             <FileDown size={16} />
             <span>Export CSV</span>
           </button>
@@ -251,7 +243,7 @@ export default function ReportsPage() {
               placeholder="Search...."
               value={detailedSearchQuery}
               onChange={(e) => setDetailedSearchQuery(e.target.value)}
-              className="w-full pl-6 pr-12 py-3.5 bg-white border border-slate-200/80 rounded-md text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-[#A61932]/5 focus:border-[#A61932]/30 outline-none transition-all shadow-sm"
+              className="w-full pl-6 pr-12 py-3.5 bg-[rgba(255,255,255,0.75)] border border-slate-200/80 rounded-md text-sm font-semibold text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-[#A61932]/5 focus:border-[#A61932]/30 outline-none transition-all"
             />
             <Search size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-950 font-bold pointer-events-none" />
           </div>
@@ -263,12 +255,12 @@ export default function ReportsPage() {
               value={regionFilter}
               onChange={setRegionFilter}
               className="w-[140px] sm:w-[160px]"
-              buttonClassName="w-full flex items-center justify-between pl-6 pr-4 py-3.5 bg-white border border-slate-200/80 rounded-md text-sm font-bold text-slate-800 hover:border-slate-305 hover:bg-slate-50 transition-all shadow-sm cursor-pointer active:scale-95"
+              buttonClassName="w-full flex items-center justify-between pl-6 pr-4 py-3.5 bg-[rgba(255,255,255,0.75)] border border-slate-200/80 rounded-md text-sm font-bold text-slate-800 hover:border-slate-305 hover:bg-slate-50 transition-all shadow-sm cursor-pointer active:scale-95"
             />
 
             {/* Segmented Date Switcher */}
             <div className="relative">
-              <div className="flex bg-white border border-slate-200 rounded-lg p-1.5 items-center shadow-[inset_0_1.5px_3.5px_rgba(0,0,0,0.07)]">
+              <div className="flex bg-[rgba(255,255,255,0.75)] border border-slate-200 rounded-lg p-1.5 items-center -[inset_0_1.5px_3.5px_rgba(0,0,0,0.07)]">
                 {(["7 Days", "30 Days", "Custom"] as const).map((range) => {
                   const isActive = (range === "7 Days" && (selectedDateRange === "7 Days" || selectedDateRange === "2 Days")) ||
                                    (range === "30 Days" && selectedDateRange === "30 Days") ||
@@ -287,7 +279,7 @@ export default function ReportsPage() {
                       }}
                       className={`px-5 py-1.5 text-xs font-bold transition-all ${
                         isActive
-                          ? "bg-[#A61932] text-white rounded-[6px] shadow-[0_3px_8px_rgba(166,25,50,0.24),0_1px_2px_rgba(0,0,0,0.1)] font-bold"
+                          ? "bg-[#A61932] text-white rounded-[6px] shadow-[(0,0,0,0.18)] font-bold"
                           : "text-[#A61932] hover:bg-slate-50 rounded-[6px] font-semibold"
                       }`}
                     >
@@ -326,7 +318,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           
           {/* Left Card: Campaign Performance Leaderboard */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
+          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-[rgba(255,255,255,0.75)] rounded-md border border-slate-100 p-4">
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-900">Campaign Performance Leaderboard</h3>
@@ -345,7 +337,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Right Card: Coverage Distribution */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
+          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-[rgba(255,255,255,0.75)] rounded-md border border-slate-100 p-4">
             <div>
               <h3 className="text-lg font-bold text-slate-900 mb-4">Coverage Distribution</h3>
               <div className="space-y-4">
@@ -359,7 +351,7 @@ export default function ReportsPage() {
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4">
                     <div className="w-20 text-sm font-semibold text-slate-700">{item.label}</div>
-                    <div className="flex-1 h-6 bg-[#F1F3F5] rounded-sm overflow-hidden">
+                    <div className="flex-1 h-6 bg-[rgba(255,255,255,0.75)] rounded-sm overflow-hidden">
                       <div className={`h-full ${item.color} rounded-sm transition-all duration-500`} style={{ width: `${item.bar}%` }} />
                     </div>
                     <div className="w-6 text-right text-sm font-bold text-slate-900">{item.count}</div>
@@ -369,7 +361,7 @@ export default function ReportsPage() {
             </div>
             
             <div className="mt-5">
-              <div className="border-l-4 border-[#A91D22] pl-4 bg-[#F8F9FA] py-3.5 pr-3 rounded-r-md">
+              <div className="border-l-4 border-[#A91D22] pl-4 bg-[rgba(255,255,255,0.75)] py-3.5 pr-3 rounded-r-md">
                 <p className="text-xs text-slate-600 leading-relaxed font-semibold">
                   <span className="font-bold text-slate-800">Insight:</span> Most campaigns achieved 61-80% outlet coverage, but a few campaigns had limited distribution.
                 </p>
@@ -382,7 +374,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           
           {/* Left Card: Underperforming Campaign Insights */}
-          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
+          <div className="col-span-12 lg:col-span-8 flex flex-col justify-between bg-[rgba(255,255,255,0.75)] rounded-md border border-slate-100 p-4">
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-bold text-slate-900">Underperforming Campaign Insights</h3>
@@ -392,7 +384,7 @@ export default function ReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 text-left bg-slate-50/50">
+                    <tr className="border-b border-slate-100 text-left bg-black/[0.03]">
                       <th className="py-2.5 px-4 font-bold text-slate-600 text-[10px] uppercase tracking-wider select-none">
                         Campaign Name
                       </th>
@@ -440,7 +432,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Right Card: Campaign Lifecycle Funnel */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-white rounded-md border border-slate-100 p-4 shadow-sm">
+          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between bg-[rgba(255,255,255,0.75)] rounded-md border border-slate-100 p-4">
             <div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Campaign Lifecycle Funnel</h3>
               <div className="space-y-2">
@@ -451,7 +443,7 @@ export default function ReportsPage() {
                   { stage: "Approved", count: 5, color: "bg-[#10B981]" },
                   { stage: "Running", count: 4, color: "bg-[#3B82F6]" }
                 ].map((item, idx) => (
-                  <div key={idx} className="relative h-8 flex bg-[#F1F3F5] rounded-md overflow-hidden">
+                  <div key={idx} className="relative h-8 flex bg-[rgba(255,255,255,0.75)] rounded-md overflow-hidden">
                     <div 
                       className={`${item.color} h-full text-white text-xs font-bold flex items-center justify-between px-4 rounded-md transition-all duration-500`}
                       style={{ width: `${Math.max(25, (item.count / 18) * 100)}%` }}
@@ -473,7 +465,7 @@ export default function ReportsPage() {
 
         {/* 5. ROW 3: Campaign Activity Heatmap */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-          <div className="col-span-12 flex flex-col bg-white rounded-md border border-slate-100 p-5 shadow-sm min-h-[380px]">
+          <div className="col-span-12 flex flex-col bg-[rgba(255,255,255,0.75)] rounded-md border border-slate-100 p-5 min-h-[380px]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-slate-900">Campaign Activity Heatmap</h3>
               <div className="flex gap-4 items-center text-[9px] font-bold uppercase tracking-wider text-slate-500">
@@ -503,20 +495,20 @@ export default function ReportsPage() {
         </div>
 
         {/* 6. ROW 4: Detailed Campaign Data */}
-        <div className="bg-white rounded-md border border-slate-100 p-5 shadow-sm col-span-12">
+        <div className="col-span-12 mt-6">
           
           {/* Card Header with Search Input */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-4">
             <h3 className="text-lg font-bold text-slate-900">Detailed Campaign Data</h3>
-            <div className="relative group">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-modRed transition-colors" />
+            <div className="relative group w-full sm:w-auto">
               <input
                 type="text"
-                placeholder="Search campaigns..."
+                placeholder="Search...."
                 value={detailedSearchQuery}
                 onChange={(e) => setDetailedSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-[#F8F9FA] border-none rounded-full text-xs font-semibold placeholder:text-slate-400 focus:ring-2 focus:ring-modRed/5 focus:bg-white outline-none transition-all w-full sm:w-64"
+                className="pl-4 pr-10 py-2 bg-[rgba(31,31,31,0.05)] border border-slate-200/80 rounded-md text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-modRed/5 outline-none transition-all w-full sm:w-72 shadow-sm"
               />
+              <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none" />
             </div>
           </div>
 
@@ -524,102 +516,76 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-500 bg-slate-50/50">
+                <tr className="border-b border-slate-200 text-slate-800 bg-[#EFEBE4]">
                   <th 
                     onClick={() => handleReportsSort("name")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Campaign</span>
-                      {reportsSortBy === "name" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("created")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Created</span>
-                      {reportsSortBy === "created" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("submitted")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Submitted</span>
-                      {reportsSortBy === "submitted" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("approvalType")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
-                      <span>Approval Type</span>
-                      {reportsSortBy === "approvalType" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <span>Approval Time</span>
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("runtime")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Runtime</span>
-                      {reportsSortBy === "runtime" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("status")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Status</span>
-                      {reportsSortBy === "status" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
                   <th 
                     onClick={() => handleReportsSort("reason")}
-                    className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-700 select-none"
+                    className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider cursor-pointer hover:bg-black/5 select-none"
                   >
                     <div className="flex items-center space-x-1">
                       <span>Reason</span>
-                      {reportsSortBy === "reason" ? (
-                        reportsSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
-                      ) : (
-                        <ArrowUpDown size={10} className="opacity-40" />
-                      )}
+                      <ArrowUpDown size={11} className="opacity-70" />
                     </div>
                   </th>
-                  <th className="py-2.5 px-4 font-bold text-[10px] uppercase tracking-wider text-center select-none">Action</th>
+                  <th className="py-3 px-4 font-bold text-[11px] uppercase tracking-wider select-none text-center">
+                    Expand
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-100">
                 {sortedCampaigns.map((camp, idx) => {
                   const handleRowClick = (e: React.MouseEvent) => {
                     const target = e.target as HTMLElement;
@@ -632,31 +598,21 @@ export default function ReportsPage() {
                     <tr 
                       key={idx} 
                       onClick={handleRowClick}
-                      className="hover:bg-slate-50/70 transition-all font-medium cursor-pointer"
+                      className="transition-all cursor-pointer hover:bg-slate-50/50 bg-[rgba(255,255,255,0.75)]"
                     >
-                      <td className="py-2 px-4 font-bold text-slate-900 text-sm">
-                        <Link href={`/campaigns/${camp.id}?from=reports`} className="hover:text-modRed transition-colors">
-                          {camp.name}
-                        </Link>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">
+                        {camp.name}
                       </td>
-                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.created}</td>
-                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.submitted}</td>
-                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.approvalType}</td>
-                      <td className="py-2 px-4 text-slate-600 text-xs font-semibold">{camp.runtime}</td>
-                      <td className="py-2 px-4">
-                        <span className={`px-2.5 py-0.5 border rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
-                          camp.status === "Live" ? "bg-red-50 text-modRed border-red-100/60" :
-                          camp.status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
-                          camp.status === "Sent" || camp.status === "Sent for Approval" ? "bg-blue-50 text-blue-700 border-blue-100" :
-                          camp.status === "Under Modification" ? "bg-amber-50 text-amber-700 border-amber-100" :
-                          "bg-slate-50 text-slate-600 border-slate-200"
-                        }`}>
-                          {camp.status}
-                        </span>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">{camp.created}</td>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">{camp.submitted}</td>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">-</td>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">{camp.runtime}</td>
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">
+                        {camp.status}
                       </td>
-                      <td className="py-2 px-4 text-slate-500 text-xs">{camp.reason}</td>
-                      <td className="py-2 px-4 text-center">
-                        <Link href={`/campaigns/${camp.id}?from=reports`} className="text-modRed font-bold text-sm hover:underline underline-offset-2">
+                      <td className="py-4 px-4 text-slate-700 text-sm font-medium">{camp.reason === "-" ? "Missing Info" : camp.reason}</td>
+                      <td className="py-4 px-4 text-center">
+                        <Link href={`/campaigns/${camp.id}?from=reports`} className="text-blue-600 font-medium text-sm hover:underline">
                           View
                         </Link>
                       </td>
@@ -675,17 +631,14 @@ export default function ReportsPage() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-100 px-4">
-            <span className="text-xs text-slate-500 font-bold">Showing {filteredCampaigns.length} of {campaigns.length} campaigns</span>
-            <div className="flex gap-2">
-              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
-                <ChevronLeft size={16} className="text-slate-400" />
-              </button>
-              <span className="px-3 py-1.5 rounded-xl bg-modRed text-white text-xs font-bold shadow-md shadow-modRed/10">1</span>
-              <span className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-bold cursor-pointer">2</span>
-              <button className="p-1.5 hover:bg-slate-50 rounded-xl transition-all border border-slate-200 cursor-pointer">
-                <ChevronRight size={16} className="text-slate-400" />
-              </button>
+          <div className="flex justify-between items-center mt-4">
+            <span className="text-xs text-slate-500 font-bold">Showing {filteredCampaigns.length} of {campaigns.length}</span>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+              <button className="px-2 py-1 hover:text-modRed transition-colors">Prev</button>
+              <button className="w-6 h-6 rounded bg-[#A61932] text-white flex items-center justify-center">1</button>
+              <span className="px-1 text-slate-400">...</span>
+              <button className="w-6 h-6 rounded bg-[#A61932] text-white flex items-center justify-center">8</button>
+              <button className="px-2 py-1 hover:text-modRed transition-colors">Next</button>
             </div>
           </div>
         </div>

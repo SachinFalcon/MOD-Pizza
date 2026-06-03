@@ -36,7 +36,7 @@ export function KPICard({ title, value, unit = "", trend, iconType, href }: { ti
   };
 
   const card = (
-    <div className={`bg-white rounded-xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full group ${href ? 'cursor-pointer hover:border-modRed/20' : ''}`}>
+    <div className={`bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 p-5 hover: transition-all flex flex-col h-full group ${href ? 'cursor-pointer hover:border-modRed/20' : ''} shadow-[(0,0,0,0.18)]`}>
       <div className="flex justify-between items-start mb-3">
         <h4 className="text-[11px] font-bold text-[#556987] uppercase tracking-wider">{title}</h4>
         <div className={`p-1.5 rounded-md ${bgColors[iconType]}`}>
@@ -76,13 +76,13 @@ export function KPICard({ title, value, unit = "", trend, iconType, href }: { ti
 
 export function TaskItem({ title, desc, actionLabel, status }: { title: string; desc: string; actionLabel?: string; status?: string }) {
   return (
-    <div className="flex items-center justify-between p-6 bg-white rounded-xl border border-slate-50 group hover:shadow-sm transition-all">
+    <div className="flex items-center justify-between p-6 bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-50 group hover: transition-all shadow-[(0,0,0,0.18)]">
       <div>
         <h4 className="text-base font-bold text-slate-900">{title}</h4>
         <p className="text-sm text-slate-500 mt-1 font-medium">{desc}</p>
       </div>
       {actionLabel ? (
-        <button className="px-6 py-2.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 transition-all uppercase tracking-widest text-slate-900">
+        <button className="px-6 py-2.5 rounded-lg text-xs font-bold border border-slate-200 bg-[rgba(255,255,255,0.75)] hover:bg-slate-50 transition-all uppercase tracking-widest text-slate-900">
           {actionLabel}
         </button>
       ) : status && (
@@ -97,7 +97,7 @@ export function TaskItem({ title, desc, actionLabel, status }: { title: string; 
 
 export function QuickActionButton({ icon, label, sub }: { icon: React.ReactNode; label: string; sub: string }) {
   return (
-    <div className="bg-[#F8F9FA] rounded-xl p-6 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group cursor-pointer border border-transparent hover:border-slate-100">
+    <div className="bg-[rgba(31,31,31,0.05)] rounded-xl p-6 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group cursor-pointer border border-transparent hover:border-slate-100">
       <div className="p-3 bg-red-50 rounded-lg text-modRed mb-4 group-hover:scale-110 transition-transform shadow-sm">
         {icon}
       </div>
@@ -109,16 +109,16 @@ export function QuickActionButton({ icon, label, sub }: { icon: React.ReactNode;
 
 export function OpportunityItem({ title, date, sub }: { title: string; date: string; sub: string }) {
   return (
-    <div className="flex items-center justify-between pl-4 relative group">
+    <div className="flex items-center justify-between pl-5 relative group">
       {/* Left Accent Bar */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-modRed rounded-full opacity-80"></div>
+      <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#A61932] rounded-full"></div>
       
       <div className="py-2">
         <p className="text-xs font-semibold text-slate-500">{date}</p>
-        <h4 className="text-base font-bold text-slate-900 leading-tight mt-0.5">{title}</h4>
-        <p className="text-sm text-slate-500 font-medium mt-1">{sub}</p>
+        <h4 className="text-[15px] font-bold text-slate-900 leading-tight mt-0.5">{title}</h4>
+        <p className="text-xs text-slate-500 font-medium mt-1">{sub}</p>
       </div>
-      <button className="px-5 py-2.5 bg-modRed text-white text-xs font-bold rounded-lg hover:bg-red-700 transition-all active:scale-95 uppercase tracking-widest">
+      <button className="px-4 py-2 bg-[#A61932] text-white text-[11px] font-bold rounded-md hover:bg-[#8e1428] transition-all active:scale-95 uppercase tracking-wide">
         CREATE
       </button>
     </div>

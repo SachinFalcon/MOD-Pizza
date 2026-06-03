@@ -154,7 +154,7 @@ function ResourceRow({
   return (
     <div className="flex border-b border-slate-100 hover:bg-slate-50/50 transition-colors" style={{ minHeight: 56 }}>
       {/* Resource label */}
-      <div className="w-48 shrink-0 px-4 py-3 flex flex-col justify-center border-r border-slate-100 bg-white sticky left-0 z-10">
+      <div className="w-48 shrink-0 px-4 py-3 flex flex-col justify-center border-r border-slate-100 bg-[rgba(255,255,255,0.75)] sticky left-0 z-10">
         <p className="text-[12px] font-bold text-slate-800 truncate">{resource.name}</p>
         <p className="text-[10px] text-slate-400 font-medium truncate">{resource.region}</p>
       </div>
@@ -280,7 +280,7 @@ export function CampaignScheduler({
   if (isLoading) return <GanttSkeleton />;
 
   return (
-    <div className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="flex flex-col rounded-xl border border-slate-200 bg-[rgba(255,255,255,0.75)] overflow-hidden shadow-[(0,0,0,0.18)]">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
         <div className="flex items-center gap-2">
@@ -368,7 +368,7 @@ export function CampaignScheduler({
       {/* ── Grid ── */}
       <div className="overflow-auto max-h-[520px]" ref={scrollRef}>
         {/* Day header row */}
-        <div className="flex sticky top-0 z-20 bg-white border-b border-slate-200">
+        <div className="flex sticky top-0 z-20 bg-[rgba(255,255,255,0.75)] border-b border-slate-200">
           <div className="w-48 shrink-0 border-r border-slate-100 px-4 py-2.5">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
               <LayoutGrid size={11} /> Outlet
@@ -446,7 +446,7 @@ export function CampaignScheduler({
 
 function GanttSkeleton() {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden animate-pulse">
+    <div className="rounded-xl border border-slate-200 bg-[rgba(255,255,255,0.75)] overflow-hidden animate-pulse shadow-[(0,0,0,0.18)]">
       <div className="h-14 bg-slate-50 border-b border-slate-100" />
       <div className="h-10 bg-slate-50 border-b border-slate-100" />
       {Array.from({ length: 6 }).map((_, i) => (

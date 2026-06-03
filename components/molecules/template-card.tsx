@@ -12,7 +12,7 @@ export interface TemplateCardData {
 
 export function TemplateCard({ data }: { data: TemplateCardData }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all group">
+    <div className="bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 overflow-hidden hover: transition-all group shadow-[(0,0,0,0.18)]">
       <div className="relative h-44 overflow-hidden">
         <img src={data.img} alt={data.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {data.badge && (

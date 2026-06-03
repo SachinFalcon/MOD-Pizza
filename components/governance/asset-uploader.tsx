@@ -127,7 +127,7 @@ export function AssetUploader({ onUploaded }: { onUploaded?: (count: number) => 
       {files.length > 0 && (
         <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
           {files.map((uf) => (
-            <div key={uf.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+            <div key={uf.id} className="flex items-center gap-3 p-3 bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 shadow-[(0,0,0,0.18)]">
               {/* Thumbnail or icon */}
               <div className="h-12 w-12 rounded-lg overflow-hidden bg-slate-100 shrink-0 flex items-center justify-center">
                 {uf.preview ? (

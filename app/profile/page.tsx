@@ -26,8 +26,8 @@ import {
 import { api } from "@/services/mock.service";
 
 export default function ProfilePage() {
-  const [activeProfile, setActiveProfile] = useState<UserProfileData>(getActiveProfile());
-  const [activeKey, setActiveKey] = useState<string>(getActiveProfileKey());
+  const [activeProfile, setActiveProfile] = useState<UserProfileData>(USER_PROFILES.editor);
+  const [activeKey, setActiveKey] = useState<string>("editor");
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (key: string) => {
@@ -158,11 +158,19 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden px-4 md:px-0 bg-[#F8F9FA]">
+    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1600px] mx-auto overflow-x-hidden md:px-0 bg-transparent relative">
+      {/* Decorative Gradients for Top Section */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[350px] bg-gradient-to-br from-[#F4C5C8] via-[#FFFFFF] to-[#F4C5C8] z-0 pointer-events-none" 
+        style={{ 
+          maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', 
+          WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' 
+        }} 
+      />
       
       {/* 1. Header Breadcrumbs & Controls */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 px-4">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-slate-400 uppercase">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 px-8 relative z-10">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-slate-500 uppercase">
           <span className="text-modRed">{activeProfile.role}</span>
           <span>&gt;</span>
           <span>User Profile</span>
@@ -172,7 +180,7 @@ export default function ProfilePage() {
           {/* Close Button */}
           <Link 
             href="/dashboard" 
-            className="h-9 w-9 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-modRed hover:border-modRed transition-all active:scale-95 shadow-sm"
+            className="h-9 w-9 bg-[rgba(255,255,255,0.75)] border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-modRed hover:border-modRed transition-all active:scale-95"
           >
             <X size={16} />
           </Link>
@@ -180,15 +188,15 @@ export default function ProfilePage() {
       </div>
 
       {/* Main Content Layout Grid */}
-      <div className="px-4 space-y-6">
+      <div className="px-4 md:px-8 space-y-6 relative z-10">
         
-        {/* 2. Top Profile Summary Card */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8">
+        {/* 2. Top Profile Summary Area (No White Card) */}
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-8 pb-6 border-b-0">
           
           {/* Left Avatar & Name display */}
           <div className="flex flex-col items-center shrink-0 w-full md:w-auto">
             <div className="relative group">
-              <div className="h-32 w-32 rounded-[2.5rem] bg-slate-50 border-4 border-white shadow-md overflow-hidden relative">
+              <div className="h-32 w-32 rounded-global bg-slate-50 border-4 border-white shadow-md overflow-hidden relative">
                 <img 
                   src={activeProfile.avatarUrl} 
                   alt={activeProfile.name} 
@@ -234,7 +242,7 @@ export default function ProfilePage() {
               
               <div className="pt-4 sm:col-span-2 md:col-span-1 md:pt-4 md:border-l md:pl-6 border-slate-100 flex items-center justify-end w-full">
                 <div className="flex flex-col sm:flex-row gap-2.5 w-full justify-end mt-2 sm:mt-0">
-                  <button className="flex items-center justify-center gap-1.5 px-4.5 py-2.5 bg-white border border-red-200 text-modRed rounded-full font-bold text-xs hover:bg-red-50 transition-all shadow-sm active:scale-95 cursor-pointer w-full sm:w-auto">
+                  <button className="flex items-center justify-center gap-1.5 px-4.5 py-2.5 bg-[rgba(255,255,255,0.75)] border border-red-200 text-modRed rounded-full font-bold text-xs hover:bg-red-50 transition-all active:scale-95 cursor-pointer w-full sm:w-auto">
                     <Key size={14} />
                     <span className="whitespace-nowrap">Change Password</span>
                   </button>
@@ -257,7 +265,7 @@ export default function ProfilePage() {
           <div className="col-span-12 lg:col-span-8 space-y-6">
             
             {/* Card: Access & Permissions */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <div className="bg-[rgba(255,255,255,0.75)] rounded-global border border-slate-100 p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-base font-bold text-slate-900">Access & Permissions</h3>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
@@ -271,7 +279,7 @@ export default function ProfilePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <tr className="border-b border-slate-200 bg-black/[0.03]">
                       <th 
                         onClick={() => handleAccessSort("module")}
                         className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
@@ -325,7 +333,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Card: Recent Activity Log */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <div className="bg-[rgba(255,255,255,0.75)] rounded-global border border-slate-100 p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-base font-bold text-slate-900">Recent Activity Log</h3>
                 <button className="text-xs font-bold text-modRed hover:underline cursor-pointer">View All</button>
@@ -335,7 +343,7 @@ export default function ProfilePage() {
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead>
-                    <tr className="border-b border-slate-100 text-slate-400">
+                    <tr className="border-b border-slate-200 bg-black/[0.03] text-slate-400">
                       <th 
                         onClick={() => handleActivitySort("action")}
                         className="pb-3 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-slate-605 transition-colors select-none"
@@ -413,7 +421,7 @@ export default function ProfilePage() {
               {/* Mobile View: Sleek native vertical list */}
               <div className="block sm:hidden space-y-4">
                 {sortedActivityLog.map((log, idx) => (
-                  <div key={idx} className="flex justify-between items-start p-4 border border-slate-100 rounded-2xl bg-[#F8F9FA]/50 gap-3">
+                  <div key={idx} className="flex justify-between items-start p-4 border border-slate-100 rounded-global bg-[#F8F9FA]/50 gap-3">
                     <div className="space-y-1">
                       <h4 className="font-bold text-slate-900 text-sm leading-snug">{log.action}</h4>
                       <div className="flex flex-wrap items-center gap-1.5 text-slate-500 text-xs font-semibold">
@@ -432,16 +440,16 @@ export default function ProfilePage() {
             </div>
 
             {/* Card: Security Settings / Two-Factor & Active Sessions */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
+            <div className="bg-[rgba(255,255,255,0.75)] rounded-global border border-slate-100 p-6 space-y-6">
               <h3 className="text-base font-bold text-slate-900">Security Settings</h3>
               
               {/* Info banner */}
-              <div className="p-4 bg-red-50/40 border border-red-100/60 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="p-4 bg-red-50/40 border border-red-100/60 rounded-global flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">Two-Factor Auth</h4>
                   <p className="text-slate-500 text-xs mt-1 font-medium">Enabled since Dec 2023</p>
                 </div>
-                <button className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm cursor-pointer active:scale-95 transition-all shrink-0 w-full sm:w-auto text-center">
+                <button className="px-5 py-2.5 bg-[rgba(255,255,255,0.75)] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer active:scale-95 transition-all shrink-0 w-full sm:w-auto text-center shadow-[(0,0,0,0.18)]">
                   Manage 2FA
                 </button>
               </div>
@@ -454,7 +462,7 @@ export default function ProfilePage() {
                 <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/50">
+                      <tr className="border-b border-slate-200 bg-black/[0.03]">
                         <th 
                           onClick={() => handleSessionsSort("device")}
                           className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-650 transition-colors select-none"
@@ -524,9 +532,9 @@ export default function ProfilePage() {
                 {/* Mobile View: Premium card layout */}
                 <div className="block sm:hidden space-y-3">
                   {sortedActiveSessions.map((session, idx) => (
-                    <div key={idx} className="p-4 border border-slate-100 rounded-2xl bg-[#F8F9FA]/50 flex justify-between items-center gap-4">
+                    <div key={idx} className="p-4 border border-slate-100 rounded-global bg-[#F8F9FA]/50 flex justify-between items-center gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-sm">
+                        <div className="h-10 w-10 rounded-xl bg-[rgba(255,255,255,0.75)] border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 shadow-[(0,0,0,0.18)]">
                           {session.device.includes("iPhone") ? <Smartphone size={18} /> : <Laptop size={18} />}
                         </div>
                         <div>
@@ -554,7 +562,7 @@ export default function ProfilePage() {
           <div className="col-span-12 lg:col-span-4 space-y-6">
             
             {/* Card: Scope */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <div className="bg-[rgba(255,255,255,0.75)] rounded-global border border-slate-100 p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Globe size={18} className="text-slate-700" />
                 <h3 className="text-base font-bold text-slate-900">Scope</h3>
@@ -562,9 +570,15 @@ export default function ProfilePage() {
 
               <div className="space-y-3">
                 {activeProfile.scopeStats.map((stat, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-4 border border-slate-100 rounded-2xl font-bold bg-[#F8F9FA]/50">
-                    <span className="text-slate-600 text-xs font-bold">{stat.region}</span>
-                    <span className={`text-sm font-extrabold ${idx === 0 ? "text-modRed" : "text-slate-800"}`}>
+                  <div key={idx} className={`flex justify-between items-center p-4 border rounded-global font-bold ${
+                    idx === 0 
+                      ? "bg-[#FDF4F5] border-red-100/50" 
+                      : "bg-[#F0F2F5] border-slate-200/60"
+                  }`}>
+                    <span className={`text-xs font-bold ${idx === 0 ? "text-modRed" : "text-slate-800"}`}>
+                      {stat.region}
+                    </span>
+                    <span className={`text-sm font-black ${idx === 0 ? "text-modRed" : "text-slate-900"}`}>
                       {stat.count} Screens
                     </span>
                   </div>
@@ -573,7 +587,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Card: Security Settings Summary (Right Sidebar) */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
+            <div className="bg-[rgba(255,255,255,0.75)] rounded-global border border-slate-100 p-6 space-y-6">
               <div className="flex items-center gap-2">
                 <Shield size={18} className="text-slate-700" />
                 <h3 className="text-base font-bold text-slate-900">Security Settings</h3>

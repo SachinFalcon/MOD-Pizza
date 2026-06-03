@@ -7,18 +7,14 @@ import { Menu, X } from "lucide-react";
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Persistence logic for sidebar collapsed state
+  const isCollapsed = !isHovered;
+
   React.useEffect(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved !== null) {
-      setIsCollapsed(saved === 'true');
-    }
-    
     // Tiny delay to ensure width is applied BEFORE transitions are enabled
     const timer = setTimeout(() => {
       setIsMounted(true);
@@ -26,12 +22,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     
     return () => clearTimeout(timer);
   }, []);
-
-  const toggleCollapse = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    localStorage.setItem('sidebar-collapsed', String(newState));
-  };
 
   const handleScroll = (e: React.UIEvent<HTMLElement>) => {
     const currentScrollY = e.currentTarget.scrollTop;
@@ -47,7 +37,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8F9FA] text-slate-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-[rgba(247,241,233,0.35)] text-slate-900 font-sans overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -57,16 +47,19 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Sidebar - Desktop & Mobile */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 
-        ${isMounted ? "transition-all duration-300" : "transition-none"}
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        ${isCollapsed ? "md:w-20 w-64" : "w-64"}
-      `}>
+      <div 
+        className={`
+          fixed inset-y-0 left-0 z-50 transform md:relative md:translate-x-0 
+          ${isMounted ? "transition-all duration-300" : "transition-none"}
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isCollapsed ? "md:w-16 w-56" : "w-56"}
+        `}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Sidebar 
           onClose={() => setIsSidebarOpen(false)} 
           isCollapsed={isCollapsed}
-          onToggleCollapse={toggleCollapse}
           isMounted={isMounted}
         />
       </div>
@@ -82,9 +75,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         
         <main 
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 pt-28 md:pt-32"
+          className="flex-1 overflow-y-auto pb-8 pt-28 md:pt-32"
         >
-          {children}
+          <div className="w-full max-w-[1600px] mx-auto px-8 md:px-[52px]">
+            {children}
+          </div>
         </main>
       </div>
     </div>

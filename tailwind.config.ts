@@ -22,6 +22,9 @@ const config: Config = {
           900: "#171717",
         },
       },
+      borderRadius: {
+        global: "var(--global-radius)",
+      },
       fontFamily: {
         sans: ["var(--font-poppins)", "Barlow", "Brandon Grotesque", "sans-serif"],
         heading: ["var(--font-oswald)", "Knockout 48 Featherweight", "Brandon Grotesque", "sans-serif"],

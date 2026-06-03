@@ -89,33 +89,37 @@ export function LibraryPageContent() {
             onChange={setStatusFilter}
           />
           {/* Date Range Filter */}
-          <button
-            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-            className="flex items-center space-x-2 bg-[#F4F4F5] rounded-full px-5 py-2.5 text-[15px] font-medium text-slate-900 cursor-pointer hover:bg-[#E4E4E7] transition-all active:scale-95 shadow-sm"
-          >
-            <Calendar size={18} className={startDate && endDate ? "text-[#A61932]" : ""} />
-            <span>
-              {startDate && endDate
-                ? `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })}`
-                : "All Time"}
-            </span>
-          </button>
-          <DateRangePickerPopover
-            isOpen={isDatePickerOpen}
-            onClose={() => setIsDatePickerOpen(false)}
-            initialStartDate={startDate ?? undefined}
-            initialEndDate={endDate ?? undefined}
-            onApply={(start, end) => {
-              setStartDate(start);
-              setEndDate(end);
-              setIsDatePickerOpen(false);
-            }}
-            onClear={() => {
-              setStartDate(undefined);
-              setEndDate(undefined);
-              setIsDatePickerOpen(false);
-            }}
-          />
+          <div className="relative inline-block">
+            <button
+              onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+              className="flex items-center justify-between space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer min-w-[130px] active:scale-95 shadow-[(0,0,0,0.18)]"
+            >
+              <div className="flex items-center space-x-2">
+                <Calendar size={16} className={startDate && endDate ? "text-[#A61932]" : "text-slate-500"} />
+                <span>
+                  {startDate && endDate
+                    ? `${startDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })} - ${endDate.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit" })}`
+                    : "All Time"}
+                </span>
+              </div>
+            </button>
+            <DateRangePickerPopover
+              isOpen={isDatePickerOpen}
+              onClose={() => setIsDatePickerOpen(false)}
+              initialStartDate={startDate ?? undefined}
+              initialEndDate={endDate ?? undefined}
+              onApply={(start, end) => {
+                setStartDate(start);
+                setEndDate(end);
+                setIsDatePickerOpen(false);
+              }}
+              onClear={() => {
+                setStartDate(undefined);
+                setEndDate(undefined);
+                setIsDatePickerOpen(false);
+              }}
+            />
+          </div>
         </div>
         <div className="relative group">
           <SearchInput value={searchTerm} onChange={(e: any) => setSearchTerm(e.target.value)} />
@@ -132,7 +136,7 @@ export function LibraryPageContent() {
       {/* Upload/Import Dialog Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col relative max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[rgba(255,255,255,0.75)] rounded-2xl border border-slate-100 w-full max-w-2xl overflow-hidden flex flex-col relative max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 shadow-[(0,0,0,0.18)]">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex justify-between items-start">
               <div>
@@ -151,21 +155,13 @@ export function LibraryPageContent() {
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex gap-2">
               <button
                 onClick={() => setModalTab("upload")}
-                className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  modalTab === "upload"
-                    ? "bg-[#A61932] text-white shadow-md shadow-red-900/10"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-300"
-                }`}
+                className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${ modalTab === "upload" ? "bg-[#A61932] text-white -red-900/10" : " bg-[rgba(255,255,255,0.75)] border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-300" }`}
               >
                 Upload Files
               </button>
               <button
                 onClick={() => setModalTab("import")}
-                className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  modalTab === "import"
-                    ? "bg-[#A61932] text-white shadow-md shadow-red-900/10"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-300"
-                }`}
+                className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${ modalTab === "import" ? "bg-[#A61932] text-white -red-900/10" : " bg-[rgba(255,255,255,0.75)] border border-slate-200 text-slate-600 hover:text-slate-800 hover:border-slate-300" }`}
               >
                 Bulk Import CSV
               </button>

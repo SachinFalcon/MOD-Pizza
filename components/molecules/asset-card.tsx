@@ -13,7 +13,7 @@ export interface AssetCardData {
 
 export function AssetCard({ data }: { data: AssetCardData }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all group">
+    <div className="bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 overflow-hidden hover: transition-all group shadow-[(0,0,0,0.18)]">
       <div className="relative h-48 overflow-hidden">
         <img src={data.img} alt={data.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute top-3 right-3">

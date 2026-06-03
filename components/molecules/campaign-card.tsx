@@ -16,7 +16,7 @@ export interface CampaignCardData {
 
 export function CampaignCard({ data }: { data: CampaignCardData }) {
   const cardContent = (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all group h-full flex flex-col justify-between cursor-pointer">
+    <div className="bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 overflow-hidden hover: transition-all group h-full flex flex-col justify-between cursor-pointer shadow-[(0,0,0,0.18)]">
       <div>
         <div className="relative h-48 overflow-hidden">
           <img src={data.img} alt={data.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

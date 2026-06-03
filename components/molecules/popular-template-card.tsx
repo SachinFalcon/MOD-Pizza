@@ -12,7 +12,7 @@ export interface PopularTemplateData {
 
 export function PopularTemplateCard({ data }: { data: PopularTemplateData }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-row h-40">
+    <div className="bg-[rgba(255,255,255,0.75)] rounded-xl border border-slate-100 overflow-hidden hover: transition-all flex flex-row h-40 shadow-[(0,0,0,0.18)]">
       <div className="w-40 shrink-0 overflow-hidden">
         <img src={data.img} alt={data.title} className="w-full h-full object-cover" />
       </div>

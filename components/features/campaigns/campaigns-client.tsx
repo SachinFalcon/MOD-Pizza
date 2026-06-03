@@ -197,7 +197,7 @@ export default function CampaignsClient() {
             placeholder="Search by name or ID...."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-md py-2.5 pl-12 pr-4 text-[13px] font-medium focus:ring-2 focus:ring-modRed/5 focus:border-modRed/10 transition-all outline-none"
+            className="w-full bg-white border border-slate-200 rounded-md py-2.5 pl-12 pr-4 text-[13px] font-medium focus:ring-2 focus:ring-modRed/5 focus:border-modRed/10 transition-all outline-none shadow-[(0,0,0,0.18)]"
           />
         </div>
 
@@ -212,7 +212,7 @@ export default function CampaignsClient() {
           <div className="relative">
             <button
               onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-              className="flex items-center space-x-2 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[13px] font-bold text-slate-700 shadow-sm hover:border-modRed/20 hover:bg-slate-50 transition-all outline-none cursor-pointer"
+              className="flex items-center space-x-2 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:border-modRed/20 hover:bg-slate-50 transition-all outline-none cursor-pointer shadow-[(0,0,0,0.18)]"
             >
               <Filter size={14} className={startDate && endDate ? "text-modRed" : "text-slate-400"} />
               <span>
@@ -239,7 +239,7 @@ export default function CampaignsClient() {
             />
           </div>
 
-          <div className="hidden lg:flex items-center space-x-3 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[12px] font-bold text-slate-700 shadow-sm">
+          <div className="hidden lg:flex items-center space-x-3 bg-white border border-slate-200 rounded-md px-4 py-2.5 text-[12px] font-bold text-slate-700 shadow-[(0,0,0,0.18)]">
             <span className="text-slate-400 font-medium whitespace-nowrap">Rows:</span>
             <span>{filteredCampaigns.length}</span>
           </div>
@@ -279,10 +279,10 @@ export default function CampaignsClient() {
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
+        <div className="overflow-hidden mt-6">
           <table className="w-full text-left border-collapse hidden md:table">
             <thead>
-              <tr className="bg-[#F3F4F6] border-b border-slate-200">
+              <tr className="bg-black/[0.03] border-b border-slate-200">
                 <th className="px-6 py-3 text-[11px] font-bold text-[#1C1C1C] uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => requestSort('name')}>
                   <div className="flex items-center space-x-1">
                     <span>Campaign Name &amp; ID</span>
@@ -359,7 +359,7 @@ export default function CampaignsClient() {
           </div>
 
           {/* Pagination */}
-          <div className="px-8 py-4 bg-slate-50/30 flex justify-between items-center border-t border-slate-50">
+          <div className="px-8 py-4 flex justify-between items-center border-t border-slate-200">
             <p className="text-[12px] font-bold text-slate-400">Showing {filteredCampaigns.length} Campaigns</p>
             <div className="flex items-center space-x-2">
               <button className="text-[12px] font-bold text-slate-400 hover:text-slate-900 px-2 py-1 transition-colors uppercase tracking-widest">Prev</button>
@@ -377,7 +377,7 @@ export default function CampaignsClient() {
 
 function PageNumber({ num, active = false }: { num: number; active?: boolean }) {
   return (
-    <button className={`h-8 w-8 rounded-md flex items-center justify-center text-[12px] font-bold transition-all ${active ? 'bg-modRed text-white shadow-md shadow-modRed/20' : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-400'}`}>
+    <button className={`h-8 w-8 rounded-md flex items-center justify-center text-[12px] font-bold transition-all ${active ? 'bg-modRed text-white -modRed/20' : ' bg-white border border-slate-200 text-slate-500 hover:border-slate-400'}`}>
       {num}
     </button>
   );

@@ -34,7 +34,7 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
       <td className="px-6 py-3">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-md bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
-             <img src={`https://picsum.photos/seed/${id}/100/100`} alt="Creative" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+             <img src={`https://picsum.photos/seed/${id}/100/100`} alt="Creative" className="w-full h-full object-cover transition-all" />
           </div>
           <div>
             <Link href={`/campaigns/${id}`} className="text-[13px] font-bold text-slate-900 hover:text-modRed transition-colors">
@@ -61,7 +61,7 @@ export function CampaignTableRow({ name, id, outlets, runtime, coverage, status,
         )}
       </td>
       <td className="px-6 py-3 text-right">
-        <button className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-slate-600 transition-all">
+        <button className="p-1.5 hover: bg-[rgba(255,255,255,0.75)] hover: rounded-md text-slate-600 transition-all">
           <MoreVertical size={18} />
         </button>
       </td>

@@ -148,7 +148,7 @@ export function DateRangePickerPopover({
   return (
     <div 
       ref={containerRef}
-      className="absolute right-0 mt-2 bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 z-50 w-[340px] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute right-0 mt-2 bg-white rounded-2xl border border-slate-200 p-5 z-50 w-[340px] animate-in fade-in slide-in-from-top-2 duration-200 shadow-[(0,0,0,0.18)]"
     >
       {/* Header View Toggle */}
       <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-50">
@@ -274,7 +274,7 @@ export function DateRangePickerPopover({
                   onMouseEnter={() => startDate && !endDate && setHoverDate(day)}
                   className={`h-9 w-9 text-xs font-bold transition-all relative flex items-center justify-center ${
                     active 
-                      ? "bg-[#A61932] text-white rounded-full shadow-[0_2px_4px_rgba(166,25,50,0.25)] z-10" 
+                      ? "bg-[#A61932] text-white rounded-full shadow-[(0,0,0,0.18)] z-10" 
                       : between
                       ? "bg-[#FDF2F2] text-[#A61932] rounded-none hover:bg-[#FDE8E8]"
                       : "text-slate-800 hover:bg-slate-100 rounded-full"
