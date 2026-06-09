@@ -16,7 +16,14 @@ import {
   Image,
   Smartphone,
   Check,
-  Zap
+  Zap,
+  Settings,
+  Shield,
+  Database,
+  ShieldCheck,
+  X,
+  Plus,
+  ArrowRight
 } from "lucide-react";
 
 // ==========================================
@@ -142,17 +149,29 @@ export default function SettingsPage() {
     fetchSettingsData();
   }, []);
 
-  // Tab IDs
   const tabs = [
+    { id: "platform", label: "Platform Defaults", icon: <Settings size={18} /> },
     { id: "campaign", label: "Campaign Rules", icon: <Sliders size={18} /> },
     { id: "screens", label: "Screens & Devices", icon: <Monitor size={18} /> },
     { id: "media", label: "Media & Playback", icon: <PlayCircle size={18} /> },
+    { id: "security", label: "Security & Permissions", icon: <Shield size={18} /> },
     { id: "notifications", label: "Notifications", icon: <Bell size={18} /> },
+    { id: "storage", label: "Storage", icon: <Database size={18} /> },
+    { id: "approvals", label: "Approvals", icon: <ShieldCheck size={18} /> },
   ];
 
   // ==========================================
   // STATE MANAGEMENT
   // ==========================================
+
+  // Platform Defaults
+  const [timezone, setTimezone] = useState("(GMT-08:00) Pacific Time (US & Canada)");
+  const [dateFormat, setDateFormat] = useState("MM/DD/YYYY");
+  const [timeFormat, setTimeFormat] = useState("12-hour (AM/PM)");
+  const [platformStartOfWeek, setPlatformStartOfWeek] = useState("Monday");
+  const [systemLanguage, setSystemLanguage] = useState("English (US)");
+  const [sessionTimeout, setSessionTimeout] = useState("30");
+  const [namingConvention, setNamingConvention] = useState("MTAS_Global_{ID}");
 
   // Campaign Rules
   const [defaultDuration, setDefaultDuration] = useState("30 Days");
@@ -198,6 +217,37 @@ export default function SettingsPage() {
   const [alertDelayBuffer, setAlertDelayBuffer] = useState("15");
   const [escalationTime, setEscalationTime] = useState("30 Minutes");
 
+  // Security & Permissions
+  const [loginAttemptLimit, setLoginAttemptLimit] = useState("5");
+  const [lockoutDuration, setLockoutDuration] = useState("30 Minutes");
+  const [passwordPolicy, setPasswordPolicy] = useState({
+    minLength: true,
+    specialSymbol: true,
+    number: true,
+    upperCase: true
+  });
+  const [requireOtp, setRequireOtp] = useState(true);
+  const [approvalMode, setApprovalMode] = useState("Standard Single Confirmation");
+  const [enableAuditLogs, setEnableAuditLogs] = useState(true);
+  const [ipRestriction, setIpRestriction] = useState(false);
+  const [ipWhitelist, setIpWhitelist] = useState(["192.168.1.1", "10.0.0.45", "203.0.113.195"]);
+
+  // Storage
+  const [storageMaxUploadSize, setStorageMaxUploadSize] = useState("500");
+  const [autoDeleteOldAssets, setAutoDeleteOldAssets] = useState(true);
+  const [storageCompression, setStorageCompression] = useState("Balanced");
+
+  // Approvals
+  const [approvalRequiredFor, setApprovalRequiredFor] = useState({
+    campaignPublish: true,
+    campaignEdit: true,
+    screenAssignment: false,
+    mediaUpload: true
+  });
+  const [defaultApprovalType, setDefaultApprovalType] = useState("Single Approval");
+  const [slaLimitValue, setSlaLimitValue] = useState("24");
+  const [slaLimitUnit, setSlaLimitUnit] = useState("Hours");
+
   // ==========================================
   // ACTIONS
   // ==========================================
@@ -233,6 +283,28 @@ export default function SettingsPage() {
         loginAttempts,
         alertDelayBuffer,
         escalationTime,
+        loginAttemptLimit,
+        lockoutDuration,
+        passwordPolicy,
+        requireOtp,
+        approvalMode,
+        enableAuditLogs,
+        ipRestriction,
+        ipWhitelist,
+        storageMaxUploadSize,
+        autoDeleteOldAssets,
+        storageCompression,
+        timezone,
+        dateFormat,
+        timeFormat,
+        platformStartOfWeek,
+        systemLanguage,
+        sessionTimeout,
+        namingConvention,
+        approvalRequiredFor,
+        defaultApprovalType,
+        slaLimitValue,
+        slaLimitUnit,
       });
       toast.success("Settings saved successfully!", {
         description: "System configurations have been updated globally.",
@@ -996,6 +1068,571 @@ export default function SettingsPage() {
                   </span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* PLATFORM DEFAULTS TAB */}
+          {/* ======================================================== */}
+          {activeTab === "platform" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Section Header */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Platform Defaults</h3>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Configure global localization and environment variables used across all modules.</p>
+              </div>
+
+              {/* Grid 1: 2-column Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Timezone */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">Timezone</span>
+                  <CustomSelect
+                    value={timezone}
+                    onChange={setTimezone}
+                    options={["(GMT-08:00) Pacific Time (US & Canada)", "(GMT-05:00) Eastern Time", "(GMT+00:00) London"]}
+                  />
+                  <span className="text-[11px] font-medium text-slate-400 mt-2 block">Standard system time for scheduling reports</span>
+                </div>
+
+                {/* Date Format */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">Date Format</span>
+                  <CustomSelect
+                    value={dateFormat}
+                    onChange={setDateFormat}
+                    options={["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"]}
+                  />
+                  <span className="text-[11px] font-medium text-slate-400 mt-2 block">Applied to all dashboards and logs</span>
+                </div>
+
+                {/* Time Format */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">Time Format</span>
+                  <div className="flex items-center gap-6 mt-4">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setTimeFormat("12-hour (AM/PM)")}>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${timeFormat === "12-hour (AM/PM)" ? 'border-modRed' : 'border-slate-300'}`}>
+                        {timeFormat === "12-hour (AM/PM)" && <div className="w-2 h-2 rounded-full bg-modRed"></div>}
+                      </div>
+                      <span className="text-[13px] font-bold text-slate-700">12-hour (AM/PM)</span>
+                    </div>
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => setTimeFormat("24-hour")}>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${timeFormat === "24-hour" ? 'border-modRed' : 'border-slate-300'}`}>
+                        {timeFormat === "24-hour" && <div className="w-2 h-2 rounded-full bg-modRed"></div>}
+                      </div>
+                      <span className="text-[13px] font-bold text-slate-700">24-hour</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Start of Week */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">Start of Week</span>
+                  <CustomSelect
+                    value={platformStartOfWeek}
+                    onChange={setPlatformStartOfWeek}
+                    options={["Monday", "Sunday"]}
+                  />
+                </div>
+
+                {/* System Language */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">System Language</span>
+                  <CustomSelect
+                    value={systemLanguage}
+                    onChange={setSystemLanguage}
+                    options={["English (US)", "Spanish", "French"]}
+                  />
+                </div>
+
+                {/* Session Timeout */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <span className="text-sm font-bold text-slate-800 block mb-3">Session Timeout (minutes)</span>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="number"
+                      value={sessionTimeout}
+                      onChange={(e) => setSessionTimeout(e.target.value)}
+                      className="w-16 bg-[rgba(255,255,255,0.75)] border border-slate-200/80 rounded-md py-2.5 px-3 text-center text-sm font-bold text-slate-800 focus:outline-none"
+                    />
+                    <span className="text-[11px] font-medium text-slate-400">Inactivity period before logout</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Naming Convention */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <span className="text-sm font-bold text-slate-800 block mb-3">Naming Convention</span>
+                <CustomSelect
+                  value={namingConvention}
+                  onChange={setNamingConvention}
+                  options={["MTAS_Global_{ID}", "Asset_{YYYYMMDD}", "{Brand}_{Campaign}_{ID}"]}
+                />
+                <span className="text-[11px] font-medium text-slate-400 mt-2 block">Prefix and suffix used for new assets</span>
+              </div>
+
+              {/* Bottom Note Banner */}
+              <div className="bg-[#FFF5F5] border border-red-100 rounded-md p-5 flex items-start space-x-3.5 mt-6 shadow-sm">
+                <Info size={20} className="text-modRed shrink-0 mt-0.5" />
+                <span className="text-xs font-semibold text-slate-600 leading-relaxed mt-0.5 block">
+                  Changes to Platform Defaults may take up to 15 minutes to propagate across all edge nodes. Some localized dashboards might require a manual refresh for the date and time format changes to take effect immediately.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* SECURITY & PERMISSIONS TAB */}
+          {/* ======================================================== */}
+          {activeTab === "security" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Section Header */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Security & Permissions</h3>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Manage global security protocols, session management, and network access restrictions for the MTAS environment.</p>
+              </div>
+
+              {/* Card 1: Authentication Section */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <div className="flex justify-between items-center mb-6">
+                  <h4 className="text-lg font-bold text-slate-900">Authentication Section</h4>
+                  <span className="bg-[#E6F4EA] text-[#137333] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    System Optimal
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <span className="text-sm font-bold text-slate-800">Login Attempt Limit</span>
+                    <div className="mt-3">
+                      <CustomSelect
+                        value={loginAttemptLimit}
+                        onChange={setLoginAttemptLimit}
+                        options={["3", "5", "10", "Unlimited"]}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-slate-400 mt-2 block">Maximum failed attempts before account lock.</span>
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-slate-800">Lockout Duration (minutes)</span>
+                    <div className="mt-3">
+                      <CustomSelect
+                        value={lockoutDuration}
+                        onChange={setLockoutDuration}
+                        options={["15 Minutes", "30 Minutes", "1 Hour", "24 Hours"]}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-sm font-bold text-slate-800 mb-4 block">Password Policy</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { key: "minLength", label: "Minimum length (12 characters)" },
+                      { key: "number", label: "Require number (0-9)" },
+                      { key: "specialSymbol", label: "Require special symbol (@, #, $)" },
+                      { key: "upperCase", label: "Require uppercase letter" }
+                    ].map((policy) => (
+                      <div key={policy.key} className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPasswordPolicy(prev => ({ ...prev, [policy.key]: !prev[policy.key as keyof typeof passwordPolicy] }))}
+                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 border transition-all cursor-pointer ${ passwordPolicy[policy.key as keyof typeof passwordPolicy] ? 'bg-modRed border-modRed text-white' : ' bg-[rgba(255,255,255,0.75)] border-slate-350' }`}
+                        >
+                          {passwordPolicy[policy.key as keyof typeof passwordPolicy] && <Check size={12} strokeWidth={3} />}
+                        </button>
+                        <span className="text-[13px] font-medium text-slate-700">{policy.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Protection & Monitoring */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Action Protection */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <h4 className="text-lg font-bold text-slate-900 mb-6">Action Protection</h4>
+                  
+                  <div className="flex items-center justify-between gap-4 mb-8">
+                    <div>
+                      <span className="text-sm font-bold text-slate-800 block">Require OTP for Sensitive Actions</span>
+                      <span className="text-xs font-medium text-slate-400 mt-1 block">Prompt for 2FA on deletion or bulk exports</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRequireOtp(!requireOtp)}
+                      className={`w-12 h-6.5 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
+                        requireOtp ? 'bg-modRed' : 'bg-slate-200'
+                      }`}
+                    >
+                      <span className={`absolute top-1 left-1 w-4.5 h-4.5 rounded-full bg-[rgba(255,255,255,0.75)] transition-transform ${ requireOtp ? 'translate-x-5.5' : 'translate-x-0' }`} />
+                    </button>
+                  </div>
+
+                  <div>
+                    <span className="text-sm font-bold text-slate-800 mb-3 block">Approval Confirmation Mode</span>
+                    <CustomSelect
+                      value={approvalMode}
+                      onChange={setApprovalMode}
+                      options={["Standard Single Confirmation", "Dual Authentication", "Manager Review"]}
+                    />
+                  </div>
+                </div>
+
+                {/* Monitoring */}
+                <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                  <h4 className="text-lg font-bold text-slate-900 mb-6">Monitoring</h4>
+                  
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                      <span className="text-sm font-bold text-slate-800 block">Enable Audit Logs</span>
+                      <span className="text-xs font-medium text-slate-400 mt-1 block">Track all administrative changes</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEnableAuditLogs(!enableAuditLogs)}
+                      className={`w-12 h-6.5 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
+                        enableAuditLogs ? 'bg-modRed' : 'bg-slate-200'
+                      }`}
+                    >
+                      <span className={`absolute top-1 left-1 w-4.5 h-4.5 rounded-full bg-[rgba(255,255,255,0.75)] transition-transform ${ enableAuditLogs ? 'translate-x-5.5' : 'translate-x-0' }`} />
+                    </button>
+                  </div>
+
+                  <div className="bg-[#FFF5F5] border border-red-100/50 rounded-md p-4 mt-auto">
+                    <p className="text-[11px] font-semibold text-red-950/80 leading-relaxed">
+                      <span className="text-modRed font-bold">Pro-Tip:</span> Audit logs are retained for 365 days by default. You can change this in the <span className="underline decoration-modRed/30 underline-offset-2 hover:decoration-modRed cursor-pointer transition-colors text-modRed font-bold">General Settings</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Network Access Section */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <div className="flex justify-between items-center mb-6">
+                  <h4 className="text-lg font-bold text-slate-900">Network Access Section</h4>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">IP Restriction</span>
+                    <button
+                      type="button"
+                      onClick={() => setIpRestriction(!ipRestriction)}
+                      className={`w-10 h-5 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
+                        ipRestriction ? 'bg-modRed' : 'bg-slate-200'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-[rgba(255,255,255,0.75)] transition-transform ${ ipRestriction ? 'translate-x-5' : 'translate-x-0' }`} />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-sm font-bold text-slate-800 mb-3 block">IP Whitelist</span>
+                  <div className={`min-h-[100px] bg-slate-50 border border-slate-200 rounded-md p-3 flex flex-wrap gap-2 ${!ipRestriction ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {ipWhitelist.map((ip, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 bg-white border border-slate-200 rounded px-2.5 py-1.5 shadow-sm">
+                        <span className="text-xs font-bold text-slate-700">{ip}</span>
+                        <button 
+                          onClick={() => setIpWhitelist(ipWhitelist.filter(i => i !== ip))}
+                          className="text-slate-400 hover:text-modRed transition-colors ml-1 cursor-pointer"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                      </div>
+                    ))}
+                    <input 
+                      type="text" 
+                      placeholder="Add IP address..." 
+                      className="bg-transparent border-none outline-none text-xs text-slate-600 font-medium placeholder:text-slate-400 min-w-[120px] flex-1 py-1 px-2"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.currentTarget.value) {
+                          setIpWhitelist([...ipWhitelist, e.currentTarget.value]);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-end mt-3">
+                    <button className="text-[11px] font-bold text-modRed hover:text-red-700 transition-colors uppercase tracking-wider cursor-pointer">
+                      + Add My Current IP
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* STORAGE TAB */}
+          {/* ======================================================== */}
+          {activeTab === "storage" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Section Header */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Storage</h3>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Configure global storage parameters, retention policies, and asset optimization for the MTAS environment.</p>
+              </div>
+
+              {/* Storage Usage */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <div className="flex justify-between items-end mb-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Storage Usage</h4>
+                    <span className="text-xs font-medium text-slate-400 mt-0.5 block">Real-time enterprise disk consumption</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-black text-slate-900 tracking-tight">1.2TB</span>
+                    <span className="text-xs font-medium text-slate-400 block mt-0.5">of 1.5 TB total</span>
+                  </div>
+                </div>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-modRed rounded-full" style={{ width: '80%' }}></div>
+                </div>
+              </div>
+
+              {/* Limits and Optimization */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)] space-y-8">
+                
+                {/* Max Upload Size */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-slate-100">
+                  <div className="max-w-xl">
+                    <span className="text-sm font-bold text-slate-800 block">Max Upload Size</span>
+                    <span className="text-xs font-medium text-slate-400 mt-1 block">Set the maximum file size allowed for individual uploads.</span>
+                  </div>
+                  <div className="flex items-center shrink-0 w-full md:w-auto">
+                    <input 
+                      type="number"
+                      value={storageMaxUploadSize}
+                      onChange={(e) => setStorageMaxUploadSize(e.target.value)}
+                      className="w-24 bg-[rgba(255,255,255,0.75)] border border-slate-200/80 border-r-0 rounded-l-md py-2.5 px-4 text-center text-sm font-bold text-slate-800 focus:outline-none"
+                    />
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-r-md py-2.5 px-4 text-sm font-bold text-slate-500">
+                      MB
+                    </div>
+                  </div>
+                </div>
+
+                {/* Auto Delete Old Assets */}
+                <div className="flex items-center justify-between gap-4 pb-8 border-b border-slate-100">
+                  <div className="max-w-xl">
+                    <span className="text-sm font-bold text-slate-800 block">Auto Delete Old Assets</span>
+                    <span className="text-xs font-medium text-slate-400 mt-1 block">Automatically remove assets that haven't been accessed for over 180 days.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAutoDeleteOldAssets(!autoDeleteOldAssets)}
+                    className={`w-12 h-6.5 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
+                      autoDeleteOldAssets ? 'bg-modRed' : 'bg-slate-200'
+                    }`}
+                  >
+                    <span className={`absolute top-1 left-1 w-4.5 h-4.5 rounded-full bg-[rgba(255,255,255,0.75)] transition-transform ${ autoDeleteOldAssets ? 'translate-x-5.5' : 'translate-x-0' }`} />
+                  </button>
+                </div>
+
+                {/* Compression Level */}
+                <div>
+                  <span className="text-sm font-bold text-slate-800 block">Compression Level</span>
+                  <span className="text-xs font-medium text-slate-400 mt-1 block">Adjust the trade-off between file size and processing speed for stored assets.</span>
+                  
+                  <div className="mt-8 relative px-2">
+                    {/* Visual Track */}
+                    <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-slate-100 -translate-y-1/2 rounded-full z-0"></div>
+                    
+                    {/* The slider steps */}
+                    <div className="relative z-10 flex justify-between items-center w-full">
+                      {[
+                        { id: "Fast (No Compression)", align: "text-left" },
+                        { id: "Balanced", align: "text-center" },
+                        { id: "Maximum Compression", align: "text-right" }
+                      ].map((step, idx) => {
+                        const isSelected = storageCompression === step.id;
+                        return (
+                          <div 
+                            key={step.id} 
+                            onClick={() => setStorageCompression(step.id)}
+                            className="flex flex-col items-center cursor-pointer group"
+                            style={{ width: '120px' }}
+                          >
+                            <div className={`w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center bg-white ${isSelected ? 'border-modRed shadow-md shadow-modRed/20' : 'border-slate-300 group-hover:border-slate-400'}`}>
+                              {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-modRed"></div>}
+                            </div>
+                            <span className={`absolute top-8 text-[11px] font-bold w-24 ${step.align} ${isSelected ? 'text-modRed' : 'text-slate-400 group-hover:text-slate-600'}`}>
+                              {step.id}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="h-10"></div> {/* Spacing for absolute text */}
+                </div>
+              </div>
+
+              {/* Bottom Note Banner */}
+              <div className="bg-[#FFF5F5] border-l-4 border-modRed rounded-r-md p-5 flex items-start space-x-3.5 mt-6">
+                <Info size={20} className="text-modRed shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-bold text-red-950 block">Note on Asset Lifecycle</span>
+                  <span className="text-xs font-semibold text-red-900/80 leading-relaxed mt-0.5 block">
+                    Changes to compression levels will only apply to new uploads. Existing assets must be manually re-indexed to apply new compression settings.
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* APPROVALS TAB */}
+          {/* ======================================================== */}
+          {activeTab === "approvals" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Section Header */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Approval</h3>
+                <p className="text-xs font-semibold text-slate-400 mt-1">Define how requests are routed and validated across the organization.</p>
+              </div>
+
+              {/* Card 1: Approval Scope */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <h4 className="text-lg font-bold text-slate-900 mb-6">Approval Scope</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Left Column: Approval Required For */}
+                  <div>
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Approval Required For</span>
+                    <div className="space-y-3">
+                      {[
+                        { key: "campaignPublish", label: "Campaign publish" },
+                        { key: "campaignEdit", label: "Campaign edit" },
+                        { key: "screenAssignment", label: "Screen assignment" },
+                        { key: "mediaUpload", label: "Media upload" }
+                      ].map((item) => {
+                        const isChecked = approvalRequiredFor[item.key as keyof typeof approvalRequiredFor];
+                        return (
+                          <div key={item.key} className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setApprovalRequiredFor(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof approvalRequiredFor] }))}
+                              className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-all cursor-pointer ${ isChecked ? 'bg-modRed border-modRed text-white' : ' bg-white border-slate-300' }`}
+                            >
+                              {isChecked && <Check size={14} strokeWidth={3} />}
+                            </button>
+                            <span className="text-[14px] font-semibold text-slate-900">{item.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Default Approval Type */}
+                  <div>
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Default Approval Type</span>
+                    <div className="space-y-3">
+                      {[
+                        { id: "Single Approval", desc: "Any one assigned user can approve" },
+                        { id: "Multi-Approval", desc: "All assigned users must approve" },
+                        { id: "Sequential Approval", desc: "Must follow the defined step order" }
+                      ].map((type) => {
+                        const isSelected = defaultApprovalType === type.id;
+                        return (
+                          <div 
+                            key={type.id} 
+                            onClick={() => setDefaultApprovalType(type.id)}
+                            className={`flex items-start gap-4 p-4 rounded-md border cursor-pointer transition-all ${isSelected ? 'border-modRed/20 bg-white' : 'border-slate-200 hover:border-slate-300 bg-white'}`}
+                          >
+                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-modRed' : 'border-slate-400'}`}>
+                              {isSelected && <div className="w-2 h-2 rounded-full bg-modRed"></div>}
+                            </div>
+                            <div>
+                              <span className="text-[14px] font-bold text-slate-900 block leading-tight">{type.id}</span>
+                              <span className="text-[12px] font-medium text-slate-500 mt-1 block">{type.desc}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Approval Chain Configuration */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-8 shadow-[0_2px_12px_rgba(0,0,0,0.015)]">
+                <div className="flex justify-between items-center mb-8">
+                  <h4 className="text-lg font-bold text-slate-900">Approval Chain Configuration</h4>
+                  <button className="bg-modRed hover:bg-red-800 text-white text-xs font-bold py-2.5 px-4 rounded-md transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <Plus size={14} strokeWidth={3} />
+                    Add Step
+                  </button>
+                </div>
+
+                <div className="flex flex-col md:flex-row items-center gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                  {/* Step 1 */}
+                  <div className="relative min-w-[240px] bg-white border-2 border-dashed border-slate-200 rounded-md p-6 flex flex-col items-center justify-center text-center">
+                    <button className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><X size={14} /></button>
+                    <div className="w-8 h-8 rounded-full bg-modRed text-white text-sm font-bold flex items-center justify-center mb-3">1</div>
+                    <span className="text-[15px] font-bold text-slate-900 block">Outlet Manager</span>
+                    <span className="text-[12px] font-medium text-slate-500 mt-1 block">Local Site Approval</span>
+                  </div>
+                  
+                  <ArrowRight className="text-slate-300 shrink-0 hidden md:block" size={24} />
+
+                  {/* Step 2 */}
+                  <div className="relative min-w-[240px] bg-white border-2 border-dashed border-slate-200 rounded-md p-6 flex flex-col items-center justify-center text-center">
+                    <button className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"><X size={14} /></button>
+                    <div className="w-8 h-8 rounded-full bg-modRed text-white text-sm font-bold flex items-center justify-center mb-3">2</div>
+                    <span className="text-[15px] font-bold text-slate-900 block">Regional Manager</span>
+                    <span className="text-[12px] font-medium text-slate-500 mt-1 block">Territory Compliance</span>
+                  </div>
+                  
+                  <ArrowRight className="text-slate-300 shrink-0 hidden md:block" size={24} />
+
+                  {/* Step 3 */}
+                  <div className="relative min-w-[240px] bg-[#FFF5F5] border border-modRed/30 rounded-md p-6 flex flex-col items-center justify-center text-center">
+                    <button className="absolute top-2 right-2 text-red-300 hover:text-red-500 transition-colors cursor-pointer"><X size={14} /></button>
+                    <div className="w-8 h-8 rounded-full bg-modRed text-white text-sm font-bold flex items-center justify-center mb-3">3</div>
+                    <span className="text-[15px] font-bold text-modRed block">System Admin</span>
+                    <span className="text-[12px] font-medium text-red-400 mt-1 block">Final Oversight</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Auto-Approval Rules */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[15px] font-bold text-slate-900 block">Auto-Approval Rules</span>
+                  <span className="text-xs font-medium text-slate-400 mt-1 block">Configure conditional logic to automatically approve requests that meet pre-defined safety criteria.</span>
+                </div>
+                <button className="bg-slate-100 hover:bg-slate-200 border border-slate-200/60 text-slate-900 text-xs font-bold py-2.5 px-6 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+                  Configure Rules
+                </button>
+              </div>
+
+              {/* Card 4: SLA Response Limit */}
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/60 rounded-md p-6 shadow-[0_2px_12px_rgba(0,0,0,0.015)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[15px] font-bold text-slate-900 block">SLA Response Limit</span>
+                  <span className="text-xs font-medium text-slate-400 mt-1 block">Maximum time allowed for an approver to act before the request is escalated or flagged.</span>
+                </div>
+                <div className="flex items-center shrink-0">
+                  <input 
+                    type="number"
+                    value={slaLimitValue}
+                    onChange={(e) => setSlaLimitValue(e.target.value)}
+                    className="w-16 bg-[rgba(255,255,255,0.75)] border border-slate-200/80 border-r-0 rounded-l-md py-2.5 px-4 text-center text-sm font-bold text-slate-800 focus:outline-none"
+                  />
+                  <div className="w-28">
+                    <CustomSelect
+                      value={slaLimitUnit}
+                      onChange={setSlaLimitUnit}
+                      options={["Hours", "Days", "Minutes"]}
+                      className="[&>button]:rounded-l-none [&>button]:py-2.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
         </div>

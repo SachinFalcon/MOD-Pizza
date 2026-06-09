@@ -1,0 +1,1154 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Play,
+  Calendar,
+  Clock,
+  MoreVertical,
+  AlertCircle,
+  CheckCircle2,
+  Users,
+  MapPin,
+  Search,
+  ChevronDown,
+  Paperclip,
+  Smile,
+  AtSign,
+  Send,
+  Video,
+  Image as ImageIcon,
+  ExternalLink,
+  MessageSquare,
+  Trophy,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
+} from "lucide-react";
+import { api, Campaign, CampaignOutlet, PlaybackAsset, CampaignAsset, Comment } from "@/services/mock.service";
+import { FilterDropdown } from "@/components/atoms/filter-dropdown";
+import { DateRangePickerPopover } from "@/components/ui/date-range-picker-popover";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { getActiveProfile } from "@/config/user-roles";
+
+const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
+
+// Standard cities coordinates for US map markers
+const MAP_MARKERS = [
+  { markerOffset: -16, name: "Seattle", coordinates: [-122.33, 47.60] },
+  { markerOffset: -16, name: "Los Angeles", coordinates: [-118.24, 34.05] },
+  { markerOffset: 20, name: "Denver", coordinates: [-104.99, 39.73] },
+  { markerOffset: 20, name: "Dallas", coordinates: [-96.79, 32.77] },
+  { markerOffset: -16, name: "Chicago", coordinates: [-87.62, 41.87] },
+  { markerOffset: -16, name: "New York", coordinates: [-74.00, 40.71] },
+  { markerOffset: 20, name: "Atlanta", coordinates: [-84.38, 33.74] },
+  { markerOffset: 20, name: "Miami", coordinates: [-80.19, 25.76] },
+];
+
+// Fallback / Initial Mock Data for graceful loading without layout shifts
+const FALLBACK_COMMENTS: Comment[] = [
+  {
+    id: 1,
+    author: "You",
+    role: "",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    time: "2 hours ago",
+    text: "The typography on the main banner needs slightly more leading. It feels a bit cramped for an 'editorial' feel."
+  },
+  {
+    id: 2,
+    author: "Nolan Schleifer",
+    role: "EDITOR",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+    time: "1 hours ago",
+    text: "Agreed. Adjusted to 1.6em. I've uploaded a new preview for review."
+  },
+  {
+    id: 3,
+    author: "You",
+    role: "",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    time: "2 hours ago",
+    text: "Campaign targets for EMEA are slightly high. Do we have the additional spend for the Italian market expansion?"
+  }
+];
+
+const FALLBACK_OUTLETS: CampaignOutlet[] = [
+  { id: "OUT-1043", name: "Hudson Yards Atrium", city: "New York City, NY", region: "East Coast", status: "Active", startPercent: 0, widthPercent: 80, window: "07:00 - 23:00" },
+  { id: "OUT-1044", name: "Times Square Hub", city: "New York City, NY", region: "East Coast", status: "Active", startPercent: 0, widthPercent: 100, window: "00:00 - 24:00" },
+  { id: "OUT-1045", name: "Soho Boutique Outlet", city: "New York City, NY", region: "East Coast", status: "Active", startPercent: 10, widthPercent: 90, window: "09:00 - 21:00" },
+  { id: "OUT-1046", name: "Union Square Store", city: "New York City, NY", region: "East Coast", status: "Active", startPercent: 0, widthPercent: 80, window: "08:00 - 22:00" },
+  { id: "OUT-1047", name: "Santa Monica Pier", city: "Los Angeles, CA", region: "West Coast", status: "Active", startPercent: 30, widthPercent: 70, window: "10:00 - 23:00", startLabel: "STARTS DEC 10" },
+  { id: "OUT-1048", name: "Sunset Boulevard", city: "Los Angeles, CA", region: "West Coast", status: "Scheduled", startPercent: 30, widthPercent: 70, window: "08:00 - 22:00" },
+  { id: "OUT-1049", name: "Beverly Hills Central", city: "Los Angeles, CA", region: "West Coast", status: "Scheduled", startPercent: 30, widthPercent: 70, window: "09:00 - 23:00" },
+  { id: "OUT-1050", name: "Pike Place Market", city: "Seattle, WA", region: "Northwest", status: "Scheduled", startPercent: 40, widthPercent: 60, window: "07:00 - 21:00", startLabel: "STARTS DEC 12" },
+  { id: "OUT-1051", name: "Capitol Hill Pizza", city: "Seattle, WA", region: "Northwest", status: "Scheduled", startPercent: 40, widthPercent: 60, window: "08:00 - 23:00" },
+  { id: "OUT-1052", name: "University District", city: "Seattle, WA", region: "Northwest", status: "Scheduled", startPercent: 40, widthPercent: 60, window: "10:00 - 22:00" }
+];
+
+const FALLBACK_PLAYBACK: PlaybackAsset[] = [
+  { index: 1, name: "Summer_Promo_Main.mp4", type: "VIDEO", duration: "15s", resolution: "1920×1080", size: "12.4 MB" },
+  { index: 2, name: "Summer_Promo_Main.mp4", type: "VIDEO", duration: "15s", resolution: "1920×1080", size: "12.4 MB" },
+  { index: 3, name: "Summer_Promo_Main.mp4", type: "IMAGE", duration: "15s", resolution: "1920×1080", size: "12.4 MB" },
+  { index: 4, name: "Summer_Promo_Main.mp4", type: "VIDEO", duration: "15s", resolution: "1920×1080", size: "12.4 MB" }
+];
+
+const FALLBACK_ASSETS: CampaignAsset[] = [
+  { title: "Winter Coffee Promo.mp4", type: "Video (MP4)", duration: "15.0s", res: "1920 × 1080", size: "24.5 MB", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop" },
+  { title: "Winter Coffee Promo.mp4", type: "Video (MP4)", duration: "15.0s", res: "1920 × 1080", size: "24.5 MB", img: "https://images.unsplash.com/photo-1590947132387-155cc02f3212?w=400&h=300&fit=crop" },
+  { title: "Winter Coffee Promo.mp4", type: "Video (MP4)", duration: "15.0s", res: "1920 × 1080", size: "24.5 MB", img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop" },
+  { title: "Winter Coffee Promo.mp4", type: "Video (MP4)", duration: "15.0s", res: "1920 × 1080", size: "24.5 MB", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop" }
+];
+
+export default function PublisherCampaignDetailsView() {
+  const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const campaignId = (params?.id as string) || "AD-94821";
+
+  // State-based query params parsing to handle Next.js hydration cleanly
+  const [from, setFrom] = useState("campaigns");
+
+  useEffect(() => {
+    const fromParam = searchParams.get("from");
+    if (fromParam) {
+      setFrom(fromParam);
+    }
+  }, [searchParams]);
+
+  const backHref = from === "library" ? "/library" : from === "reports" ? "/reports" : "/campaigns";
+  const backLabel = from === "library" ? "GLOBAL LIBRARY" : from === "reports" ? "REPORTS & INSIGHTS" : "CAMPAIGNS";
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState<"overview" | "schedule" | "creatives">("overview");
+
+  // Preview Modal State
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Campaign State
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // State populated from API with local fallback
+  const [outletsData, setOutletsData] = useState<CampaignOutlet[]>(FALLBACK_OUTLETS);
+  const [playbackSequence, setPlaybackSequence] = useState<PlaybackAsset[]>(FALLBACK_PLAYBACK);
+  const [assetGrid, setAssetGrid] = useState<CampaignAsset[]>(FALLBACK_ASSETS);
+  const [comments, setComments] = useState<Comment[]>(FALLBACK_COMMENTS);
+  const [newComment, setNewComment] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // Schedule Filter & Sort State
+  const [scheduleSearch, setScheduleSearch] = useState("");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [regionFilter, setRegionFilter] = useState("All Regions");
+  const [cityFilter, setCityFilter] = useState("All Cities");
+  const [schedulePage, setSchedulePage] = useState(1);
+  const [scheduleSortBy, setScheduleSortBy] = useState<"name" | "city" | "status" | "window" | "schedule" | null>(null);
+  const [scheduleSortOrder, setScheduleSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Creative Filter & Sort State
+  const [creativeFilter, setCreativeFilter] = useState("All Types");
+  const [creativesSortBy, setCreativesSortBy] = useState<"name" | "type" | "duration" | "resolution" | null>(null);
+  const [creativesSortOrder, setCreativesSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Sorting Handlers
+  const handleScheduleSort = (column: "name" | "city" | "status" | "window" | "schedule") => {
+    if (scheduleSortBy === column) {
+      if (scheduleSortOrder === "asc") {
+        setScheduleSortOrder("desc");
+      } else {
+        setScheduleSortBy(null);
+      }
+    } else {
+      setScheduleSortBy(column);
+      setScheduleSortOrder("asc");
+    }
+  };
+
+  const handleCreativesSort = (column: "name" | "type" | "duration" | "resolution") => {
+    if (creativesSortBy === column) {
+      if (creativesSortOrder === "asc") {
+        setCreativesSortOrder("desc");
+      } else {
+        setCreativesSortBy(null);
+      }
+    } else {
+      setCreativesSortBy(column);
+      setCreativesSortOrder("asc");
+    }
+  };
+
+  // Fetch all campaign details concurrently via Mock Service Layer API
+  useEffect(() => {
+    async function fetchAllDetails() {
+      setIsLoading(true);
+      try {
+        const [
+          campaignsData,
+          outlets,
+          playback,
+          assets,
+          fetchedComments
+        ] = await Promise.all([
+          api.getCampaigns(),
+          api.getCampaignOutlets(campaignId),
+          api.getCampaignPlaybackSequence(campaignId),
+          api.getCampaignAssets(campaignId),
+          api.getCampaignComments(campaignId)
+        ]);
+
+        const found = campaignsData.find(c => c.id === campaignId);
+        if (found) {
+          setCampaign(found);
+        } else {
+          // Fallback info if campaign not in default mocks list
+          setCampaign({
+            id: campaignId,
+            name: campaignId === "AD-94821" ? "Holiday Winter Promo" : "Special Pizza Combo",
+            creatives: "4 Assets",
+            outlets: "149",
+            status: "Live",
+            runtime: "1,842 mins (30.7 hrs)",
+            lastEdit: "2 hrs ago"
+          });
+        }
+
+        if (outlets && outlets.length > 0) {
+          setOutletsData(outlets);
+        }
+        if (playback && playback.length > 0) {
+          setPlaybackSequence(playback);
+        }
+        if (assets && assets.length > 0) {
+          setAssetGrid(assets);
+        }
+        if (fetchedComments && fetchedComments.length > 0) {
+          // Flip the roles for the Publisher view: 'You' from the API becomes the Editor, and the Publisher becomes 'You'
+          const flippedComments = fetchedComments.map(c => {
+            if (c.author === "Brandon Septimus" || c.role === "PUBLISHER") {
+              return { ...c, author: "Nolan Schleifer", role: "EDITOR", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop" };
+            }
+            // 'You' remains 'You' (the active Publisher directing the Editor)
+            if (c.author === "You") {
+              return { ...c, role: "" };
+            }
+            return c;
+          });
+          setComments(flippedComments);
+        }
+      } catch (error) {
+        console.error("Failed to load campaign data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchAllDetails();
+  }, [campaignId]);
+
+  // Add Comment via Mock Service Layer API
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || isSubmittingComment) return;
+
+    setIsSubmittingComment(true);
+    try {
+      const res = await api.addCampaignComment(campaignId, newComment);
+      if (res.success && res.comment) {
+        setComments(prev => [...prev, res.comment]);
+        setNewComment("");
+      }
+    } catch (error) {
+      console.error("Failed to add comment", error);
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  // Filter Outlets
+  const filteredOutlets = useMemo(() => {
+    return outletsData.filter(outlet => {
+      const matchesSearch = outlet.name.toLowerCase().includes(scheduleSearch.toLowerCase()) ||
+        outlet.id.toLowerCase().includes(scheduleSearch.toLowerCase());
+      const matchesRegion = regionFilter === "All Regions" || outlet.region === regionFilter;
+      const matchesCity = cityFilter === "All Cities" || outlet.city.includes(cityFilter);
+      return matchesSearch && matchesRegion && matchesCity;
+    });
+  }, [outletsData, scheduleSearch, regionFilter, cityFilter]);
+
+  // Sort Outlets
+  const sortedOutlets = useMemo(() => {
+    if (!scheduleSortBy) return filteredOutlets;
+    return [...filteredOutlets].sort((a, b) => {
+      if (scheduleSortBy === "schedule") {
+        return scheduleSortOrder === "asc" ? a.startPercent - b.startPercent : b.startPercent - a.startPercent;
+      }
+      let valA = "";
+      let valB = "";
+      if (scheduleSortBy === "name") {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      } else if (scheduleSortBy === "city") {
+        valA = a.city.toLowerCase();
+        valB = b.city.toLowerCase();
+      } else if (scheduleSortBy === "status") {
+        valA = a.status.toLowerCase();
+        valB = b.status.toLowerCase();
+      } else if (scheduleSortBy === "window") {
+        valA = a.window.toLowerCase();
+        valB = b.window.toLowerCase();
+      }
+      if (valA < valB) return scheduleSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return scheduleSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredOutlets, scheduleSortBy, scheduleSortOrder]);
+
+  // Sort Playback Sequence
+  const sortedPlaybackSequence = useMemo(() => {
+    if (!creativesSortBy) return playbackSequence;
+    return [...playbackSequence].sort((a, b) => {
+      let valA = "";
+      let valB = "";
+      if (creativesSortBy === "name") {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      } else if (creativesSortBy === "type") {
+        valA = a.type.toLowerCase();
+        valB = b.type.toLowerCase();
+      } else if (creativesSortBy === "duration") {
+        valA = a.duration.toLowerCase();
+        valB = b.duration.toLowerCase();
+      } else if (creativesSortBy === "resolution") {
+        valA = a.resolution.toLowerCase();
+        valB = b.resolution.toLowerCase();
+      }
+      if (valA < valB) return creativesSortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return creativesSortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [playbackSequence, creativesSortBy, creativesSortOrder]);
+
+  const filteredAssets = useMemo(() => {
+    if (creativeFilter === "All Types") return assetGrid;
+    if (creativeFilter === "Video") return assetGrid.filter(a => a.type.includes("Video"));
+    if (creativeFilter === "Image") return assetGrid.filter(a => !a.type.includes("Video"));
+    return assetGrid;
+  }, [assetGrid, creativeFilter]);
+
+  if (isLoading || !campaign) {
+    return (
+      <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-modRed"></div>
+        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-4">Loading Campaign Details...</p>
+      </div>
+    );
+  }
+
+  const profile = getActiveProfile();
+
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] animate-in fade-in duration-500">
+
+      {/* ======================================================== */}
+      {/* 1. HEADER & BREADCRUMBS */}
+      {/* ======================================================== */}
+      <div className="w-full bg-gradient-to-r from-[#FFF0F2] via-white to-[#FFD2D6] border-b border-slate-100 pb-6 pt-8 px-6 md:px-8">
+        <div className="max-w-[1600px] mx-auto">
+
+          {/* Navigation row */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold tracking-widest text-slate-400">
+              <Link href={backHref} className="hover:text-modRed transition-colors uppercase">{backLabel}</Link>
+              <span className="text-slate-350 font-normal text-sm select-none">›</span>
+              <span className="text-modRed uppercase">DETAILS</span>
+            </div>
+            <Link href={backHref} className="h-8 w-8 rounded-full bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-slate-500 transition-all active:scale-90 shadow-sm">
+              <X size={14} className="stroke-[2.5]" />
+            </Link>
+          </div>
+
+          {/* Campaign Info header row */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-start space-x-4">
+              {/* Small image preview of pizza */}
+              <div className="h-16 w-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-sm relative group cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=120&h=120&fit=crop" alt="Pizza preview" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-black/35 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play size={16} className="text-white fill-white" />
+                </div>
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-none">{campaign.name}</h2>
+                  <div className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full border text-xs font-medium ${campaign.status === "Live"
+                    ? "bg-[#F0FDF4] text-[#166534] border-[#DCFCE7]"
+                    : campaign.status === "Sent for Approval"
+                      ? "bg-[#EFF6FF] text-[#1E40AF] border-[#DBEAFE]"
+                      : campaign.status === "Under Modification"
+                        ? "bg-[#FFF7ED] text-[#9A3412] border-[#FFEDD5]"
+                        : "bg-slate-50 text-slate-500 border-slate-200"
+                    }`}>
+                    {campaign.status === "Live" && <span className="h-1.5 w-1.5 rounded-full bg-[#166534]" />}
+                    <span>{campaign.status}</span>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-slate-400 mt-2">
+                  ID: {campaign.id} • Seasonal Promotion • Created by Sarah Jenkins
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsPreviewOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-modRed hover:bg-red-700 text-white rounded-lg font-bold text-xs md:text-sm shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <div className="border border-white/80 rounded-md p-0.5 flex items-center justify-center w-5 h-5 shrink-0">
+                <Play size={10} className="fill-white text-white translate-x-[0.5px]" />
+              </div>
+              <span>Preview</span>
+            </button>
+          </div>
+
+          {/* Tab Selection */}
+          <div className="flex space-x-8 border-t border-slate-100 mt-8 pt-4">
+            {[
+              { id: "overview", label: "Overview" },
+              { id: "schedule", label: "Schedule" },
+              { id: "creatives", label: "Creatives" }
+            ].map(tab => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`relative py-2 text-sm font-bold transition-colors cursor-pointer select-none ${isSelected ? "text-modRed" : "text-slate-400 hover:text-slate-650"
+                    }`}
+                >
+                  <span>{tab.label}</span>
+                  {isSelected && (
+                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-modRed rounded-full animate-in fade-in zoom-in-50 duration-200" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="py-8 max-w-[1600px] mx-auto px-6 md:px-8">
+        {activeTab === "overview" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+
+          {/* Top Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            {/* Card 1: Outlet Coverage */}
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Outlet Coverage</span>
+                <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
+                  <MapPin size={18} />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">{campaign.outlets} <span className="text-sm font-semibold text-slate-500">Outlets</span></p>
+                <p className="text-xs font-medium text-slate-400 mt-1 leading-normal">Outlets currently displaying this campaign</p>
+              </div>
+            </div>
+
+            {/* Card 2: Assigned Team */}
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assigned Team</span>
+                <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
+                  <Users size={18} />
+                </div>
+              </div>
+              <div className="flex items-center space-x-6 my-auto pt-2">
+                <div className="flex items-center space-x-2">
+                  <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop" alt="Editor Avatar" className="w-8 h-8 rounded-full border border-slate-100" />
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 block uppercase leading-none">EDITOR</span>
+                    <span className="text-xs font-semibold text-slate-800 block mt-0.5">Mike Ross</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop" alt="Publisher Avatar" className="w-8 h-8 rounded-full border border-slate-100" />
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 block uppercase leading-none">PUBLISHER</span>
+                    <span className="text-xs font-bold text-slate-800 block mt-0.5">Sarah Chen</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs font-medium text-slate-400 mt-1 leading-none">Responsible for deployment &amp; approvals</p>
+            </div>
+
+            {/* Card 3: Campaign Runtime */}
+            <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+              <div className="flex justify-between items-start">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Campaign Runtime</span>
+                <div className="p-2 bg-[#FFF5F5] rounded-xl text-modRed">
+                  <Clock size={18} />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">{campaign.runtime}</p>
+                <p className="text-xs font-medium text-slate-400 mt-1 leading-normal">Total time this campaign has played across all screens</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Main Layout Grid */}
+          <div className="grid grid-cols-12 gap-6 items-start">
+
+            {/* Left Column (8 cols): Campaign Details & Geographic Map */}
+            <div className="col-span-12 lg:col-span-8 space-y-6">
+
+              {/* Campaign Details Box */}
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">Campaign Details</h3>
+                <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
+              </div>
+              <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-6 md:p-8">
+
+                <div className="space-y-6">
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                    Regional winter promotion focusing on holiday gift sets and seasonal beverage discounts. Target audience includes commuters and weekend shoppers across the Midwest regional cluster. Campaign includes high-brightness video assets and dynamic pricing integrations.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Objective</span>
+                      <span className="text-sm font-bold text-slate-800 block mt-1">Increase beverage sales by 25% during winter season</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Campaign Type</span>
+                      <span className="text-sm font-bold text-slate-800 block mt-1">Promotion</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Created</span>
+                      <span className="text-sm font-bold text-slate-800 block mt-1">Dec 01, 2023 00:00 AM</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Last Modified</span>
+                      <span className="text-sm font-bold text-slate-800 block mt-1">Dec 31, 2023 11:59 PM</span>
+                    </div>
+                  </div>
+
+                  {/* Notes Alert box */}
+                  <div className="bg-[rgba(255,255,255,0.75)] border border-slate-200/50 rounded-lg p-5 flex items-start space-x-3 mt-4">
+                    <AlertCircle size={18} className="text-slate-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block leading-none mb-1.5">NOTES</span>
+                      <p className="text-xs font-semibold text-slate-700 leading-normal">
+                        Approved by regional manager. Creative assets verified. Technical sync completed on Feb 8.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Geographic Deployment Box */}
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight">Geographic Deployment</h3>
+                <button className="text-xs font-semibold text-modRed hover:underline">Edit Details</button>
+              </div>
+
+              {/* Plain Map with Red Dots */}
+              <div className="w-full relative flex items-center justify-center bg-slate-50 rounded-lg p-8 min-h-[600px]">
+                <ComposableMap projection="geoAlbersUsa" className="w-full h-auto max-h-[560px]">
+                  <Geographies geography={geoUrl}>
+                    {({ geographies }: { geographies: any[] }) =>
+                      geographies.map((geo: any) => (
+                        <Geography
+                          key={geo.rsmKey}
+                          geography={geo}
+                          fill="#E5E7EB"
+                          stroke="#FFFFFF"
+                          strokeWidth={0.5}
+                          style={{
+                            default: { outline: "none" },
+                            hover: { fill: "#D1D5DB", outline: "none" },
+                            pressed: { outline: "none" }
+                          }}
+                        />
+                      ))
+                    }
+                  </Geographies>
+
+                  {MAP_MARKERS.map(({ name, coordinates, markerOffset }) => (
+                    <Marker key={name} coordinates={coordinates as any}>
+                      {/* Scanner pulse ring */}
+                      <circle r={6} fill="#BD1720">
+                        <animate attributeName="r" begin="0s" dur="2s" values="6;24" calcMode="spline" keyTimes="0;1" keySplines="0.165, 0.84, 0.44, 1" repeatCount="indefinite" />
+                        <animate attributeName="opacity" begin="0s" dur="2s" values="0.6;0" calcMode="spline" keyTimes="0;1" keySplines="0.3, 0.61, 0.355, 1" repeatCount="indefinite" />
+                      </circle>
+                      {/* Solid dot */}
+                      <circle r={6} fill="#BD1720" stroke="#FFFFFF" strokeWidth={1.5} className="shadow-md" />
+                      <text
+                        textAnchor="middle"
+                        y={markerOffset}
+                        style={{ fontFamily: "sans-serif", fontSize: "11px", fill: "#1E293B", fontWeight: "bold" }}
+                      >
+                        {name}
+                      </text>
+                    </Marker>
+                  ))}
+                </ComposableMap>
+              </div>
+
+            </div>
+
+            {/* Right Column (4 cols): Coverage Gauge & Comment Section */}
+            <div className="col-span-12 lg:col-span-4 space-y-6">
+
+              {/* Coverage circular chart */}
+              <div>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">Campaign Coverage</h3>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center">
+                  {/* SVG Circular Donut Chart */}
+                  <div className="relative h-40 w-40 flex items-center justify-center my-6">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      {/* Background Circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        stroke="#F3F4F6"
+                        strokeWidth="8"
+                        fill="transparent"
+                      />
+                      {/* Fill Circle (98.6%) */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        stroke="#A61932"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray="251.2"
+                        strokeDashoffset={251.2 - (251.2 * 98.6) / 100}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000 ease-out"
+                      />
+                    </svg>
+                    <div className="absolute flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold text-slate-900 tracking-tighter">98.6%</span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-semibold text-slate-400 max-w-[240px] leading-relaxed mb-2">
+                    98.6% percentage of total screens are currently displaying this campaign.
+                  </p>
+                </div>
+              </div>
+
+              {/* Comments Thread Section */}
+              <div>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">Comments Thread</h3>
+                </div>
+
+                {/* Message items list */}
+                <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1 mb-4">
+                  {comments.map((comment) => {
+                    const isYou = comment.author === "You";
+                    return (
+                      <div key={comment.id} className="space-y-1">
+                        <div className="bg-[rgba(255,255,255,0.75)] border border-slate-100 rounded-lg p-4 flex flex-col transition-all">
+                          <div className="flex justify-between items-start mb-2">
+                            {!isYou ? (
+                              <div className="flex justify-between items-start w-full">
+                                <div className="flex items-center space-x-2">
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-bold text-slate-800">{comment.author}</span>
+                                      {comment.role && (
+                                        <span className="bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                          {comment.role}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] font-semibold text-slate-400 block leading-none mt-1">{comment.time}</span>
+                                  </div>
+                                </div>
+                                <img src={comment.avatar} alt={comment.author} className="w-8 h-8 rounded-full border border-slate-100 object-cover" />
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                <img src={profile.avatarUrl} alt="You" className="w-8 h-8 rounded-full border border-slate-100 object-cover" />
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-slate-800">You</span>
+                                  </div>
+                                  <span className="text-[10px] font-semibold text-slate-400 block leading-none mt-1">{comment.time}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-600 font-medium leading-relaxed mt-1">{comment.text}</p>
+                        </div>
+                        <div className={`flex ${isYou ? "justify-start" : "justify-end"} px-2`}>
+                          <button className="text-[10px] font-bold text-[#1A73E8] hover:underline cursor-pointer">Reply</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Comment Form input */}
+                <form onSubmit={handleAddComment} className="rounded-lg p-4 flex flex-col space-y-3 bg-[#F3F4F6] transition-all">
+                  <textarea
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="w-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none resize-none h-14 bg-transparent"
+                  />
+                  <div className="flex justify-between items-center border-t border-slate-200/50 pt-2.5">
+                    <div className="flex items-center space-x-2 text-slate-400">
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><Paperclip size={14} /></button>
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><Smile size={14} /></button>
+                      <button type="button" className="p-1 hover:text-slate-650 rounded-md transition-colors"><AtSign size={14} /></button>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!newComment.trim() || isSubmittingComment}
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-white transition-all active:scale-90 cursor-pointer ${
+                        newComment.trim() && !isSubmittingComment ? "bg-modRed hover:bg-red-750" : "bg-slate-350 cursor-not-allowed"
+                      }`}
+                    >
+                      {isSubmittingComment ? (
+                        <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Send size={12} className="fill-white translate-x-[-0.5px]" />
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 3. TAB CONTENTS: SCHEDULE */}
+      {/* ======================================================== */}
+      {activeTab === "schedule" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+
+          {/* Outlet Schedule Filter Controls */}
+          <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+            <div className="relative flex-1 w-full group">
+              <input
+                type="text"
+                placeholder="Search by Outlet ID..."
+                value={scheduleSearch}
+                onChange={(e) => setScheduleSearch(e.target.value)}
+                className="w-full bg-[rgba(31,31,31,0.05)] border border-slate-150 rounded-xl py-2.5 pl-4 pr-12 text-xs font-semibold focus:ring-2 focus:ring-modRed/10 focus:border-modRed/20 transition-all outline-none text-slate-800 placeholder-slate-400"
+              />
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-modRed transition-colors" size={16} />
+            </div>
+
+            <div className="flex w-full md:w-auto gap-3 items-center shrink-0">
+              <FilterDropdown
+                options={["All Regions", "East Coast", "West Coast", "Northwest"]}
+                value={regionFilter}
+                onChange={setRegionFilter}
+              />
+              <FilterDropdown
+                options={["All Cities", "New York City", "Los Angeles", "Seattle"]}
+                value={cityFilter}
+                onChange={setCityFilter}
+              />
+            </div>
+          </div>
+
+          {/* Outlets Schedule Heading */}
+          <div className="px-2 pt-2">
+            <h3 className="text-sm font-bold text-slate-850">
+              Outlets Schedule <span className="text-slate-400 font-medium ml-1">({campaign.outlets || "149"} Outlets)</span>
+            </h3>
+          </div>
+
+          {/* Table list card */}
+          <div className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <th
+                      onClick={() => handleScheduleSort("name")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>OUTLET NAME & ID</span>
+                        {scheduleSortBy === "name" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleScheduleSort("city")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>LOCATION</span>
+                        {scheduleSortBy === "city" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleScheduleSort("status")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>STATUS</span>
+                        {scheduleSortBy === "status" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleScheduleSort("schedule")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>SCHEDULE INDICATOR</span>
+                        {scheduleSortBy === "schedule" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleScheduleSort("window")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>DAILY WINDOW</span>
+                        {scheduleSortBy === "window" ? (
+                          scheduleSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedOutlets.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-12 text-xs font-semibold text-slate-400">No outlets match your filters.</td>
+                    </tr>
+                  ) : (
+                    sortedOutlets.map((outlet) => (
+                      <React.Fragment key={outlet.id}>
+                        {!scheduleSortBy && outlet.startLabel && (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <span className="text-[10px] font-bold text-modRed tracking-widest uppercase shrink-0">
+                                  {outlet.startLabel}
+                                </span>
+                                <div className="h-px bg-red-100 flex-1" />
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        <tr className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <span className="text-xs font-bold text-slate-800 block">{outlet.name}</span>
+                            <span className="text-[10px] font-semibold text-slate-450 block mt-0.5">ID: {outlet.id}</span>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-semibold text-slate-600">{outlet.city}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider border ${
+                              outlet.status === "Active"
+                                ? "bg-[#F0FDF4] text-[#166534] border-[#DCFCE7]"
+                                : "bg-[#FFF7ED] text-[#9A3412] border-[#FFEDD5]"
+                            }`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${
+                                outlet.status === "Active" ? "bg-[#166534]" : "bg-[#9A3412]"
+                              }`} />
+                              <span>{outlet.status.toUpperCase()}</span>
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-400 w-full max-w-[200px]">
+                              <span>Dec 01</span>
+                              <div className="h-2 bg-slate-100 rounded-full flex-1 relative overflow-hidden">
+                                <div
+                                  className={`absolute h-full rounded-full ${
+                                    outlet.status === "Active" ? "bg-modRed" : "bg-[#FADBD8]"
+                                  }`}
+                                  style={{
+                                    left: `${outlet.startPercent}%`,
+                                    width: `${outlet.widthPercent}%`
+                                  }}
+                                />
+                              </div>
+                              <span>Dec 31</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-xs font-semibold text-slate-600 font-mono">{outlet.window}</td>
+                        </tr>
+                      </React.Fragment>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Footer */}
+            <div className="flex justify-between items-center px-6 py-4 text-xs font-bold text-slate-500 bg-transparent">
+              <span>Showing 9 of 122 Outlets</span>
+              <div className="flex items-center space-x-1.5">
+                <button type="button" className="px-2 py-1 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">Prev</button>
+                <button type="button" className="h-6 w-6 rounded bg-modRed text-white flex items-center justify-center font-bold shadow-sm cursor-pointer">1</button>
+                <span className="text-slate-400 px-0.5">...</span>
+                <button type="button" className="h-6 w-6 rounded bg-modRed text-white flex items-center justify-center font-bold shadow-sm cursor-pointer">8</button>
+                <button type="button" className="px-2 py-1 text-slate-700 hover:text-slate-900 font-bold transition-colors cursor-pointer">Next</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 4. TAB CONTENTS: CREATIVES */}
+      {/* ======================================================== */}
+      {activeTab === "creatives" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Playback Sequence Table */}
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Creative Playback Sequence</h3>
+            <span className="bg-[#FFF2F2] text-modRed px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+              {playbackSequence.length} Items Total
+            </span>
+          </div>
+          <div className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <th
+                      onClick={() => handleCreativesSort("name")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>OUTLET NAME & ID</span>
+                        {creativesSortBy === "name" ? (
+                          creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleCreativesSort("type")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>LOCATION</span>
+                        {creativesSortBy === "type" ? (
+                          creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleCreativesSort("duration")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>SCHEDULE INDICATOR</span>
+                        {creativesSortBy === "duration" ? (
+                          creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th
+                      onClick={() => handleCreativesSort("resolution")}
+                      className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 cursor-pointer hover:text-slate-600 transition-colors select-none"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>STATUS</span>
+                        {creativesSortBy === "resolution" ? (
+                          creativesSortOrder === "asc" ? <ArrowUp size={10} className="text-modRed" /> : <ArrowDown size={10} className="text-modRed" />
+                        ) : (
+                          <ArrowUpDown size={10} className="opacity-40" />
+                        )}
+                      </div>
+                    </th>
+                    <th className="text-left text-[10px] font-bold text-slate-800 uppercase tracking-widest px-6 py-4 select-none">
+                      DAILY WINDOW
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedPlaybackSequence.map((item) => (
+                    <tr key={item.index} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-3">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-xs font-bold text-slate-400 w-4">{item.index}</span>
+                          <img
+                            src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=80&h=80&fit=crop"
+                            alt="thumbnail"
+                            className="w-10 h-10 object-cover rounded-lg border border-slate-100 shrink-0"
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-800 block">{item.name}</span>
+                            <span className="text-[10px] font-semibold text-slate-400 block mt-0.5">
+                              MP4 • {item.resolution} • {item.size}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
+                          item.type === "VIDEO"
+                            ? "bg-[#E8F0FE] text-[#1967D2] border-[#D2E3FC]"
+                            : "bg-[#FFEFE2] text-[#C26400] border-[#FFE0C2]"
+                        }`}>
+                          {item.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-xs font-semibold text-slate-600">{item.duration}</td>
+                      <td className="px-6 py-3 text-xs font-semibold text-slate-600 font-mono">{item.resolution}</td>
+                      <td className="px-6 py-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsPreviewOpen(true)}
+                          className="text-xs font-bold text-modRed hover:text-red-750 transition-colors uppercase tracking-wider cursor-pointer"
+                        >
+                          Preview
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Creative assets grid section */}
+          <div className="flex justify-between items-center mb-4 mt-6">
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Creative Assets Grid</h3>
+
+            <div className="flex items-center space-x-2">
+              <Filter size={14} className="text-slate-400" />
+              <FilterDropdown
+                options={["All Types", "Video", "Image"]}
+                value={creativeFilter}
+                onChange={setCreativeFilter}
+              />
+            </div>
+          </div>
+          <div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredAssets.map((asset, idx) => (
+                <div key={idx} className="bg-[rgba(255,255,255,0.75)] border border-slate-200/50 rounded-lg overflow-hidden -[0_2px_8px_rgba(0,0,0,0.01)] hover: transition-all group">
+                  <div className="h-44 bg-slate-100 relative overflow-hidden">
+                    <img src={asset.img} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 truncate">{asset.title}</h4>
+                      <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Added Dec 12, 2023</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-2 pt-2 border-t border-slate-50">
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">TYPE</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.type}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">DURATION</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.duration}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">RESOLUTION</span>
+                        <span className="text-[11px] font-semibold text-slate-750 block mt-1">{asset.res}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">SIZE</span>
+                        <span className="text-[11px] font-bold text-slate-750 block mt-1">{asset.size}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsPreviewOpen(true)}
+                      className="w-full mt-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg transition-all cursor-pointer text-center"
+                    >
+                      Preview
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        )}
+      </div>
+
+      {/* ======================================================== */}
+      {/* 5. INTERACTIVE VIDEO PREVIEW MODAL */}
+      {/* ======================================================== */}
+      {isPreviewOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center animate-in fade-in duration-300">
+
+          {/* Close trigger button */}
+          <button
+            onClick={() => setIsPreviewOpen(false)}
+            className="absolute top-6 right-6 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all active:scale-90 border border-white/10 cursor-pointer shadow-lg"
+          >
+            <X size={24} />
+          </button>
+
+          {/* Interactive Pizza Video Loop Container */}
+          <div className="w-full max-w-4xl max-h-[85vh] aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative border border-white/5 animate-in zoom-in-95 duration-300 px-4 md:px-0">
+            <video
+              src="https://assets.mixkit.co/videos/preview/mixkit-delicious-pizza-being-sliced-in-slow-motion-41848-large.mp4"
+              controls
+              autoPlay
+              loop
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+        </div>
+      )}
+
+    </div>
+  )
+}

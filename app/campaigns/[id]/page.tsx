@@ -7,17 +7,20 @@ export function generateStaticParams() {
     { id: "AD-94823" },
     { id: "AD-94824" },
     { id: "AD-94825" },
+    { id: "AD-94621" },
+    { id: "AD-94622" },
+    { id: "AD-94623" },
+    { id: "AD-94624" },
+    { id: "AD-94625" },
+    { id: "AD-94626" },
     { id: "CAM-00000" },
   ];
 }
 
-import CampaignDetailsClient from "@/components/features/campaign-details/campaign-details-client";
-import { Suspense } from "react";
+import CampaignDetailsWrapper from "@/components/features/campaign-details/campaign-details-wrapper";
 
 export default function CampaignDetailsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500 font-semibold">Loading Campaign Details...</div>}>
-      <CampaignDetailsClient />
-    </Suspense>
+    <CampaignDetailsWrapper />
   );
 }
