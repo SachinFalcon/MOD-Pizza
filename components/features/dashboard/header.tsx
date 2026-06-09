@@ -31,8 +31,6 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const [isDark, setIsDark] = useState(false);
-
   return (
     <div className="px-4 md:px-8 pt-6 pb-2 max-w-[1600px] mx-auto">
       <header className="h-16 md:h-[80px] bg-white shadow-[(0,0,0,0.18)] rounded-full flex items-center justify-between px-4 md:px-5 border border-slate-100/60">
@@ -78,14 +76,6 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <span className="absolute -top-1 -right-1 h-5 w-5 bg-[#A61932] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm">
               28
             </span>
-          </button>
-
-          {/* Theme Toggle (Moon Icon) */}
-          <button 
-            onClick={() => setIsDark(!isDark)}
-            className={`w-[52px] h-[52px] rounded-full flex items-center justify-center relative active:scale-95 transition-all ${ isDark ? 'bg-slate-900 text-yellow-400' : ' bg-[rgba(31,31,31,0.05)] hover:bg-slate-200 text-slate-800' }`}
-          >
-            <Moon size={18} />
           </button>
 
           {/* User Profile Info Dropdown */}
