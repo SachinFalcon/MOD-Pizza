@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useApprovals } from "@/lib/contexts/approvals-context";
-import { Search, ChevronDown, Calendar, MapPin, Check, X, RefreshCw } from "lucide-react";
+import { Search, ChevronDown, Calendar, MapPin, Check, X, RefreshCw, Clock } from "lucide-react";
 import ApprovalModal from "./approval-modal";
 
 export default function EditorApprovals() {

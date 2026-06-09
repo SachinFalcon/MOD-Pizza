@@ -95,6 +95,37 @@ export interface SettingsData {
   loginAttempts: number;
   alertDelayBuffer: string;
   escalationTime: string;
+  lockoutDuration: string;
+  passwordPolicy: {
+    minLength: boolean;
+    specialSymbol: boolean;
+    number: boolean;
+    upperCase: boolean;
+  };
+  requireOtp: boolean;
+  approvalMode: string;
+  enableAuditLogs: boolean;
+  ipRestriction: boolean;
+  ipWhitelist: string[];
+  storageMaxUploadSize: string;
+  autoDeleteOldAssets: boolean;
+  storageCompression: string;
+  timezone: string;
+  dateFormat: string;
+  timeFormat: string;
+  platformStartOfWeek: string;
+  systemLanguage: string;
+  sessionTimeout: string;
+  namingConvention: string;
+  approvalRequiredFor: {
+    campaignPublish: boolean;
+    campaignEdit: boolean;
+    screenAssignment: boolean;
+    mediaUpload: boolean;
+  };
+  defaultApprovalType: string;
+  slaLimitValue: string;
+  slaLimitUnit: string;
 }
 
 // Dashboard Extra Interfaces
@@ -250,7 +281,38 @@ const DEFAULT_SETTINGS: SettingsData = {
   criticalAlertsOnly: false,
   loginAttempts: 5,
   alertDelayBuffer: "15",
-  escalationTime: "30 Minutes"
+  escalationTime: "30 Minutes",
+  lockoutDuration: "15 Minutes",
+  passwordPolicy: {
+    minLength: true,
+    specialSymbol: true,
+    number: true,
+    upperCase: true
+  },
+  requireOtp: false,
+  approvalMode: "Single Step",
+  enableAuditLogs: true,
+  ipRestriction: false,
+  ipWhitelist: ["192.168.1.1", "10.0.0.45", "203.0.113.195"],
+  storageMaxUploadSize: "500MB",
+  autoDeleteOldAssets: false,
+  storageCompression: "Balanced",
+  timezone: "UTC",
+  dateFormat: "MM/DD/YYYY",
+  timeFormat: "12-hour",
+  platformStartOfWeek: "Monday",
+  systemLanguage: "English",
+  sessionTimeout: "30",
+  namingConvention: "MTAS_Global_{ID}",
+  approvalRequiredFor: {
+    campaignPublish: true,
+    campaignEdit: true,
+    screenAssignment: false,
+    mediaUpload: true
+  },
+  defaultApprovalType: "Single Approval",
+  slaLimitValue: "24",
+  slaLimitUnit: "Hours"
 };
 
 let userSettingsState = { ...DEFAULT_SETTINGS };

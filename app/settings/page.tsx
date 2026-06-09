@@ -283,7 +283,6 @@ export default function SettingsPage() {
         loginAttempts,
         alertDelayBuffer,
         escalationTime,
-        loginAttemptLimit,
         lockoutDuration,
         passwordPolicy,
         requireOtp,
