@@ -345,3 +345,9 @@ A floating **Dev Role Switcher** appears in the bottom-right corner in developme
 ---
 
 *MOD Pizza MTAS HQ — Internal Use Only*
+
+
+
+Editor: dev.sachin@modpizza.com (password: password123)
+Publisher: dev.ajay@modpizza.com (password: password123)
+Admin: dev.lakshay@modpizza.com (password: password123)

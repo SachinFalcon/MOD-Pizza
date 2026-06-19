@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Search, ChevronDown, Filter, Plus, Play, Eye, Mail } from "lucide-react";
 import ReactECharts from "echarts-for-react";
 import Link from "next/link";
+import { useRbac } from "@/hooks/use-rbac";
 
 import { CreateCampaignModal } from "@/components/organisms/create-campaign-modal";
 
@@ -15,63 +16,101 @@ interface PublisherCampaign {
   name: string;
   thumbnailUrl: string;
   status: CampaignStatus;
+  publisher: {
+    name: string;
+    region: string;
+    avatar: string;
+  };
   editor: {
     name: string;
     region: string;
     avatar: string;
   };
   runtimeHours: number;
+  runtimeStr?: string;
 }
 
 // Fallback dummy data
 const MOCK_CAMPAIGNS: PublisherCampaign[] = [
   {
-    id: "AD-94621",
-    name: "Holiday Promo",
-    thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
+    id: "CMP-2041",
+    name: "Weekend Promo",
+    thumbnailUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=100&q=80",
     status: "Live",
-    editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
-    runtimeHours: 134,
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+    editor: { name: "Tiana Arcand", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
+    runtimeHours: 145.5,
+    runtimeStr: "145h 30m"
   },
   {
-    id: "AD-94622",
+    id: "CMP-2042",
+    name: "Holiday Promo Loop",
+    thumbnailUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&q=80",
+    status: "Live",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+    editor: { name: "Jaxson Calzoni", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150" },
+    runtimeHours: 122.2,
+    runtimeStr: "122h 14m"
+  },
+  {
+    id: "CMP-2043",
+    name: "Festival Campaign",
+    thumbnailUrl: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80",
+    status: "Live",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+    editor: { name: "Daniel Ross", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
+    runtimeHours: 118.5,
+    runtimeStr: "118h 29m"
+  },
+  {
+    id: "CMP-2044",
     name: "Holiday Promo",
     thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
     status: "Draft",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
     editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
     runtimeHours: 0,
+    runtimeStr: "0"
   },
   {
-    id: "AD-94623",
+    id: "CMP-2045",
     name: "Holiday Promo",
     thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
     status: "Live",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
     editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
     runtimeHours: 119,
+    runtimeStr: "119 hrs"
   },
   {
-    id: "AD-94624",
+    id: "CMP-2046",
     name: "Holiday Promo",
     thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
     status: "Paused",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
     editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
     runtimeHours: 98,
+    runtimeStr: "98 hrs"
   },
   {
-    id: "AD-94625",
+    id: "CMP-2047",
     name: "Holiday Promo",
     thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
     status: "Failed",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
     editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
     runtimeHours: 0,
+    runtimeStr: "0"
   },
   {
-    id: "AD-94626",
+    id: "CMP-2048",
     name: "Holiday Promo",
     thumbnailUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=100&q=80",
     status: "Scheduled",
+    publisher: { name: "Olivia Grant", region: "Midwest Region", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
     editor: { name: "Miracle", region: "Midwest Region", avatar: "https://i.pravatar.cc/150?u=miracle" },
     runtimeHours: 0,
+    runtimeStr: "0"
   },
 ];
 
@@ -101,6 +140,8 @@ const StatusPill = ({ status }: { status: CampaignStatus }) => {
 };
 
 export default function PublisherCampaignsView() {
+  const { profile } = useRbac();
+  const isAdmin = profile.id === "admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -401,6 +442,7 @@ export default function PublisherCampaignsView() {
               <tr className="border-b border-slate-200 bg-[#EFECE8]">
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest">Campaign Name & ID</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest">Status</th>
+                {isAdmin && <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest">Publisher</th>}
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest">Editor</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest flex items-center space-x-1"><span>Runtime</span> <span className="text-[9px]">◆</span></th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-widest text-center">Action</th>
@@ -426,6 +468,20 @@ export default function PublisherCampaignsView() {
                   <td className="px-6 py-3">
                     <StatusPill status={camp.status} />
                   </td>
+                  {isAdmin && (
+                    <td className="px-6 py-3">
+                      <div className="flex items-center space-x-3">
+                        <img src={camp.publisher.avatar} alt={camp.publisher.name} className="w-8 h-8 rounded-full object-cover" />
+                        <div>
+                          <p className="text-[13px] font-bold text-slate-900">{camp.publisher.name}</p>
+                          <p className="text-[10px] font-bold text-slate-400">{camp.publisher.region}</p>
+                        </div>
+                        <button className="ml-2 w-6 h-6 rounded-full border border-red-200 flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors">
+                          <Mail size={12} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                   <td className="px-6 py-3">
                     <div className="flex items-center space-x-3">
                       <img src={camp.editor.avatar} alt={camp.editor.name} className="w-8 h-8 rounded-full object-cover" />
@@ -440,7 +496,7 @@ export default function PublisherCampaignsView() {
                   </td>
                   <td className="px-6 py-3">
                     <div className="flex items-center space-x-2">
-                      <span className="text-[13px] font-bold text-slate-900">{camp.runtimeHours} {camp.runtimeHours > 0 ? "hrs" : ""}</span>
+                      <span className="text-[13px] font-bold text-slate-900">{camp.runtimeStr || `${camp.runtimeHours} ${camp.runtimeHours > 0 ? "hrs" : ""}`}</span>
                       {camp.runtimeHours > 100 && <span title="Top Performer">🏆</span>}
                     </div>
                   </td>

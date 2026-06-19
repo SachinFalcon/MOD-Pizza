@@ -35,6 +35,9 @@ const config: Config = {
         "slide-out-left": "slideOutLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "slide-out-right": "slideOutRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         "pizza-grow": "pizzaGrowRotate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "float": "float 6s ease-in-out infinite",
+        "spin-slow": "spinSlow 40s linear infinite",
+        "spin-slow-reverse": "spinSlow 50s linear infinite reverse",
       },
       keyframes: {
         slideOutLeft: {
@@ -63,6 +66,27 @@ const config: Config = {
           },
           to: {
             transform: "scale(1.3) rotate(20deg)",
+          },
+        },
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+        float: {
+          "0%, 100%": {
+            transform: "translateY(0)",
+          },
+          "50%": {
+            transform: "translateY(-20px)",
+          },
+        },
+        spinSlow: {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(360deg)",
           },
         },
       },

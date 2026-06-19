@@ -10,7 +10,7 @@ export default function CampaignDetailsWrapper() {
 
   return (
     <Suspense fallback={<div className="p-8 text-center text-slate-500 font-semibold">Loading Campaign Details...</div>}>
-      {profile.id === "publisher" ? <PublisherCampaignDetailsView /> : <CampaignDetailsClient />}
+      {profile.id === "publisher" || profile.id === "admin" ? <PublisherCampaignDetailsView /> : <CampaignDetailsClient />}
     </Suspense>
   );
 }

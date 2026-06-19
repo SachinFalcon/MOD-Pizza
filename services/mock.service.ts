@@ -449,9 +449,9 @@ export const api = {
     return userSettingsState;
   },
 
-  saveSettings: async (data: SettingsData): Promise<{ success: boolean }> => {
+  saveSettings: async (data: Partial<SettingsData>): Promise<{ success: boolean }> => {
     await delay(800);
-    userSettingsState = { ...data };
+    userSettingsState = { ...userSettingsState, ...data };
     return { success: true };
   },
 

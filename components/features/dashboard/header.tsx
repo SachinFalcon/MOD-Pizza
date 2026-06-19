@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRbac, useRbacActions } from "@/hooks/use-rbac";
+import { useRbac } from "@/hooks/use-rbac";
 import {
   Bell,
   Search,
@@ -17,7 +17,6 @@ import {
 
 export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { profile } = useRbac();
-  const { setRole } = useRbacActions();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -111,39 +110,6 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
                   <Settings size={16} />
                   <span>Profile Settings</span>
                 </Link>
-
-                <div className="px-4 py-2.5 group/account relative flex items-center justify-between text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-modRed transition-colors cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <Users size={16} />
-                    <span>Switch Account</span>
-                  </div>
-                  <ChevronDown size={14} className="-rotate-90 opacity-50 group/account-hover:opacity-100" />
-                  
-                  {/* Nested dropdown for roles */}
-                  <div className="absolute right-[100%] top-0 mr-1 w-48 bg-white rounded-xl shadow-[(0,0,0,0.18)] border border-slate-100 py-2 hidden group-hover/account:block animate-in fade-in slide-in-from-right-2">
-                    <div className="px-4 py-1.5 mb-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Roles</p>
-                    </div>
-                    <button 
-                      onClick={() => { setRole("editor"); setIsProfileMenuOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-modRed transition-colors"
-                    >
-                      Editor (Dev Sachin)
-                    </button>
-                    <button 
-                      onClick={() => { setRole("publisher"); setIsProfileMenuOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-modRed transition-colors"
-                    >
-                      Publisher (Dev Ajay)
-                    </button>
-                    <button 
-                      onClick={() => { setRole("admin"); setIsProfileMenuOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-modRed transition-colors"
-                    >
-                      Admin (Dev Sachin)
-                    </button>
-                  </div>
-                </div>
 
                 <div className="my-1 border-t border-slate-50"></div>
                 

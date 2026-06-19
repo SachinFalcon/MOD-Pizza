@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, MapPin, Plus, RefreshCw, Megaphone, Globe, MonitorPlay, Camera, Maximize, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { AddScreenModal } from "./add-screen-modal";
 
 interface OutletDetailsPanelProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface OutletDetailsPanelProps {
 
 export function OutletDetailsPanel({ isOpen, onClose, outletId, onDeactivateClick }: OutletDetailsPanelProps) {
   const [activeTab, setActiveTab] = useState<"live" | "scheduled" | "failed">("live");
+  const [isAddScreenModalOpen, setIsAddScreenModalOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -53,7 +55,7 @@ export function OutletDetailsPanel({ isOpen, onClose, outletId, onDeactivateClic
               </div>
             </div>
             <button 
-              onClick={() => toast.success("New screen provisioning started")}
+              onClick={() => setIsAddScreenModalOpen(true)}
               className="bg-[#B32626] text-white hover:bg-[#921b1b] px-4 py-2.5 rounded-lg flex items-center space-x-2 text-sm font-bold transition-all shadow-sm active:scale-95"
             >
               <Plus size={16} strokeWidth={2.5} />
@@ -313,6 +315,12 @@ export function OutletDetailsPanel({ isOpen, onClose, outletId, onDeactivateClic
         </div>
 
       </div>
+
+      {/* Add New Screen Modal */}
+      <AddScreenModal 
+        isOpen={isAddScreenModalOpen}
+        onClose={() => setIsAddScreenModalOpen(false)}
+      />
     </>
   );
 }

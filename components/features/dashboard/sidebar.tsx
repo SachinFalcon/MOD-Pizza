@@ -32,6 +32,11 @@ export function Sidebar({ onClose, isCollapsed, isMounted = true }: SidebarProps
   const { campaigns } = useApprovals();
 
   const isPublisher = profile.id === "publisher";
+  const isAdmin = profile.id === "admin";
+  const canViewOutlets = isPublisher || isAdmin;
+  const canViewApprovals = isPublisher || isAdmin;
+  const canViewSchedule = isPublisher || isAdmin;
+  const canViewUsers = isPublisher || isAdmin;
   const pendingCount = campaigns.filter(c => c.status === "pending").length;
 
   return (
@@ -78,13 +83,13 @@ export function Sidebar({ onClose, isCollapsed, isMounted = true }: SidebarProps
       <nav className={`flex-1 ${isCollapsed ? "md:px-2 px-4" : "px-4"} space-y-1 overflow-y-auto scrollbar-hide mt-4`}>
         <CategoryLabel label="OVERVIEW" isCollapsed={isCollapsed} />
         <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active={pathname === "/dashboard"} onClick={onClose} isCollapsed={isCollapsed} />
-        {isPublisher && (
+        {canViewOutlets && (
           <SidebarItem href="/outlets" icon={<MapPin size={18} />} label="Outlet Network" active={pathname === "/outlets"} onClick={onClose} isCollapsed={isCollapsed} />
         )}
 
         <CategoryLabel label="MANAGE CAMPAIGNS" isCollapsed={isCollapsed} />
         <SidebarItem href="/campaigns" icon={<Megaphone size={18} />} label="Campaigns" active={pathname === "/campaigns"} onClick={onClose} isCollapsed={isCollapsed} />
-        {isPublisher && (
+        {canViewApprovals && (
           <SidebarItem 
             href="/approvals" 
             icon={<CheckSquare size={18} />} 
@@ -95,7 +100,7 @@ export function Sidebar({ onClose, isCollapsed, isMounted = true }: SidebarProps
             badge={pendingCount > 0 ? <span className="bg-modRed text-white text-[10px] font-bold px-1.5 py-0.5 rounded">{pendingCount}</span> : null}
           />
         )}
-        {isPublisher && (
+        {canViewSchedule && (
           <SidebarItem href="/schedule" icon={<Calendar size={18} />} label="Screen Schedule" active={pathname === "/schedule"} onClick={onClose} isCollapsed={isCollapsed} />
         )}
         <SidebarItem href="/library" icon={<Library size={18} />} label="Global Library" active={pathname === "/library"} onClick={onClose} isCollapsed={isCollapsed} />
@@ -104,7 +109,7 @@ export function Sidebar({ onClose, isCollapsed, isMounted = true }: SidebarProps
         <SidebarItem href="/reports" icon={<BarChart3 size={18} />} label="Reports & Insights" active={pathname === "/reports"} onClick={onClose} isCollapsed={isCollapsed} />
 
         <CategoryLabel label="SETTINGS" isCollapsed={isCollapsed} />
-        {isPublisher && (
+        {canViewUsers && (
           <SidebarItem href="/users" icon={<Users size={18} />} label="User Management" active={pathname === "/users"} onClick={onClose} isCollapsed={isCollapsed} />
         )}
         <SidebarItem href="/settings" icon={<Settings size={18} />} label="Settings" active={pathname === "/settings"} onClick={onClose} isCollapsed={isCollapsed} />

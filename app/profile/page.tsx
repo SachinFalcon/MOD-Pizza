@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  RefreshCw
 } from "lucide-react";
 import { 
   USER_PROFILES, 
@@ -205,54 +206,51 @@ export default function ProfilePage() {
               </div>
               <span className="absolute bottom-1.5 right-1.5 h-4.5 w-4.5 bg-emerald-500 border-3 border-white rounded-full shadow" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-4 text-center">{activeProfile.name}</h3>
-            <span className="inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold text-slate-600 bg-slate-100 uppercase tracking-widest text-center shadow-sm">
-              {activeProfile.roleLabel}
-            </span>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight mt-4 text-center">{activeProfile.name}</h3>
+            <div className="flex gap-2 mt-3">
+              <span className="px-3 py-1 rounded bg-[#F8E8E8] text-[#B32626] text-[10px] font-bold uppercase tracking-widest text-center">
+                {activeProfile.role}
+              </span>
+              <span className="px-3 py-1 rounded bg-[#F0F2F5] text-slate-600 text-[10px] font-bold uppercase tracking-widest text-center">
+                {activeProfile.roleLabel}
+              </span>
+            </div>
           </div>
 
           {/* Right Detailed Metadata Grid */}
-          <div className="flex-1 w-full flex flex-col justify-between self-stretch">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm font-semibold w-full">
-              
-              <div className="pb-4 border-b border-slate-100 sm:border-b-0 sm:pb-0">
-                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Email</span>
-                <span className="text-slate-950 font-bold break-all">{activeProfile.email}</span>
+          <div className="flex-1 w-full flex flex-col justify-between self-stretch pl-0 md:pl-16">
+            <div className="flex flex-col w-full text-sm font-semibold">
+              <div className="flex justify-between items-center py-3.5 border-b border-slate-200/60">
+                <span className="text-slate-500 font-medium text-xs">Email</span>
+                <span className="text-slate-900 font-bold">{activeProfile.email}</span>
               </div>
-              
-              <div className="pb-4 border-b border-slate-100 sm:border-b-0 sm:pb-0 sm:border-l sm:pl-6 border-slate-100">
-                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Phone</span>
-                <span className="text-slate-950 font-bold">{activeProfile.phone}</span>
+              <div className="flex justify-between items-center py-3.5 border-b border-slate-200/60">
+                <span className="text-slate-500 font-medium text-xs">Phone</span>
+                <span className="text-slate-900 font-bold">{activeProfile.phone}</span>
               </div>
-              
-              <div className="pb-4 border-b border-slate-100 md:border-b-0 md:pb-0 md:border-l md:pl-6 border-slate-100">
-                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Scope</span>
-                <span className="text-slate-950 font-bold">{activeProfile.scope}</span>
+              <div className="flex justify-between items-center py-3.5 border-b border-slate-200/60">
+                <span className="text-slate-500 font-medium text-xs">Scope</span>
+                <span className="text-slate-900 font-bold">{activeProfile.scope}</span>
               </div>
-
-              <div className="pb-4 border-b border-slate-100 sm:border-b-0 sm:pb-0 sm:pt-4 border-slate-100">
-                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Joined</span>
-                <span className="text-slate-950 font-bold">{activeProfile.joined}</span>
+              <div className="flex justify-between items-center py-3.5 border-b border-slate-200/60">
+                <span className="text-slate-500 font-medium text-xs">Joined</span>
+                <span className="text-slate-900 font-bold">{activeProfile.joined}</span>
               </div>
-
-              <div className="pb-4 border-b border-slate-100 sm:border-b-0 sm:pb-0 sm:pt-4 sm:border-l sm:pl-6 border-slate-100">
-                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Last Login</span>
+              <div className="flex justify-between items-center py-3.5 border-b border-slate-200/60">
+                <span className="text-slate-500 font-medium text-xs">Last Login</span>
                 <span className="text-modRed font-bold">{activeProfile.lastLogin}</span>
               </div>
-              
-              <div className="pt-4 sm:col-span-2 md:col-span-1 md:pt-4 md:border-l md:pl-6 border-slate-100 flex items-center justify-end w-full">
-                <div className="flex flex-col sm:flex-row gap-2.5 w-full justify-end mt-2 sm:mt-0">
-                  <button className="flex items-center justify-center gap-1.5 px-4.5 py-2.5 bg-[rgba(255,255,255,0.75)] border border-red-200 text-modRed rounded-full font-bold text-xs hover:bg-red-50 transition-all active:scale-95 cursor-pointer w-full sm:w-auto">
-                    <Key size={14} />
-                    <span className="whitespace-nowrap">Change Password</span>
-                  </button>
-                  <button className="flex items-center justify-center gap-1.5 px-5.5 py-2.5 bg-modRed text-white rounded-full font-bold text-xs hover:bg-[#8F161A] transition-all shadow-md shadow-modRed/10 active:scale-95 cursor-pointer w-full sm:w-auto">
-                    <Edit3 size={14} />
-                    <span className="whitespace-nowrap">Edit Profile</span>
-                  </button>
-                </div>
-              </div>
-
+            </div>
+            
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[rgba(255,255,255,0.75)] border border-red-200 text-modRed rounded-md font-bold text-xs hover:bg-red-50 transition-all active:scale-95">
+                <RefreshCw size={14} />
+                <span>Change Password</span>
+              </button>
+              <button className="flex items-center justify-center gap-2 px-6 py-2 bg-[#B32626] text-white rounded-md font-bold text-xs hover:bg-[#921b1b] transition-all shadow-md active:scale-95">
+                <Edit3 size={14} />
+                <span>Edit Profile</span>
+              </button>
             </div>
           </div>
 
@@ -444,12 +442,10 @@ export default function ProfilePage() {
               <h3 className="text-base font-bold text-slate-900">Security Settings</h3>
               
               {/* Info banner */}
-              <div className="p-4 bg-red-50/40 border border-red-100/60 rounded-global flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Two-Factor Auth</h4>
-                  <p className="text-slate-500 text-xs mt-1 font-medium">Enabled since Dec 2023</p>
-                </div>
-                <button className="px-5 py-2.5 bg-[rgba(255,255,255,0.75)] border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer active:scale-95 transition-all shrink-0 w-full sm:w-auto text-center shadow-[(0,0,0,0.18)]">
+              <div className="p-4 bg-[#FDF5F5] border border-[#F4D1D1] rounded-lg">
+                <h4 className="font-bold text-slate-900 text-sm">Two-Factor Auth</h4>
+                <p className="text-slate-500 text-[10px] mt-1 mb-2 font-medium">Enabled since Dec 2023</p>
+                <button className="text-slate-500 text-[10px] font-bold hover:underline cursor-pointer">
                   Manage 2FA
                 </button>
               </div>

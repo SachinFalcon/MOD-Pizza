@@ -4,6 +4,7 @@ import React from "react";
 import { useRbac } from "@/hooks/use-rbac";
 import EditorDashboard from "@/components/features/dashboard/editor-dashboard";
 import PublisherDashboard from "@/components/features/dashboard/publisher-dashboard";
+import AdminDashboard from "@/components/features/dashboard/admin-dashboard";
 
 export default function DashboardPage() {
   const { profile } = useRbac();
@@ -12,7 +13,11 @@ export default function DashboardPage() {
     return <PublisherDashboard />;
   }
 
-  // Admin and Editor currently use the Editor dashboard
+  if (profile.id === "admin") {
+    return <AdminDashboard />;
+  }
+
+  // Editor uses the Editor dashboard
   return <EditorDashboard />;
 }
 
