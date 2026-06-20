@@ -20,7 +20,7 @@ const MAP_MARKERS = [
 
 export function USAMap() {
   return (
-    <div className="w-full relative flex items-center justify-center bg-slate-50 rounded-lg p-4 md:p-8 min-h-[400px]">
+    <div className="w-full relative flex items-center justify-center bg-transparent p-4 md:p-8 min-h-[400px]">
       <ComposableMap projection="geoAlbersUsa" className="w-full h-auto max-h-[280px] md:max-h-[450px]">
         <Geographies geography={geoUrl}>
           {({ geographies }: { geographies: any[] }) =>

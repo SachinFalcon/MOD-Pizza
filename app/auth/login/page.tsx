@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { useRbacActions } from "@/hooks/use-rbac";
-import { Loader2, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { setRole } = useRbacActions();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (password.trim() !== "password123") {
       setError("Invalid credentials. Please try again.");
@@ -33,7 +33,10 @@ export default function LoginPage() {
     } else if (trimmedEmail === "dev.ajay@modpizza.com") {
       setRole("publisher");
       window.location.href = "/dashboard";
-    } else if (trimmedEmail === "jack.thomas@modpizza.com" || trimmedEmail === "dev.lakshay@modpizza.com") {
+    } else if (
+      trimmedEmail === "jack.thomas@modpizza.com" ||
+      trimmedEmail === "dev.lakshay@modpizza.com"
+    ) {
       setRole("admin");
       window.location.href = "/dashboard";
     } else {
@@ -43,168 +46,149 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-slate-900 selection:bg-modRed selection:text-white font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-[#F7F7F7] text-slate-900 font-sans flex overflow-hidden">
       
-      {/* LEFT PANEL - PREMIUM HERO IMAGE */}
-      <div className="relative hidden lg:flex w-[55%] items-end justify-start overflow-hidden bg-slate-900">
-        
-        {/* Animated Background Image (Ken Burns Effect) */}
-        <div 
-          className="absolute inset-0 z-0 bg-[url('/images/pizza_banner.png')] bg-cover bg-center opacity-80"
-          style={{ animation: 'kenburns 25s ease-out infinite alternate' }}
-        ></div>
-        
-        {/* Gradient Overlay for Text Readability & Premium Feel */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent mix-blend-multiply"></div>
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-modRed/80 via-transparent to-transparent mix-blend-overlay"></div>
+      {/* SVG Clip Path Definition for the Sauce Curve */}
+      <svg width="0" height="0" className="absolute pointer-events-none">
+        <defs>
+          <clipPath id="sauce-curve" clipPathUnits="objectBoundingBox">
+            <path d="M 0,0 L 1,0 L 1,0.05 Q 0.45,0.65 0,0.85 Z" />
+          </clipPath>
+        </defs>
+      </svg>
 
-        {/* Floating Abstract Elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-modRed/30 rounded-full blur-[120px] z-10 animate-pulse" style={{ animationDuration: '8s' }}></div>
-        <div className="absolute bottom-[20%] right-[-10%] w-[400px] h-[400px] bg-modOrange/20 rounded-full blur-[100px] z-10 animate-pulse" style={{ animationDuration: '12s' }}></div>
-
-        {/* Hero Content */}
-        <div className="relative z-20 p-16 w-full max-w-2xl animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 fill-mode-both">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold uppercase tracking-widest mb-6">
-            <span className="w-2 h-2 rounded-full bg-modOrange animate-pulse"></span>
-            Global Ad Management
-          </div>
-          <h1 className="text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6 font-heading uppercase drop-shadow-xl">
-            Command Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-modOrange to-modRed">
-              Campaigns
-            </span>
-          </h1>
-          <p className="text-lg text-white/80 font-medium leading-relaxed max-w-lg mb-8 drop-shadow-md">
-            The central hub for creating, managing, and distributing MOD Pizza's digital marketing assets across our global network of outlets.
-          </p>
-          
-          <div className="flex items-center gap-6">
-            <div className="flex -space-x-4">
-              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" className="w-12 h-12 rounded-full border-2 border-slate-900 object-cover" alt="User" />
-              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80" className="w-12 h-12 rounded-full border-2 border-slate-900 object-cover" alt="User" />
-              <img src="/images/BMW_S_1000_RR_Winglet_4_cb2f77e0e7.png" className="w-12 h-12 rounded-full border-2 border-slate-900 object-cover bg-white" alt="User" />
-            </div>
-            <div className="text-sm font-semibold text-white">
-              <span className="text-modOrange">Join the team.</span><br />
-              <span className="text-white/60">Over 1,200 active campaigns.</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CSS for Ken Burns */}
-        <style dangerouslySetInnerHTML={{__html: `
-          @keyframes kenburns {
-            0% { transform: scale(1) translate(0, 0); }
-            50% { transform: scale(1.05) translate(-1%, -1%); }
-            100% { transform: scale(1.1) translate(-2%, -2%); }
-          }
-        `}} />
+      {/* RED CURVED SHAPE - "Sauce" design */}
+      <div 
+        className="absolute top-0 left-[35%] w-[65%] h-[60%] bg-[#C8102E] z-0 shadow-xl overflow-hidden"
+        style={{ clipPath: 'url(#sauce-curve)' }}
+      >
+        {/* Line art watermark over the red shape */}
+        <img src="/images/pizza ing 6.jpg" className="absolute top-[5%] left-[5%] w-[450px] opacity-25 mix-blend-multiply rotate-[15deg] pointer-events-none" alt="Line Art" />
       </div>
 
-      {/* RIGHT PANEL - CLEAN LOGIN FORM */}
-      <div className="w-full lg:w-[45%] flex items-center justify-center relative bg-white lg:rounded-l-3xl lg:-ml-6 z-30 shadow-[-20px_0_40px_rgba(0,0,0,0.1)]">
+      {/* CENTRAL TRANSPARENT PIZZA (Enlarged and centered in the background) */}
+      <img 
+         src="/images/pizza ing 7 copy.jpg" 
+         className="absolute top-1/2 left-[65%] -translate-x-1/2 -translate-y-1/2 w-[850px] xl:w-[1000px] opacity-[0.05] mix-blend-multiply contrast-150 brightness-110 grayscale z-0 pointer-events-none" 
+         alt="Center Watermark" 
+      />
+
+      {/* LINE ART WATERMARKS OVER OFF-WHITE BACKGROUND */}
+      <img src="/images/pizza ing 6.jpg" className="absolute top-[-15%] right-[-10%] w-[450px] opacity-[0.10] mix-blend-multiply -rotate-[30deg] z-0 pointer-events-none" alt="Line Art" />
+      <img src="/images/pizza ing 6.jpg" className="absolute bottom-[-15%] right-[-10%] w-[500px] opacity-[0.10] mix-blend-multiply rotate-180 z-0 pointer-events-none" alt="Line Art" />
+
+      {/* LEFT COLUMN 1: WHITE STRIP */}
+      <div className="absolute left-0 top-0 bottom-0 w-[12%] lg:w-[15%] bg-white z-10 border-r border-slate-200 overflow-hidden flex items-center justify-center">
+         {/* Tiled Line Art Pattern in the empty space */}
+         <div className="absolute inset-0 opacity-[0.08] mix-blend-multiply contrast-[1.2] grayscale pointer-events-none" style={{ backgroundImage: "url('/images/pizza ing 8.jpg')", backgroundSize: "250px", backgroundRepeat: "repeat" }}></div>
+
+         {/* Flying ingredients hero graphic - Rotated and scaled to perfectly fill the vertical height */}
+         <img 
+            src="/images/pizza ing 9.jpg" 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vh] max-w-none opacity-90 mix-blend-multiply contrast-[1.3] brightness-110 grayscale z-30 pointer-events-none -rotate-90" 
+            alt="Flying Ingredients" 
+            style={{ clipPath: "inset(0 0 12% 0)" }}
+         />
+
+         {/* Subtle corner ingredients matching reference */}
+         <img src="/images/spinach.png" className="absolute top-[18%] right-[-15px] w-12 drop-shadow-md z-30" alt="Basil" />
+      </div>
+
+      {/* LEFT COLUMN 2: DARK OVEN STRIP */}
+      <div className="absolute left-[12%] lg:left-[15%] top-0 bottom-0 w-[23%] lg:w-[25%] bg-[#1A1A1C] z-10 shadow-2xl overflow-hidden">
         
-        {/* Minimalist Grid Background */}
-        <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+        {/* Subtle Sketch Pattern on the Black Background */}
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-screen invert pointer-events-none" style={{ backgroundImage: "url('/images/pizza ing 8.jpg')", backgroundSize: "250px", backgroundRepeat: "repeat" }}></div>
 
-        <div className="relative z-10 w-full max-w-[400px] px-8 py-12 animate-in fade-in zoom-in-95 duration-700">
-          
-          {/* Logo Area */}
-          <div className="mb-12">
-            <div className="flex items-center space-x-1.5 mb-2">
-              <span className="text-3xl font-black text-modRed tracking-tighter">MTAS</span>
-              <span className="text-3xl font-black text-slate-900 tracking-tighter">HQ</span>
-            </div>
-            <p className="text-xs font-bold tracking-[0.2em] text-slate-400 uppercase">Portal Login</p>
-          </div>
+        {/* Photo Background */}
+        <img 
+          src="/images/pizza_banner.png" 
+          alt="MOD Pizza" 
+          className="absolute top-1/2 left-1/2 w-[140%] xl:w-[130%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-85"
+          style={{ 
+            filter: "contrast(1.1) saturate(1.2)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)"
+          }}
+        /><div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#111111] to-transparent z-10"></div>
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#1A1A1C] to-transparent z-10"></div>
 
-          <h2 className="text-2xl font-bold text-slate-900 mb-8 tracking-tight">Welcome back</h2>
+        {/* Header (Now Transparent over image) */}
+        <div className="absolute top-0 w-full h-[100px] flex items-center justify-center z-20">
+          <h2 className="text-[26px] xl:text-[32px] font-sans font-medium text-white tracking-[0.25em] uppercase drop-shadow-md ml-2">MOD PIZZA</h2>
+        </div>
+        
+      </div>
+
+      {/* RIGHT PANEL - FORM */}
+      <div className="absolute left-[35%] lg:left-[40%] right-0 top-0 bottom-0 flex flex-col justify-center items-center z-20">
+        
+        {/* Added mt-10 to slightly push form down, ensuring it clears the red shape entirely */}
+        <div className="w-full max-w-[420px] px-6 xl:px-0 mt-10 xl:mt-16">
           
-          <form className="space-y-6" onSubmit={handleLogin}>
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                Email Address
-              </label>
+          <h1 className="text-[30px] sm:text-[34px] font-black text-black mb-8 tracking-tighter uppercase font-heading text-center">
+            WELCOME BACK TO MOD!
+          </h1>
+
+          <form className="space-y-4" onSubmit={handleLogin}>
+            
+            <div className="space-y-4">
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@modpizza.com"
-                className="w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-medium focus:border-modRed focus:bg-white focus:outline-none focus:ring-4 focus:ring-modRed/10 transition-all duration-300"
+                placeholder="Email Address"
+                className="w-full rounded-full border border-slate-400 bg-[#EAEAEA] px-5 py-3 text-[14px] font-medium text-slate-900 placeholder:text-slate-700 focus:outline-none focus:border-[#C8102E] focus:bg-white transition-all shadow-inner"
+                required
+              />
+              
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full rounded-full border border-slate-400 bg-[#EAEAEA] px-5 py-3 text-[14px] font-medium text-slate-900 placeholder:text-slate-700 focus:outline-none focus:border-[#C8102E] focus:bg-white transition-all shadow-inner"
                 required
               />
             </div>
-            
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest">
-                  Password
-                </label>
-                <a href="#" className="text-[11px] font-bold text-modRed hover:text-red-800 transition-colors">Forgot?</a>
-              </div>
-              <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-modRed focus:bg-white focus:outline-none focus:ring-4 focus:ring-modRed/10 transition-all duration-300 pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-all duration-200"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+
+            <div className="flex justify-end pt-1 pb-2">
+              <Link href="#" className="text-[12px] font-medium text-slate-700 hover:text-[#C8102E] transition-colors">
+                Forgot your password?
+              </Link>
             </div>
 
             {error && (
-              <div className="animate-in fade-in slide-in-from-top-2 duration-300 text-red-600 text-xs font-bold bg-red-50 border border-red-100 rounded-lg p-3 flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
-                {error}
-              </div>
+               <div className="text-white text-[13px] font-bold bg-[#C8102E] rounded-full px-5 py-2 mb-2 text-center shadow-md">
+                 {error}
+               </div>
             )}
 
             <button 
               type="submit"
               disabled={isLoading}
-              className="group relative w-full overflow-hidden rounded-xl bg-slate-900 px-4 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-modRed hover:shadow-[0_8px_25px_-8px_rgba(169,29,34,0.5)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full rounded-full bg-[#A31621] px-6 py-3.5 text-[15px] font-bold text-white transition-all hover:bg-[#8B101A] active:translate-y-1 shadow-[0_4px_10px_rgba(0,0,0,0.2),0_4px_0_#750f16] flex justify-center items-center gap-2"
             >
-              <div className="relative z-10 flex items-center justify-center gap-2">
-                {isLoading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Verifying...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Sign In to Portal</span>
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </div>
+              {isLoading ? <Loader2 size={20} className="animate-spin" /> : "Log In"}
             </button>
 
-            <div className="pt-6">
-              <label className="flex items-center space-x-3 cursor-pointer group w-fit">
-                <div className="relative flex items-center justify-center">
-                  <input type="checkbox" className="peer w-5 h-5 rounded border-2 border-slate-200 text-modRed focus:ring-modRed/20 transition-all cursor-pointer checked:border-modRed" />
-                </div>
-                <span className="text-sm font-semibold text-slate-500 group-hover:text-slate-900 transition-colors">Keep me signed in</span>
-              </label>
-            </div>
-          </form>
 
-          <div className="mt-16 pt-8 border-t border-slate-100 text-left">
-            <p className="text-[10px] font-bold text-slate-400 tracking-wider uppercase leading-relaxed">
-              Internal Use Only <br/>
-              © {new Date().getFullYear()} MOD Super Fast Pizza, LLC.
-            </p>
-          </div>
+
+            <div className="text-center mt-8 pt-4">
+              <span className="text-[13px] font-medium text-slate-700">Don't have an account? </span>
+              <Link href="#" className="text-[13px] font-bold text-[#A31621] hover:text-[#8B101A] transition-colors">SIGN UP</Link>
+            </div>
+
+          </form>
         </div>
+
+        {/* FOOTER */}
+        <div className="absolute bottom-4 w-full text-center z-10">
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+            © {new Date().getFullYear()} MOD Pizza. All Rights Reserved.
+          </p>
+        </div>
+
       </div>
     </div>
   );
